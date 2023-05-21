@@ -1,13 +1,16 @@
 DB_SOURCE=root:example@tcp(127.0.0.1:3306)
 APP_NAME=playground
 
-.PHONY: gin
+.PHONY: gin migrateup migratedown sqlc
 
 gin:
 	go build -o bin/gin ./cmd/gin/main.go
 
 migrateup:
-	migrate -path db/migration -database 'mysql://$(DB_SOURCE)/$(APP_NAME)' -verbose up
+	migrate -path tools/migration -database 'mysql://$(DB_SOURCE)/$(APP_NAME)' -verbose up
 
 migratedown:
-	migrate -path db/migration -database 'mysql://$(DB_SOURCE)/$(APP_NAME)' -verbose down
+	migrate -path tools/migration -database 'mysql://$(DB_SOURCE)/$(APP_NAME)' -verbose down
+
+sqlc:
+	sqlc generate -f ./sqlc.yaml
