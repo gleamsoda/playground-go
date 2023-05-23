@@ -26,16 +26,19 @@ func NewServer(cfg config.Config) (*gin.Engine, error) {
 	entryRepo := repo.NewEntryRepository(conn)
 	transferRepo := repo.NewTransferRepository(conn)
 	walletRepo := repo.NewWalletRepository(conn)
+	userRepo := repo.NewUserRepository(conn)
 
 	// usecases
 	entryUsecase := usecase.NewEntryUsecase(entryRepo)
 	transferUsecase := usecase.NewTransferUsecase(transferRepo, entryRepo, walletRepo)
 	walletUsecase := usecase.NewWalletUsecase(walletRepo)
+	userUsecase := usecase.NewUserUsecase(userRepo)
 
 	// handlers
 	entryHandler := NewEntryHandler(entryUsecase)
 	transferHandler := NewTransferHandler(transferUsecase)
 	walletHandler := NewWalletHandler(walletUsecase)
+	userHandler := NewUserHandler(userUsecase)
 
 	s.GET("/health", Health(conn))
 	s.POST("/entries", entryHandler.Create)
@@ -46,6 +49,8 @@ func NewServer(cfg config.Config) (*gin.Engine, error) {
 	s.GET("/wallets/:id/entries", entryHandler.List)
 	s.GET("/wallets", walletHandler.List)
 	s.DELETE("/wallets/:id", walletHandler.Delete)
+	s.POST("/users", userHandler.Create)
+	s.GET("/users/:username", userHandler.Get)
 
 	return s, nil
 }
