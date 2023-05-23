@@ -23,5 +23,9 @@ func (u *EntryUsecase) Create(ctx context.Context, arg domain.CreateEntryParams)
 }
 
 func (u *EntryUsecase) Get(ctx context.Context, id int64) (*domain.Entry, error) {
-	return u.r.GetByID(ctx, id)
+	return u.r.Get(ctx, id)
+}
+
+func (u *EntryUsecase) List(ctx context.Context, arg domain.ListEntriesParams) ([]domain.Entry, error) {
+	return u.r.List(ctx, arg)
 }

@@ -10,7 +10,14 @@ import (
 
 type Querier interface {
 	CreateEntry(ctx context.Context, arg CreateEntryParams) (int64, error)
+	CreateTransfer(ctx context.Context, arg CreateTransferParams) (int64, error)
+	CreateWallet(ctx context.Context, arg CreateWalletParams) (int64, error)
+	DeleteWallet(ctx context.Context, id int64) error
 	GetEntry(ctx context.Context, id int64) (*Entry, error)
+	GetTransfer(ctx context.Context, id int64) (*Transfer, error)
+	GetWallet(ctx context.Context, id int64) (*Wallet, error)
+	ListEntries(ctx context.Context, arg ListEntriesParams) ([]*Entry, error)
+	ListWallets(ctx context.Context, arg ListWalletsParams) ([]*Wallet, error)
 }
 
 var _ Querier = (*Queries)(nil)

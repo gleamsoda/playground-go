@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -10,18 +9,18 @@ import (
 	"github.com/gleamsoda/go-playground/domain"
 )
 
-type entryHandler struct {
-	u domain.EntryUsecase
+type walletHandler struct {
+	u domain.WalletUsecase
 }
 
-func NewEntryHandler(u domain.EntryUsecase) entryHandler {
-	return entryHandler{
+func NewWalletHandler(u domain.WalletUsecase) walletHandler {
+	return walletHandler{
 		u: u,
 	}
 }
 
-func (h entryHandler) Create(c *gin.Context) {
-	var args domain.CreateEntryParams
+func (h walletHandler) Create(c *gin.Context) {
+	var args domain.CreateWalletParams
 	if err := c.ShouldBindJSON(&args); err != nil {
 		c.JSON(http.StatusBadRequest, errorResponse(err))
 		return
@@ -34,7 +33,7 @@ func (h entryHandler) Create(c *gin.Context) {
 	}
 }
 
-func (h entryHandler) Get(c *gin.Context) {
+func (h walletHandler) Get(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, errorResponse(err))
@@ -48,23 +47,30 @@ func (h entryHandler) Get(c *gin.Context) {
 	}
 }
 
-func (h entryHandler) List(c *gin.Context) {
-	var args domain.ListEntriesParams
+func (h walletHandler) List(c *gin.Context) {
+	var args domain.ListWalletsParams
 	if err := c.ShouldBindQuery(&args); err != nil {
 		c.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	var err error
-	args.WalletID, err = strconv.ParseInt(c.Param("id"), 10, 64)
+
+	if es, err := h.u.List(c, args); err != nil {
+		c.JSON(http.StatusInternalServerError, errorResponse(err))
+	} else {
+		c.JSON(http.StatusOK, es)
+	}
+}
+
+func (h walletHandler) Delete(c *gin.Context) {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
-	fmt.Println("ListEntriesParams", args)
-	if es, err := h.u.List(c, args); err != nil {
+	if err := h.u.Delete(c, id); err != nil {
 		c.JSON(http.StatusInternalServerError, errorResponse(err))
 	} else {
-		c.JSON(http.StatusOK, es)
+		c.Status(http.StatusOK)
 	}
 }
