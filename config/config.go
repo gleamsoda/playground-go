@@ -1,10 +1,17 @@
 package config
 
-import "github.com/spf13/viper"
+import (
+	"time"
+
+	"github.com/spf13/viper"
+)
 
 type Config struct {
-	DBDriver string `mapstructure:"DB_DRIVER"`
-	DBSource string `mapstructure:"DB_SOURCE"`
+	DBDriver             string        `mapstructure:"DB_DRIVER"`
+	DBSource             string        `mapstructure:"DB_SOURCE"`
+	TokenSymmetricKey    string        `mapstructure:"TOKEN_SYMMETRIC_KEY"`
+	AccessTokenDuration  time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
+	RefreshTokenDuration time.Duration `mapstructure:"REFRESH_TOKEN_DURATION"`
 }
 
 // NewConfig reads configuration from file or environment variables.

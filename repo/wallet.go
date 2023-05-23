@@ -9,20 +9,25 @@ import (
 )
 
 type WalletRepository struct {
-	q  sqlc.Querier
-	db *sql.DB
+	q *sqlc.Queries
 }
 
 var _ domain.WalletRepository = (*WalletRepository)(nil)
 
-func NewWalletRepository(db *sql.DB) *WalletRepository {
+func NewWalletRepository(db *sql.DB) domain.WalletRepository {
 	return &WalletRepository{
-		q:  sqlc.New(db),
-		db: db,
+		q: sqlc.New(db),
 	}
 }
 
-func (r *WalletRepository) Create(ctx context.Context, arg domain.CreateWalletParams) (*domain.Wallet, error) {
+func (r *WalletRepository) WithCtx(ctx context.Context) domain.WalletRepository {
+	if tx, ok := ctx.Value(TransactionKey).(*sql.Tx); ok {
+		r.q.WithTx(tx)
+	}
+	return r
+}
+
+func (r *WalletRepository) Create(ctx context.Context, arg *domain.Wallet) (*domain.Wallet, error) {
 	id, err := r.q.CreateWallet(ctx, sqlc.CreateWalletParams{
 		UserID:   arg.UserID,
 		Balance:  arg.Balance,
@@ -50,7 +55,7 @@ func (r *WalletRepository) Get(ctx context.Context, id int64) (*domain.Wallet, e
 	}, nil
 }
 
-func (r *WalletRepository) List(ctx context.Context, arg domain.ListWalletsParams) ([]domain.Wallet, error) {
+func (r *WalletRepository) List(ctx context.Context, arg domain.ListWalletsInputParams) ([]domain.Wallet, error) {
 	wallets, err := r.q.ListWallets(ctx, sqlc.ListWalletsParams{
 		UserID: arg.UserID,
 		Limit:  arg.Limit,
@@ -76,4 +81,11 @@ func (r *WalletRepository) List(ctx context.Context, arg domain.ListWalletsParam
 
 func (r *WalletRepository) Delete(ctx context.Context, id int64) error {
 	return r.q.DeleteWallet(ctx, id)
+}
+
+func (r *WalletRepository) AddWalletBalance(ctx context.Context, arg domain.AddWalletBalanceParams) error {
+	return r.q.AddWalletBalance(ctx, sqlc.AddWalletBalanceParams{
+		ID:     arg.ID,
+		Amount: arg.Amount,
+	})
 }

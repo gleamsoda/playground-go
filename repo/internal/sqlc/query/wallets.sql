@@ -21,3 +21,8 @@ OFFSET ?;
 -- name: DeleteWallet :exec
 DELETE FROM wallets
 WHERE id = ?;
+
+-- name: AddWalletBalance :exec
+UPDATE wallets
+SET balance = balance + sqlc.arg(amount)
+WHERE id = sqlc.arg(id);

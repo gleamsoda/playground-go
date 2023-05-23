@@ -8,6 +8,9 @@ sql:
       go:
         package: "sqlc"
         out: "./repo/internal/sqlc"
+        overrides:
+          - column: "sessions.id"
+            go_type: "github.com/google/uuid.UUID"
         emit_interface: true # interfaceを生成する
         emit_empty_slices: true # 空のsliceをnilではなく空に
         emit_exported_queries: false # 出力するクエリをexportする

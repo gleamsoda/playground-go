@@ -3,27 +3,31 @@ package repo
 import (
 	"context"
 	"database/sql"
-	"fmt"
 
 	"github.com/gleamsoda/go-playground/domain"
 	"github.com/gleamsoda/go-playground/repo/internal/sqlc"
 )
 
 type EntryRepository struct {
-	q  sqlc.Querier
-	db *sql.DB
+	q *sqlc.Queries
 }
 
 var _ domain.EntryRepository = (*EntryRepository)(nil)
 
-func NewEntryRepository(db *sql.DB) *EntryRepository {
+func NewEntryRepository(db *sql.DB) domain.EntryRepository {
 	return &EntryRepository{
-		q:  sqlc.New(db),
-		db: db,
+		q: sqlc.New(db),
 	}
 }
 
-func (r *EntryRepository) Create(ctx context.Context, arg domain.CreateEntryParams) (*domain.Entry, error) {
+func (r *EntryRepository) WithCtx(ctx context.Context) domain.EntryRepository {
+	if tx, ok := ctx.Value(TransactionKey).(*sql.Tx); ok {
+		r.q.WithTx(tx)
+	}
+	return r
+}
+
+func (r *EntryRepository) Create(ctx context.Context, arg *domain.Entry) (*domain.Entry, error) {
 	id, err := r.q.CreateEntry(ctx, sqlc.CreateEntryParams{
 		WalletID: arg.WalletID,
 		Amount:   arg.Amount,
@@ -49,8 +53,7 @@ func (r *EntryRepository) Get(ctx context.Context, id int64) (*domain.Entry, err
 	}, nil
 }
 
-func (r *EntryRepository) List(ctx context.Context, arg domain.ListEntriesParams) ([]domain.Entry, error) {
-	fmt.Println("ListEntriesParams", arg)
+func (r *EntryRepository) List(ctx context.Context, arg domain.ListEntriesInputParams) ([]domain.Entry, error) {
 	entries, err := r.q.ListEntries(ctx, sqlc.ListEntriesParams{
 		WalletID: arg.WalletID,
 		Limit:    arg.Limit,

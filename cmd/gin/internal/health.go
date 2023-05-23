@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Health(conn *sql.DB) gin.HandlerFunc {
+func health(conn *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Status(http.StatusOK)
 	}

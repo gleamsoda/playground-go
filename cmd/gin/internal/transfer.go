@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/gleamsoda/go-playground/domain"
+	"github.com/gleamsoda/go-playground/internal/token"
 )
 
 type transferHandler struct {
@@ -19,11 +20,13 @@ func NewTransferHandler(u domain.TransferUsecase) transferHandler {
 }
 
 func (h transferHandler) Create(c *gin.Context) {
-	var args domain.CreateTransferParams
+	var args domain.CreateTransferInputParams
 	if err := c.ShouldBindJSON(&args); err != nil {
 		c.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
+	authPayload := c.MustGet(authorizationPayloadKey).(*token.Payload)
+	args.RequestUserID = authPayload.UserID
 
 	if e, err := h.u.Create(c, args); err != nil {
 		c.JSON(http.StatusInternalServerError, errorResponse(err))

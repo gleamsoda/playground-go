@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/gleamsoda/go-playground/domain"
+	"github.com/gleamsoda/go-playground/internal/token"
 )
 
 type walletHandler struct {
@@ -20,7 +21,7 @@ func NewWalletHandler(u domain.WalletUsecase) walletHandler {
 }
 
 func (h walletHandler) Create(c *gin.Context) {
-	var args domain.CreateWalletParams
+	var args domain.CreateWalletInputParams
 	if err := c.ShouldBindJSON(&args); err != nil {
 		c.JSON(http.StatusBadRequest, errorResponse(err))
 		return
@@ -40,7 +41,11 @@ func (h walletHandler) Get(c *gin.Context) {
 		return
 	}
 
-	if e, err := h.u.Get(c, id); err != nil {
+	authPayload := c.MustGet(authorizationPayloadKey).(*token.Payload)
+	if e, err := h.u.Get(c, domain.GetOrDeleteWalletInputParams{
+		ID:     id,
+		UserID: authPayload.UserID,
+	}); err != nil {
 		c.JSON(http.StatusInternalServerError, errorResponse(err))
 	} else {
 		c.JSON(http.StatusOK, e)
@@ -48,11 +53,13 @@ func (h walletHandler) Get(c *gin.Context) {
 }
 
 func (h walletHandler) List(c *gin.Context) {
-	var args domain.ListWalletsParams
+	var args domain.ListWalletsInputParams
 	if err := c.ShouldBindQuery(&args); err != nil {
 		c.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
+	authPayload := c.MustGet(authorizationPayloadKey).(*token.Payload)
+	args.UserID = authPayload.UserID
 
 	if es, err := h.u.List(c, args); err != nil {
 		c.JSON(http.StatusInternalServerError, errorResponse(err))
@@ -68,7 +75,11 @@ func (h walletHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	if err := h.u.Delete(c, id); err != nil {
+	authPayload := c.MustGet(authorizationPayloadKey).(*token.Payload)
+	if err := h.u.Delete(c, domain.GetOrDeleteWalletInputParams{
+		ID:     id,
+		UserID: authPayload.UserID,
+	}); err != nil {
 		c.JSON(http.StatusInternalServerError, errorResponse(err))
 	} else {
 		c.Status(http.StatusOK)

@@ -2,30 +2,33 @@ package usecase
 
 import (
 	"context"
+	"errors"
 
 	"github.com/gleamsoda/go-playground/domain"
 )
 
 type EntryUsecase struct {
-	r domain.EntryRepository
+	entryRepo  domain.EntryRepository
+	walletRepo domain.WalletRepository
 }
 
 var _ domain.EntryUsecase = (*EntryUsecase)(nil)
 
-func NewEntryUsecase(r domain.EntryRepository) *EntryUsecase {
+func NewEntryUsecase(entryRepo domain.EntryRepository, walletRepo domain.WalletRepository) domain.EntryUsecase {
 	return &EntryUsecase{
-		r: r,
+		entryRepo:  entryRepo,
+		walletRepo: walletRepo,
 	}
 }
 
-func (u *EntryUsecase) Create(ctx context.Context, arg domain.CreateEntryParams) (*domain.Entry, error) {
-	return u.r.Create(ctx, arg)
-}
+func (u *EntryUsecase) List(ctx context.Context, arg domain.ListEntriesInputParams) ([]domain.Entry, error) {
+	w, err := u.walletRepo.Get(ctx, arg.WalletID)
+	if err != nil {
+		return nil, err
+	}
 
-func (u *EntryUsecase) Get(ctx context.Context, id int64) (*domain.Entry, error) {
-	return u.r.Get(ctx, id)
-}
-
-func (u *EntryUsecase) List(ctx context.Context, arg domain.ListEntriesParams) ([]domain.Entry, error) {
-	return u.r.List(ctx, arg)
+	if w.UserID != arg.RequestUserID {
+		return nil, errors.New("wallet doesn't belong to the authenticated user")
+	}
+	return u.entryRepo.List(ctx, arg)
 }

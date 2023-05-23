@@ -9,6 +9,22 @@ import (
 	"context"
 )
 
+const addWalletBalance = `-- name: AddWalletBalance :exec
+UPDATE wallets
+SET balance = balance + ?
+WHERE id = ?
+`
+
+type AddWalletBalanceParams struct {
+	Amount int64 `json:"amount"`
+	ID     int64 `json:"id"`
+}
+
+func (q *Queries) AddWalletBalance(ctx context.Context, arg AddWalletBalanceParams) error {
+	_, err := q.db.ExecContext(ctx, addWalletBalance, arg.Amount, arg.ID)
+	return err
+}
+
 const createWallet = `-- name: CreateWallet :execlastid
 INSERT INTO wallets (
   user_id,

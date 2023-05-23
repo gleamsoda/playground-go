@@ -9,16 +9,14 @@ import (
 )
 
 type UserRepository struct {
-	q  sqlc.Querier
-	db *sql.DB
+	q *sqlc.Queries
 }
 
 var _ domain.UserRepository = (*UserRepository)(nil)
 
-func NewUserRepository(db *sql.DB) *UserRepository {
+func NewUserRepository(db *sql.DB) domain.UserRepository {
 	return &UserRepository{
-		q:  sqlc.New(db),
-		db: db,
+		q: sqlc.New(db),
 	}
 }
 

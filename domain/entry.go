@@ -13,24 +13,26 @@ type Entry struct {
 }
 
 type EntryUsecase interface {
-	Create(ctx context.Context, arg CreateEntryParams) (*Entry, error)
-	Get(ctx context.Context, id int64) (*Entry, error)
-	List(ctx context.Context, arg ListEntriesParams) ([]Entry, error)
+	List(ctx context.Context, arg ListEntriesInputParams) ([]Entry, error)
 }
 
 type EntryRepository interface {
-	Create(ctx context.Context, arg CreateEntryParams) (*Entry, error)
+	Create(ctx context.Context, arg *Entry) (*Entry, error)
 	Get(ctx context.Context, id int64) (*Entry, error)
-	List(ctx context.Context, arg ListEntriesParams) ([]Entry, error)
+	List(ctx context.Context, arg ListEntriesInputParams) ([]Entry, error)
+	WithCtx(ctx context.Context) EntryRepository
 }
 
-type CreateEntryParams struct {
-	WalletID int64 `json:"wallet_id"`
-	Amount   int64 `json:"amount"`
+func NewEntry(walletID, amount int64) *Entry {
+	return &Entry{
+		WalletID: walletID,
+		Amount:   amount,
+	}
 }
 
-type ListEntriesParams struct {
-	WalletID int64 `json:"wallet_id"`
-	Limit    int32 `json:"limit" form:"limit"`
-	Offset   int32 `json:"offset" form:"offset"`
+type ListEntriesInputParams struct {
+	RequestUserID int64 `json:"-"`
+	WalletID      int64 `json:"wallet_id"`
+	Limit         int32 `json:"limit" form:"limit"`
+	Offset        int32 `json:"offset" form:"offset"`
 }

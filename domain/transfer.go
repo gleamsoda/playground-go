@@ -14,15 +14,26 @@ type Transfer struct {
 }
 
 type TransferUsecase interface {
-	Create(ctx context.Context, arg CreateTransferParams) (*Transfer, error)
+	Create(ctx context.Context, arg CreateTransferInputParams) (*Transfer, error)
 }
 
 type TransferRepository interface {
-	Create(ctx context.Context, arg CreateTransferParams) (*Transfer, error)
+	Create(ctx context.Context, arg *Transfer) (*Transfer, error)
+	WithCtx(ctx context.Context) TransferRepository
 }
 
-type CreateTransferParams struct {
-	FromWalletID int64 `json:"from_wallet_id"`
-	ToWalletID   int64 `json:"to_wallet_id"`
-	Amount       int64 `json:"amount"`
+func NewTransfer(fromWalletID, toWalletID, amount int64) *Transfer {
+	return &Transfer{
+		FromWalletID: fromWalletID,
+		ToWalletID:   toWalletID,
+		Amount:       amount,
+	}
+}
+
+type CreateTransferInputParams struct {
+	RequestUserID int64  `json:"-"`
+	FromWalletID  int64  `json:"from_wallet_id"`
+	ToWalletID    int64  `json:"to_wallet_id"`
+	Amount        int64  `json:"amount"`
+	Currency      string `json:"currency"`
 }

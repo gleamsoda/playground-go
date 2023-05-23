@@ -6,6 +6,8 @@ package sqlc
 
 import (
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type Entry struct {
@@ -13,6 +15,17 @@ type Entry struct {
 	WalletID  int64     `json:"wallet_id"`
 	Amount    int64     `json:"amount"`
 	CreatedAt time.Time `json:"created_at"`
+}
+
+type Session struct {
+	ID           uuid.UUID `json:"id"`
+	UserID       int64     `json:"user_id"`
+	RefreshToken string    `json:"refresh_token"`
+	UserAgent    string    `json:"user_agent"`
+	ClientIp     string    `json:"client_ip"`
+	IsBlocked    bool      `json:"is_blocked"`
+	ExpiresAt    time.Time `json:"expires_at"`
+	CreatedAt    time.Time `json:"created_at"`
 }
 
 type Transfer struct {

@@ -9,20 +9,25 @@ import (
 )
 
 type TransferRepository struct {
-	q  sqlc.Querier
-	db *sql.DB
+	q *sqlc.Queries
 }
 
 var _ domain.TransferRepository = (*TransferRepository)(nil)
 
-func NewTransferRepository(db *sql.DB) *TransferRepository {
+func NewTransferRepository(db *sql.DB) domain.TransferRepository {
 	return &TransferRepository{
-		q:  sqlc.New(db),
-		db: db,
+		q: sqlc.New(db),
 	}
 }
 
-func (r *TransferRepository) Create(ctx context.Context, arg domain.CreateTransferParams) (*domain.Transfer, error) {
+func (r *TransferRepository) WithCtx(ctx context.Context) domain.TransferRepository {
+	if tx, ok := ctx.Value(TransactionKey).(*sql.Tx); ok {
+		r.q.WithTx(tx)
+	}
+	return r
+}
+
+func (r *TransferRepository) Create(ctx context.Context, arg *domain.Transfer) (*domain.Transfer, error) {
 	id, err := r.q.CreateTransfer(ctx, sqlc.CreateTransferParams{
 		FromWalletID: arg.FromWalletID,
 		ToWalletID:   arg.ToWalletID,
