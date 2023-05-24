@@ -20,4 +20,9 @@
 # Go workspace file
 go.work
 
+# binaries
 bin/
+
+# cover files
+coverage.out
+coverage.html

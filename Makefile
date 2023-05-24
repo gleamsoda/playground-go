@@ -1,11 +1,22 @@
+COVERAGE_OUT=coverage.out
+COVERAGE_HTML=coverage.html
 DB_SOURCE=root:example@tcp(127.0.0.1:3306)
 APP_NAME=playground
 GRPC_BASE=cmd/grpc/internal
 
-.PHONY: gin migrateup migratedown sqlc proto
+.PHONY: gin grpc test cover migrateup migratedown sqlc proto
 
 gin:
 	go build -o bin/gin ./cmd/gin/main.go
+
+grpc:
+	go build -o bin/grpc ./cmd/grpc/main.go
+
+test:
+	go test -v -cover ./... -coverprofile=$(COVERAGE_OUT)
+
+cover:
+	go tool cover -html=$(COVERAGE_OUT) -o $(COVERAGE_HTML)
 
 migrateup:
 	migrate -path tools/migration -database 'mysql://$(DB_SOURCE)/$(APP_NAME)' -verbose up
