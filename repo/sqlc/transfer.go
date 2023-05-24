@@ -5,18 +5,18 @@ import (
 	"database/sql"
 
 	"github.com/gleamsoda/go-playground/domain"
-	"github.com/gleamsoda/go-playground/repo/internal/sqlc"
+	"github.com/gleamsoda/go-playground/repo/sqlc/internal/boundary"
 )
 
 type TransferRepository struct {
-	q *sqlc.Queries
+	q *boundary.Queries
 }
 
 var _ domain.TransferRepository = (*TransferRepository)(nil)
 
 func NewTransferRepository(db *sql.DB) domain.TransferRepository {
 	return &TransferRepository{
-		q: sqlc.New(db),
+		q: boundary.New(db),
 	}
 }
 
@@ -28,7 +28,7 @@ func (r *TransferRepository) WithCtx(ctx context.Context) domain.TransferReposit
 }
 
 func (r *TransferRepository) Create(ctx context.Context, arg *domain.Transfer) (*domain.Transfer, error) {
-	id, err := r.q.CreateTransfer(ctx, sqlc.CreateTransferParams{
+	id, err := r.q.CreateTransfer(ctx, boundary.CreateTransferParams{
 		FromWalletID: arg.FromWalletID,
 		ToWalletID:   arg.ToWalletID,
 		Amount:       arg.Amount,

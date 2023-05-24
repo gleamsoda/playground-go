@@ -5,18 +5,18 @@ import (
 	"database/sql"
 
 	"github.com/gleamsoda/go-playground/domain"
-	"github.com/gleamsoda/go-playground/repo/internal/sqlc"
+	"github.com/gleamsoda/go-playground/repo/sqlc/internal/boundary"
 )
 
 type WalletRepository struct {
-	q *sqlc.Queries
+	q *boundary.Queries
 }
 
 var _ domain.WalletRepository = (*WalletRepository)(nil)
 
 func NewWalletRepository(db *sql.DB) domain.WalletRepository {
 	return &WalletRepository{
-		q: sqlc.New(db),
+		q: boundary.New(db),
 	}
 }
 
@@ -28,7 +28,7 @@ func (r *WalletRepository) WithCtx(ctx context.Context) domain.WalletRepository 
 }
 
 func (r *WalletRepository) Create(ctx context.Context, arg *domain.Wallet) (*domain.Wallet, error) {
-	id, err := r.q.CreateWallet(ctx, sqlc.CreateWalletParams{
+	id, err := r.q.CreateWallet(ctx, boundary.CreateWalletParams{
 		UserID:   arg.UserID,
 		Balance:  arg.Balance,
 		Currency: arg.Currency,
@@ -56,7 +56,7 @@ func (r *WalletRepository) Get(ctx context.Context, id int64) (*domain.Wallet, e
 }
 
 func (r *WalletRepository) List(ctx context.Context, arg domain.ListWalletsInputParams) ([]domain.Wallet, error) {
-	wallets, err := r.q.ListWallets(ctx, sqlc.ListWalletsParams{
+	wallets, err := r.q.ListWallets(ctx, boundary.ListWalletsParams{
 		UserID: arg.UserID,
 		Limit:  arg.Limit,
 		Offset: arg.Offset,
@@ -84,7 +84,7 @@ func (r *WalletRepository) Delete(ctx context.Context, id int64) error {
 }
 
 func (r *WalletRepository) AddWalletBalance(ctx context.Context, arg domain.AddWalletBalanceParams) error {
-	return r.q.AddWalletBalance(ctx, sqlc.AddWalletBalanceParams{
+	return r.q.AddWalletBalance(ctx, boundary.AddWalletBalanceParams{
 		ID:     arg.ID,
 		Amount: arg.Amount,
 	})

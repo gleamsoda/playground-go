@@ -3,7 +3,7 @@
 //   sqlc v1.18.0
 // source: transfers.sql
 
-package sqlc
+package boundary
 
 import (
 	"context"

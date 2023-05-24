@@ -7,23 +7,23 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/gleamsoda/go-playground/domain"
-	"github.com/gleamsoda/go-playground/repo/internal/sqlc"
+	"github.com/gleamsoda/go-playground/repo/sqlc/internal/boundary"
 )
 
 type SessionRepository struct {
-	q *sqlc.Queries
+	q *boundary.Queries
 }
 
 var _ domain.SessionRepository = (*SessionRepository)(nil)
 
 func NewSessionRepository(db *sql.DB) domain.SessionRepository {
 	return &SessionRepository{
-		q: sqlc.New(db),
+		q: boundary.New(db),
 	}
 }
 
 func (r *SessionRepository) Create(ctx context.Context, arg *domain.Session) error {
-	return r.q.CreateSession(ctx, sqlc.CreateSessionParams{
+	return r.q.CreateSession(ctx, boundary.CreateSessionParams{
 		ID:           arg.ID,
 		UserID:       arg.UserID,
 		RefreshToken: arg.RefreshToken,

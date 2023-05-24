@@ -7,7 +7,7 @@ import (
 
 	"github.com/gleamsoda/go-playground/config"
 	"github.com/gleamsoda/go-playground/domain"
-	"github.com/gleamsoda/go-playground/internal"
+	"github.com/gleamsoda/go-playground/internal/password"
 	"github.com/gleamsoda/go-playground/internal/token"
 )
 
@@ -30,7 +30,7 @@ func NewUserUsecase(userRepo domain.UserRepository, sessionRepo domain.SessionRe
 }
 
 func (u *UserUsecase) Create(ctx context.Context, arg domain.CreateUserInputParams) (*domain.User, error) {
-	hashedPassword, err := internal.HashPassword(arg.Password)
+	hashedPassword, err := password.HashPassword(arg.Password)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func (u *UserUsecase) Login(ctx context.Context, arg domain.LoginUserInputParams
 	if err != nil {
 		return nil, err
 	}
-	if err := internal.CheckPassword(arg.Password, usr.HashedPassword); err != nil {
+	if err := password.CheckPassword(arg.Password, usr.HashedPassword); err != nil {
 		return nil, err
 	}
 

@@ -3,7 +3,7 @@
 //   sqlc v1.18.0
 // source: wallets.sql
 
-package sqlc
+package boundary
 
 import (
 	"context"

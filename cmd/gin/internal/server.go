@@ -10,7 +10,7 @@ import (
 
 	"github.com/gleamsoda/go-playground/config"
 	"github.com/gleamsoda/go-playground/internal/token"
-	"github.com/gleamsoda/go-playground/repo"
+	repo "github.com/gleamsoda/go-playground/repo/sqlc"
 	"github.com/gleamsoda/go-playground/usecase"
 )
 
@@ -22,18 +22,15 @@ func NewServer(cfg config.Config) (*gin.Engine, error) {
 	if err := conn.Ping(); err != nil {
 		return nil, err
 	}
-
-	s := gin.Default()
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		_ = v.RegisterValidation("currency", validCurrency)
 	}
-
 	tm, err := token.NewPasetoMaker(cfg.TokenSymmetricKey)
 	if err != nil {
 		return nil, err
 	}
 
-	// Repositories
+	// repositories
 	entryRepo := repo.NewEntryRepository(conn)
 	transferRepo := repo.NewTransferRepository(conn)
 	walletRepo := repo.NewWalletRepository(conn)
@@ -52,13 +49,14 @@ func NewServer(cfg config.Config) (*gin.Engine, error) {
 	walletHandler := NewWalletHandler(walletUsecase)
 	userHandler := NewUserHandler(userUsecase)
 
-	s.GET("/health", health(conn))
-	s.POST("/users", userHandler.Create)
-	s.GET("/users/:username", userHandler.Get)
-	s.POST("/login", userHandler.Login)
-	s.POST("/tokens/renew_access", userHandler.RenewAccessToken)
+	svr := gin.Default()
+	svr.GET("/health", health(conn))
+	svr.POST("/users", userHandler.Create)
+	svr.GET("/users/:username", userHandler.Get)
+	svr.POST("/login", userHandler.Login)
+	svr.POST("/tokens/renew_access", userHandler.RenewAccessToken)
 
-	authRoutes := s.Group("/").Use(authMiddleware(tm))
+	authRoutes := svr.Group("/").Use(authMiddleware(tm))
 	authRoutes.GET("/wallets", walletHandler.List)
 	authRoutes.POST("/wallets", walletHandler.Create)
 	authRoutes.GET("/wallets/:id", walletHandler.Get)
@@ -66,5 +64,5 @@ func NewServer(cfg config.Config) (*gin.Engine, error) {
 	authRoutes.GET("/wallets/:id/entries", entryHandler.List)
 	authRoutes.POST("/transfers", transferHandler.Create)
 
-	return s, nil
+	return svr, nil
 }

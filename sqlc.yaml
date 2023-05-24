@@ -2,12 +2,12 @@
 version: "2"
 sql:
   - schema: "./tools/migration" # マイグレーションのディレクトリ OR 単一のSQLファイルへのパス OR パスのリスト
-    queries: "./repo/internal/sqlc/query" # SQLクエリのディレクトリ OR 単一のSQLファイルへのパス OR パスのリスト
+    queries: "./repo/sqlc/internal/query" # SQLクエリのディレクトリ OR 単一のSQLファイルへのパス OR パスのリスト
     engine: "mysql" # or postgresql
     gen:
       go:
-        package: "sqlc"
-        out: "./repo/internal/sqlc"
+        package: "boundary"
+        out: "./repo/sqlc/internal/boundary"
         overrides:
           - column: "sessions.id"
             go_type: "github.com/google/uuid.UUID"

@@ -5,23 +5,23 @@ import (
 	"database/sql"
 
 	"github.com/gleamsoda/go-playground/domain"
-	"github.com/gleamsoda/go-playground/repo/internal/sqlc"
+	"github.com/gleamsoda/go-playground/repo/sqlc/internal/boundary"
 )
 
 type UserRepository struct {
-	q *sqlc.Queries
+	q *boundary.Queries
 }
 
 var _ domain.UserRepository = (*UserRepository)(nil)
 
 func NewUserRepository(db *sql.DB) domain.UserRepository {
 	return &UserRepository{
-		q: sqlc.New(db),
+		q: boundary.New(db),
 	}
 }
 
 func (r *UserRepository) Create(ctx context.Context, arg *domain.User) (*domain.User, error) {
-	_, err := r.q.CreateUser(ctx, sqlc.CreateUserParams{
+	_, err := r.q.CreateUser(ctx, boundary.CreateUserParams{
 		Username:       arg.Username,
 		FullName:       arg.FullName,
 		Email:          arg.Email,
