@@ -10,9 +10,9 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"github.com/gleamsoda/go-playground/cmd/grpc/internal/boundary"
-	"github.com/gleamsoda/go-playground/domain"
-	"github.com/gleamsoda/go-playground/internal/validator"
+	"playground/cmd/grpc/internal/boundary"
+	"playground/domain"
+	"playground/internal/validator"
 )
 
 type Controller struct {
@@ -109,6 +109,7 @@ func validateLoginUserRequest(req *boundary.LoginUserRequest) (violations []*err
 
 func convertUser(user *domain.User) *boundary.User {
 	return &boundary.User{
+		Id:        user.ID,
 		Username:  user.Username,
 		FullName:  user.FullName,
 		Email:     user.Email,

@@ -8,10 +8,10 @@ import (
 	"github.com/go-playground/validator/v10"
 	_ "github.com/go-sql-driver/mysql"
 
-	"github.com/gleamsoda/go-playground/config"
-	"github.com/gleamsoda/go-playground/internal/token"
-	repo "github.com/gleamsoda/go-playground/repo/sqlc"
-	"github.com/gleamsoda/go-playground/usecase"
+	"playground/config"
+	"playground/internal/token"
+	repo "playground/repo/sqlc"
+	"playground/usecase"
 )
 
 func NewServer(cfg config.Config) (*gin.Engine, error) {

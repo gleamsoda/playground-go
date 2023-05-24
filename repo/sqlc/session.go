@@ -6,8 +6,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/gleamsoda/go-playground/domain"
-	"github.com/gleamsoda/go-playground/repo/sqlc/internal/boundary"
+	"playground/domain"
+	"playground/repo/sqlc/internal/boundary"
 )
 
 type SessionRepository struct {

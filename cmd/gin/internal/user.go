@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/gleamsoda/go-playground/domain"
+	"playground/domain"
 )
 
 type userHandler struct {

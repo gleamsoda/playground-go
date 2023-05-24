@@ -7,8 +7,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/gleamsoda/go-playground/domain"
-	"github.com/gleamsoda/go-playground/internal/token"
+	"playground/domain"
+	"playground/internal/token"
 )
 
 type entryHandler struct {

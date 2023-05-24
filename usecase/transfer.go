@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/gleamsoda/go-playground/domain"
+	"playground/domain"
 )
 
 type TransferUsecase struct {

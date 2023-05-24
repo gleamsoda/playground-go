@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/gleamsoda/go-playground/domain"
-	"github.com/gleamsoda/go-playground/repo/sqlc/internal/boundary"
+	"playground/domain"
+	"playground/repo/sqlc/internal/boundary"
 )
 
 type EntryRepository struct {

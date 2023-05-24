@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gleamsoda/go-playground/config"
-	"github.com/gleamsoda/go-playground/domain"
-	"github.com/gleamsoda/go-playground/internal/password"
-	"github.com/gleamsoda/go-playground/internal/token"
+	"playground/config"
+	"playground/domain"
+	"playground/internal/password"
+	"playground/internal/token"
 )
 
 type UserUsecase struct {

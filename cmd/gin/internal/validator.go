@@ -3,7 +3,7 @@ package internal
 import (
 	"github.com/go-playground/validator/v10"
 
-	"github.com/gleamsoda/go-playground/domain"
+	"playground/domain"
 )
 
 var validCurrency validator.Func = func(fieldLevel validator.FieldLevel) bool {

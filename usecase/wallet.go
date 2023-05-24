@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/gleamsoda/go-playground/domain"
+	"playground/domain"
 )
 
 type WalletUsecase struct {

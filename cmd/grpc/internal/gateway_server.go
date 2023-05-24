@@ -10,14 +10,11 @@ import (
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 
-	"github.com/gleamsoda/go-playground/cmd/grpc/internal/boundary"
+	"playground/cmd/grpc/internal/boundary"
 )
 
 // NewServer creates a new gRPC gateway server.
-func NewGatewayServer(grpcServerAddress string) (*runtime.ServeMux, error) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
+func NewGatewayServer(ctx context.Context, grpcServerAddress string) (*runtime.ServeMux, error) {
 	jsonOption := runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{
 		MarshalOptions: protojson.MarshalOptions{
 			UseProtoNames: true,
@@ -28,7 +25,7 @@ func NewGatewayServer(grpcServerAddress string) (*runtime.ServeMux, error) {
 	})
 
 	mux := runtime.NewServeMux(jsonOption)
-	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
+	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())} // --insecure
 	if err := boundary.RegisterPlaygroundHandlerFromEndpoint(ctx, mux, grpcServerAddress, opts); err != nil {
 		return nil, fmt.Errorf("cannot register handler server: %w", err)
 	}

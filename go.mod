@@ -1,4 +1,4 @@
-module github.com/gleamsoda/go-playground
+module playground
 
 go 1.20
 

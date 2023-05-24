@@ -1,12 +1,13 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net"
 	"net/http"
 
-	"github.com/gleamsoda/go-playground/cmd/grpc/internal"
-	"github.com/gleamsoda/go-playground/config"
+	"playground/cmd/grpc/internal"
+	"playground/config"
 )
 
 func main() {
@@ -16,7 +17,10 @@ func main() {
 	}
 
 	go func() {
-		gw, err := internal.NewGatewayServer(cfg.GRPCServerAddress)
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+
+		gw, err := internal.NewGatewayServer(ctx, cfg.GRPCServerAddress)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -30,7 +34,7 @@ func main() {
 	}()
 
 	func() {
-		s, err := internal.NewServer(cfg)
+		srv, err := internal.NewServer(cfg)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -39,6 +43,6 @@ func main() {
 			log.Fatal("cannot create listener:", err)
 		}
 		log.Printf("start gRPC server at %s", cfg.GRPCServerAddress)
-		log.Fatal(s.Serve(l))
+		log.Fatal(srv.Serve(l))
 	}()
 }

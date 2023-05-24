@@ -8,7 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/gleamsoda/go-playground/internal/token"
+	"playground/internal/token"
 )
 
 const (

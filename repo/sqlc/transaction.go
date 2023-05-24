@@ -5,7 +5,7 @@ import (
 
 	"golang.org/x/net/context"
 
-	"github.com/gleamsoda/go-playground/domain"
+	"playground/domain"
 )
 
 type TransactionManager struct {

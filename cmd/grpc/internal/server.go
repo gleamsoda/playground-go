@@ -8,11 +8,11 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
-	"github.com/gleamsoda/go-playground/cmd/grpc/internal/boundary"
-	"github.com/gleamsoda/go-playground/config"
-	"github.com/gleamsoda/go-playground/internal/token"
-	repo "github.com/gleamsoda/go-playground/repo/sqlc"
-	"github.com/gleamsoda/go-playground/usecase"
+	"playground/cmd/grpc/internal/boundary"
+	"playground/config"
+	"playground/internal/token"
+	repo "playground/repo/sqlc"
+	"playground/usecase"
 )
 
 // NewServer creates a new gRPC server.
