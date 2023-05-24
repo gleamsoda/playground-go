@@ -4,6 +4,8 @@ import (
 	"database/sql"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/gleamsoda/go-playground/config"
@@ -22,6 +24,9 @@ func NewServer(cfg config.Config) (*gin.Engine, error) {
 	}
 
 	s := gin.Default()
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		_ = v.RegisterValidation("currency", validCurrency)
+	}
 
 	tm, err := token.NewPasetoMaker(cfg.TokenSymmetricKey)
 	if err != nil {

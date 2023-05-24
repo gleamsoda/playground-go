@@ -32,8 +32,8 @@ func NewTransfer(fromWalletID, toWalletID, amount int64) *Transfer {
 
 type CreateTransferInputParams struct {
 	RequestUserID int64  `json:"-"`
-	FromWalletID  int64  `json:"from_wallet_id"`
-	ToWalletID    int64  `json:"to_wallet_id"`
-	Amount        int64  `json:"amount"`
-	Currency      string `json:"currency"`
+	FromWalletID  int64  `json:"from_wallet_id" binding:"required,min=1"`
+	ToWalletID    int64  `json:"to_wallet_id" binding:"required,min=1"`
+	Amount        int64  `json:"amount" binding:"required,gt=0"`
+	Currency      string `json:"currency" binding:"required,currency"`
 }

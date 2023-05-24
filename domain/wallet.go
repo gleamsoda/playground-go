@@ -45,7 +45,7 @@ func NewWallet(userID int64, balance int64, currency string) *Wallet {
 type CreateWalletInputParams struct {
 	UserID   int64  `json:"user_id"`
 	Balance  int64  `json:"balance"`
-	Currency string `json:"currency"`
+	Currency string `json:"currency" binding:"required,currency"`
 }
 
 type ListWalletsInputParams struct {
