@@ -1,4 +1,4 @@
-package validator
+package internal
 
 import (
 	"fmt"
@@ -29,10 +29,7 @@ func ValidateUsername(value string) error {
 }
 
 func ValidateFullName(value string) error {
-	if err := ValidateString(value, 3, 100); err != nil {
-		return err
-	}
-	return nil
+	return ValidateString(value, 3, 100)
 }
 
 func ValidatePassword(value string) error {

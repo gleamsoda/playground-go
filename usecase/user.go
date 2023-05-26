@@ -7,7 +7,7 @@ import (
 
 	"playground/config"
 	"playground/domain"
-	"playground/internal/password"
+	"playground/internal"
 	"playground/internal/token"
 )
 
@@ -30,7 +30,7 @@ func NewUserUsecase(userRepo domain.UserRepository, sessionRepo domain.SessionRe
 }
 
 func (u *UserUsecase) Create(ctx context.Context, arg domain.CreateUserInputParams) (*domain.User, error) {
-	hashedPassword, err := password.HashPassword(arg.Password)
+	hashedPassword, err := internal.HashPassword(arg.Password)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func (u *UserUsecase) Login(ctx context.Context, arg domain.LoginUserInputParams
 	if err != nil {
 		return nil, err
 	}
-	if err := password.CheckPassword(arg.Password, usr.HashedPassword); err != nil {
+	if err := internal.CheckPassword(arg.Password, usr.HashedPassword); err != nil {
 		return nil, err
 	}
 
