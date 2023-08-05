@@ -19,10 +19,10 @@ cover:
 	go tool cover -html=$(COVERAGE_OUT) -o $(COVERAGE_HTML)
 
 migrateup:
-	migrate -path tools/migrations -database 'mysql://$(DB_SOURCE)/$(APP_NAME)' -verbose up
+	migrate -path db/migrations -database 'mysql://$(DB_SOURCE)/$(APP_NAME)' -verbose up
 
 migratedown:
-	migrate -path tools/migrations -database 'mysql://$(DB_SOURCE)/$(APP_NAME)' -verbose down
+	migrate -path db/migrations -database 'mysql://$(DB_SOURCE)/$(APP_NAME)' -verbose down
 
 sqlc:
 	sqlc generate -f ./sqlc.yaml

@@ -15,7 +15,7 @@ COPY --from=builder /app/migrate ./migrate
 COPY app.env .
 COPY start.sh .
 COPY wait-for .
-COPY tools/migrations ./migrations
+COPY db/migrations ./migrations
 
 EXPOSE 8080
 CMD [ "/app/gin" ]
