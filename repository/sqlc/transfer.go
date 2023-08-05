@@ -1,11 +1,11 @@
-package repo
+package sqlc
 
 import (
 	"context"
 	"database/sql"
 
 	"playground/domain"
-	"playground/repo/sqlc/gen"
+	"playground/repository/sqlc/gen"
 )
 
 type TransferRepository struct {

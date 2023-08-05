@@ -1,4 +1,4 @@
-package repo
+package sqlc
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 
 	"playground/domain"
-	"playground/repo/sqlc/gen"
+	"playground/repository/sqlc/gen"
 )
 
 type SessionRepository struct {

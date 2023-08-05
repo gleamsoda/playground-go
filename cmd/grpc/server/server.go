@@ -12,7 +12,7 @@ import (
 	"playground/config"
 	"playground/domain/usecase"
 	"playground/pkg/token"
-	repo "playground/repo/sqlc"
+	"playground/repository/sqlc"
 )
 
 // NewServer creates a new gRPC server.
@@ -29,8 +29,8 @@ func NewServer(cfg config.Config) (*grpc.Server, error) {
 		return nil, fmt.Errorf("cannot create token maker: %w", err)
 	}
 
-	userRepo := repo.NewUserRepository(conn)
-	sessionRepo := repo.NewSessionRepository(conn)
+	userRepo := sqlc.NewUserRepository(conn)
+	sessionRepo := sqlc.NewSessionRepository(conn)
 	userUsecase := usecase.NewUserUsecase(userRepo, sessionRepo, tm, cfg)
 
 	ctrl := NewController(userUsecase)

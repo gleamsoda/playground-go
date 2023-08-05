@@ -11,7 +11,7 @@ import (
 	"playground/config"
 	"playground/domain/usecase"
 	"playground/pkg/token"
-	repo "playground/repo/sqlc"
+	"playground/repository/sqlc"
 )
 
 func NewServer(cfg config.Config) (*gin.Engine, error) {
@@ -31,15 +31,15 @@ func NewServer(cfg config.Config) (*gin.Engine, error) {
 	}
 
 	// repositories
-	entryRepo := repo.NewEntryRepository(conn)
-	transferRepo := repo.NewTransferRepository(conn)
-	walletRepo := repo.NewWalletRepository(conn)
-	userRepo := repo.NewUserRepository(conn)
-	sessionRepo := repo.NewSessionRepository(conn)
+	entryRepo := sqlc.NewEntryRepository(conn)
+	transferRepo := sqlc.NewTransferRepository(conn)
+	walletRepo := sqlc.NewWalletRepository(conn)
+	userRepo := sqlc.NewUserRepository(conn)
+	sessionRepo := sqlc.NewSessionRepository(conn)
 
 	// usecases
 	entryUsecase := usecase.NewEntryUsecase(entryRepo, walletRepo)
-	transferUsecase := usecase.NewTransferUsecase(transferRepo, entryRepo, walletRepo, repo.NewTransactionManager(conn))
+	transferUsecase := usecase.NewTransferUsecase(transferRepo, entryRepo, walletRepo, sqlc.NewTransactionManager(conn))
 	walletUsecase := usecase.NewWalletUsecase(walletRepo)
 	userUsecase := usecase.NewUserUsecase(userRepo, sessionRepo, tm, cfg)
 
