@@ -19,20 +19,20 @@ cover:
 	go tool cover -html=$(COVERAGE_OUT) -o $(COVERAGE_HTML)
 
 migrateup:
-	migrate -path tools/migration -database 'mysql://$(DB_SOURCE)/$(APP_NAME)' -verbose up
+	migrate -path tools/migrations -database 'mysql://$(DB_SOURCE)/$(APP_NAME)' -verbose up
 
 migratedown:
-	migrate -path tools/migration -database 'mysql://$(DB_SOURCE)/$(APP_NAME)' -verbose down
+	migrate -path tools/migrations -database 'mysql://$(DB_SOURCE)/$(APP_NAME)' -verbose down
 
 sqlc:
 	sqlc generate -f ./sqlc.yaml
 
 proto:
 	rm -f $(GRPC_BASE)/gen/*.pb.go $(GRPC_BASE)/gen/*.pb.gw.go
-	rm -f doc/*.swagger.json
+	rm -f docs/*.swagger.json
 	protoc --proto_path=$(GRPC_BASE)/proto \
 		--go_out=$(GRPC_BASE)/gen --go_opt=paths=source_relative \
     	--go-grpc_out=$(GRPC_BASE)/gen --go-grpc_opt=paths=source_relative \
 		--grpc-gateway_out=$(GRPC_BASE)/gen --grpc-gateway_opt paths=source_relative \
-		--openapiv2_out=./doc --openapiv2_opt=allow_merge=true,merge_file_name=$(APP_NAME) \
+		--openapiv2_out=./docs --openapiv2_opt=allow_merge=true,merge_file_name=$(APP_NAME) \
     	$(GRPC_BASE)/proto/*.proto
