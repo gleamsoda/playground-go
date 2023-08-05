@@ -1,4 +1,4 @@
-package internal
+package server
 
 const (
 	grpcGatewayUserAgentHeader = "grpcgateway-user-agent"

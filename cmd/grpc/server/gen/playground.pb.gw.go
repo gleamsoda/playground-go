@@ -2,11 +2,11 @@
 // source: playground.proto
 
 /*
-Package boundary is a reverse proxy.
+Package gen is a reverse proxy.
 
 It translates gRPC into RESTful JSON APIs.
 */
-package boundary
+package gen
 
 import (
 	"context"

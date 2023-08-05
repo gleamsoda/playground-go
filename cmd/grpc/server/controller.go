@@ -1,4 +1,4 @@
-package internal
+package server
 
 import (
 	"context"
@@ -10,13 +10,13 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"playground/cmd/grpc/internal/boundary"
+	"playground/cmd/grpc/server/gen"
 	"playground/domain"
 	"playground/pkg/validator"
 )
 
 type Controller struct {
-	boundary.UnimplementedPlaygroundServer
+	gen.UnimplementedPlaygroundServer
 	userUsecase domain.UserUsecase
 }
 
@@ -26,7 +26,7 @@ func NewController(userUsecase domain.UserUsecase) *Controller {
 	}
 }
 
-func (c *Controller) CreateUser(ctx context.Context, req *boundary.CreateUserRequest) (*boundary.CreateUserResponse, error) {
+func (c *Controller) CreateUser(ctx context.Context, req *gen.CreateUserRequest) (*gen.CreateUserResponse, error) {
 	violations := validateCreateUserRequest(req)
 	if violations != nil {
 		return nil, invalidArgumentError(violations)
@@ -43,13 +43,13 @@ func (c *Controller) CreateUser(ctx context.Context, req *boundary.CreateUserReq
 		return nil, status.Errorf(codes.Internal, "failed to create user: %s", err)
 	}
 
-	rsp := &boundary.CreateUserResponse{
+	rsp := &gen.CreateUserResponse{
 		User: convertUser(u),
 	}
 	return rsp, nil
 }
 
-func validateCreateUserRequest(req *boundary.CreateUserRequest) (violations []*errdetails.BadRequest_FieldViolation) {
+func validateCreateUserRequest(req *gen.CreateUserRequest) (violations []*errdetails.BadRequest_FieldViolation) {
 	if err := validator.ValidateUsername(req.GetUsername()); err != nil {
 		violations = append(violations, fieldViolation("username", err))
 	}
@@ -66,7 +66,7 @@ func validateCreateUserRequest(req *boundary.CreateUserRequest) (violations []*e
 	return violations
 }
 
-func (c *Controller) LoginUser(ctx context.Context, req *boundary.LoginUserRequest) (*boundary.LoginUserResponse, error) {
+func (c *Controller) LoginUser(ctx context.Context, req *gen.LoginUserRequest) (*gen.LoginUserResponse, error) {
 	violations := validateLoginUserRequest(req)
 	if violations != nil {
 		return nil, invalidArgumentError(violations)
@@ -85,7 +85,7 @@ func (c *Controller) LoginUser(ctx context.Context, req *boundary.LoginUserReque
 		return nil, status.Errorf(codes.Internal, "failed to find user")
 	}
 
-	rsp := &boundary.LoginUserResponse{
+	rsp := &gen.LoginUserResponse{
 		User:                  convertUser(r.User),
 		SessionId:             r.SessionID.String(),
 		AccessToken:           r.AccessToken,
@@ -96,7 +96,7 @@ func (c *Controller) LoginUser(ctx context.Context, req *boundary.LoginUserReque
 	return rsp, nil
 }
 
-func validateLoginUserRequest(req *boundary.LoginUserRequest) (violations []*errdetails.BadRequest_FieldViolation) {
+func validateLoginUserRequest(req *gen.LoginUserRequest) (violations []*errdetails.BadRequest_FieldViolation) {
 	if err := validator.ValidateUsername(req.GetUsername()); err != nil {
 		violations = append(violations, fieldViolation("username", err))
 	}
@@ -107,8 +107,8 @@ func validateLoginUserRequest(req *boundary.LoginUserRequest) (violations []*err
 	return violations
 }
 
-func convertUser(user *domain.User) *boundary.User {
-	return &boundary.User{
+func convertUser(user *domain.User) *gen.User {
+	return &gen.User{
 		Id:        user.ID,
 		Username:  user.Username,
 		FullName:  user.FullName,

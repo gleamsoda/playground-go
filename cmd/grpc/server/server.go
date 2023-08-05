@@ -1,4 +1,4 @@
-package internal
+package server
 
 import (
 	"database/sql"
@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
-	"playground/cmd/grpc/internal/boundary"
+	"playground/cmd/grpc/server/gen"
 	"playground/config"
 	"playground/pkg/token"
 	repo "playground/repo/sqlc"
@@ -35,7 +35,7 @@ func NewServer(cfg config.Config) (*grpc.Server, error) {
 
 	ctrl := NewController(userUsecase)
 	svr := grpc.NewServer()
-	boundary.RegisterPlaygroundServer(svr, ctrl)
+	gen.RegisterPlaygroundServer(svr, ctrl)
 	reflection.Register(svr)
 
 	return svr, nil
