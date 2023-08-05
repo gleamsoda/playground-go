@@ -10,9 +10,9 @@ import (
 
 	"playground/cmd/grpc/server/gen"
 	"playground/config"
+	"playground/domain/usecase"
 	"playground/pkg/token"
 	repo "playground/repo/sqlc"
-	"playground/usecase"
 )
 
 // NewServer creates a new gRPC server.

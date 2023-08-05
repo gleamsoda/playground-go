@@ -9,9 +9,9 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 
 	"playground/config"
+	"playground/domain/usecase"
 	"playground/pkg/token"
 	repo "playground/repo/sqlc"
-	"playground/usecase"
 )
 
 func NewServer(cfg config.Config) (*gin.Engine, error) {
