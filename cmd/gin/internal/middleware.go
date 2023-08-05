@@ -8,7 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"playground/internal/token"
+	"playground/pkg/token"
 )
 
 const (

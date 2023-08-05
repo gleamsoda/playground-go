@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"playground/domain"
-	"playground/internal/token"
+	"playground/pkg/token"
 )
 
 type transferHandler struct {

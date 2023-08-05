@@ -12,7 +12,7 @@ import (
 
 	"playground/cmd/grpc/internal/boundary"
 	"playground/domain"
-	"playground/internal"
+	"playground/pkg/validator"
 )
 
 type Controller struct {
@@ -50,16 +50,16 @@ func (c *Controller) CreateUser(ctx context.Context, req *boundary.CreateUserReq
 }
 
 func validateCreateUserRequest(req *boundary.CreateUserRequest) (violations []*errdetails.BadRequest_FieldViolation) {
-	if err := internal.ValidateUsername(req.GetUsername()); err != nil {
+	if err := validator.ValidateUsername(req.GetUsername()); err != nil {
 		violations = append(violations, fieldViolation("username", err))
 	}
-	if err := internal.ValidatePassword(req.GetPassword()); err != nil {
+	if err := validator.ValidatePassword(req.GetPassword()); err != nil {
 		violations = append(violations, fieldViolation("password", err))
 	}
-	if err := internal.ValidateFullName(req.GetFullName()); err != nil {
+	if err := validator.ValidateFullName(req.GetFullName()); err != nil {
 		violations = append(violations, fieldViolation("full_name", err))
 	}
-	if err := internal.ValidateEmail(req.GetEmail()); err != nil {
+	if err := validator.ValidateEmail(req.GetEmail()); err != nil {
 		violations = append(violations, fieldViolation("email", err))
 	}
 
@@ -97,10 +97,10 @@ func (c *Controller) LoginUser(ctx context.Context, req *boundary.LoginUserReque
 }
 
 func validateLoginUserRequest(req *boundary.LoginUserRequest) (violations []*errdetails.BadRequest_FieldViolation) {
-	if err := internal.ValidateUsername(req.GetUsername()); err != nil {
+	if err := validator.ValidateUsername(req.GetUsername()); err != nil {
 		violations = append(violations, fieldViolation("username", err))
 	}
-	if err := internal.ValidatePassword(req.GetPassword()); err != nil {
+	if err := validator.ValidatePassword(req.GetPassword()); err != nil {
 		violations = append(violations, fieldViolation("password", err))
 	}
 

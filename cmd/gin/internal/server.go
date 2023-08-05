@@ -9,7 +9,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 
 	"playground/config"
-	"playground/internal/token"
+	"playground/pkg/token"
 	repo "playground/repo/sqlc"
 	"playground/usecase"
 )

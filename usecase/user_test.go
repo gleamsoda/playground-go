@@ -12,9 +12,9 @@ import (
 	"playground/config"
 	"playground/domain"
 	mock_domain "playground/domain/mock"
-	"playground/internal"
-	"playground/internal/token"
-	mock_token "playground/internal/token/mock"
+	"playground/pkg/password"
+	"playground/pkg/token"
+	mock_token "playground/pkg/token/mock"
 )
 
 func TestUserUsecase_Create(t *testing.T) {
@@ -83,7 +83,7 @@ func TestUserUsecase_Login(t *testing.T) {
 		Username: "testuser",
 		Password: "password",
 	}
-	pw, _ := internal.HashPassword("password")
+	pw, _ := password.HashPassword("password")
 	usr := &domain.User{
 		ID:             1,
 		HashedPassword: pw,

@@ -10,7 +10,7 @@ import (
 
 	"playground/cmd/grpc/internal/boundary"
 	"playground/config"
-	"playground/internal/token"
+	"playground/pkg/token"
 	repo "playground/repo/sqlc"
 	"playground/usecase"
 )
