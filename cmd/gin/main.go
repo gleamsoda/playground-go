@@ -5,7 +5,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 
-	"playground/cmd/gin/internal"
+	"playground/cmd/gin/server"
 	"playground/config"
 )
 
@@ -14,7 +14,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	srv, err := internal.NewServer(cfg)
+	srv, err := server.NewServer(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}

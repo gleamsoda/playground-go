@@ -6,7 +6,7 @@ import (
 	"net"
 	"net/http"
 
-	"playground/cmd/grpc/internal"
+	"playground/cmd/grpc/server"
 	"playground/config"
 )
 
@@ -20,7 +20,7 @@ func main() {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
-		gw, err := internal.NewGatewayServer(ctx, cfg.GRPCServerAddress)
+		gw, err := server.NewGatewayServer(ctx, cfg.GRPCServerAddress)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -34,7 +34,7 @@ func main() {
 	}()
 
 	func() {
-		srv, err := internal.NewServer(cfg)
+		srv, err := server.NewServer(cfg)
 		if err != nil {
 			log.Fatal(err)
 		}
