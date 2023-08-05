@@ -9,8 +9,8 @@ import (
 	domain "playground/domain"
 	reflect "reflect"
 
-	gomock "github.com/golang/mock/gomock"
 	uuid "github.com/google/uuid"
+	gomock "go.uber.org/mock/gomock"
 )
 
 // MockEntryRepository is a mock of EntryRepository interface.
