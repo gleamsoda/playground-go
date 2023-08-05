@@ -8,7 +8,7 @@ import (
 	"go.uber.org/mock/gomock"
 
 	"playground/domain"
-	mock_domain "playground/domain/mock"
+	mock_domain "playground/test/mock/domain"
 )
 
 func TestEntryUsecase_List(t *testing.T) {

@@ -11,10 +11,10 @@ import (
 
 	"playground/config"
 	"playground/domain"
-	mock_domain "playground/domain/mock"
 	"playground/pkg/password"
 	"playground/pkg/token"
-	mock_token "playground/pkg/token/mock"
+	mock_domain "playground/test/mock/domain"
+	mock_token "playground/test/mock/token"
 )
 
 func TestUserUsecase_Create(t *testing.T) {

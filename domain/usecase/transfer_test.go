@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"playground/domain"
-	mock_domain "playground/domain/mock"
+	mock_domain "playground/test/mock/domain"
 
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
