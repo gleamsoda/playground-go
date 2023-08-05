@@ -5,18 +5,18 @@ import (
 	"database/sql"
 
 	"playground/domain"
-	"playground/repo/sqlc/internal/boundary"
+	"playground/repo/sqlc/gen"
 )
 
 type TransferRepository struct {
-	q *boundary.Queries
+	q *gen.Queries
 }
 
 var _ domain.TransferRepository = (*TransferRepository)(nil)
 
 func NewTransferRepository(db *sql.DB) domain.TransferRepository {
 	return &TransferRepository{
-		q: boundary.New(db),
+		q: gen.New(db),
 	}
 }
 
@@ -28,7 +28,7 @@ func (r *TransferRepository) WithCtx(ctx context.Context) domain.TransferReposit
 }
 
 func (r *TransferRepository) Create(ctx context.Context, arg *domain.Transfer) (*domain.Transfer, error) {
-	id, err := r.q.CreateTransfer(ctx, boundary.CreateTransferParams{
+	id, err := r.q.CreateTransfer(ctx, gen.CreateTransferParams{
 		FromWalletID: arg.FromWalletID,
 		ToWalletID:   arg.ToWalletID,
 		Amount:       arg.Amount,

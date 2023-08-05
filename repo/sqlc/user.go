@@ -5,23 +5,23 @@ import (
 	"database/sql"
 
 	"playground/domain"
-	"playground/repo/sqlc/internal/boundary"
+	"playground/repo/sqlc/gen"
 )
 
 type UserRepository struct {
-	q *boundary.Queries
+	q *gen.Queries
 }
 
 var _ domain.UserRepository = (*UserRepository)(nil)
 
 func NewUserRepository(db *sql.DB) domain.UserRepository {
 	return &UserRepository{
-		q: boundary.New(db),
+		q: gen.New(db),
 	}
 }
 
 func (r *UserRepository) Create(ctx context.Context, arg *domain.User) (*domain.User, error) {
-	_, err := r.q.CreateUser(ctx, boundary.CreateUserParams{
+	_, err := r.q.CreateUser(ctx, gen.CreateUserParams{
 		Username:       arg.Username,
 		FullName:       arg.FullName,
 		Email:          arg.Email,

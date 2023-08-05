@@ -7,23 +7,23 @@ import (
 	"github.com/google/uuid"
 
 	"playground/domain"
-	"playground/repo/sqlc/internal/boundary"
+	"playground/repo/sqlc/gen"
 )
 
 type SessionRepository struct {
-	q *boundary.Queries
+	q *gen.Queries
 }
 
 var _ domain.SessionRepository = (*SessionRepository)(nil)
 
 func NewSessionRepository(db *sql.DB) domain.SessionRepository {
 	return &SessionRepository{
-		q: boundary.New(db),
+		q: gen.New(db),
 	}
 }
 
 func (r *SessionRepository) Create(ctx context.Context, arg *domain.Session) error {
-	return r.q.CreateSession(ctx, boundary.CreateSessionParams{
+	return r.q.CreateSession(ctx, gen.CreateSessionParams{
 		ID:           arg.ID,
 		UserID:       arg.UserID,
 		RefreshToken: arg.RefreshToken,
