@@ -10,17 +10,17 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
+	"playground/app"
 	"playground/cmd/grpc/server/gen"
-	"playground/domain"
 	"playground/pkg/validator"
 )
 
 type Controller struct {
 	gen.UnimplementedPlaygroundServer
-	userUsecase domain.UserUsecase
+	userUsecase app.UserUsecase
 }
 
-func NewController(userUsecase domain.UserUsecase) *Controller {
+func NewController(userUsecase app.UserUsecase) *Controller {
 	return &Controller{
 		userUsecase: userUsecase,
 	}
@@ -32,7 +32,7 @@ func (c *Controller) CreateUser(ctx context.Context, req *gen.CreateUserRequest)
 		return nil, invalidArgumentError(violations)
 	}
 
-	args := domain.CreateUserInputParams{
+	args := app.CreateUserInputParams{
 		Username: req.GetUsername(),
 		FullName: req.GetFullName(),
 		Email:    req.GetEmail(),
@@ -73,7 +73,7 @@ func (c *Controller) LoginUser(ctx context.Context, req *gen.LoginUserRequest) (
 	}
 
 	meta := c.extractMetadata(ctx)
-	args := domain.LoginUserInputParams{
+	args := app.LoginUserInputParams{
 		Username:  req.GetUsername(),
 		Password:  req.GetPassword(),
 		UserAgent: meta.UserAgent,
@@ -107,7 +107,7 @@ func validateLoginUserRequest(req *gen.LoginUserRequest) (violations []*errdetai
 	return violations
 }
 
-func convertUser(user *domain.User) *gen.User {
+func convertUser(user *app.User) *gen.User {
 	return &gen.User{
 		Id:        user.ID,
 		Username:  user.Username,

@@ -18,11 +18,16 @@ test:
 cover:
 	go tool cover -html=$(COVERAGE_OUT) -o $(COVERAGE_HTML)
 
+mock:
+	mockgen playground/app EntryRepository,SessionRepository,TransferRepository,UserRepository,WalletRepository > ./test/mock/app/repository.go
+	mockgen playground/app EntryUsecase,TransferUsecase,UserUsecase,WalletUsecase > ./test/mock/app/usecase.go
+	mockgen playground/pkg/token Maker > ./test/mock/token/maker.go
+
 migrateup:
-	migrate -path db/migrations -database 'mysql://$(DB_SOURCE)/$(APP_NAME)' -verbose up
+	migrate -path tools/migrations -database 'mysql://$(DB_SOURCE)/$(APP_NAME)' -verbose up
 
 migratedown:
-	migrate -path db/migrations -database 'mysql://$(DB_SOURCE)/$(APP_NAME)' -verbose down
+	migrate -path tools/migrations -database 'mysql://$(DB_SOURCE)/$(APP_NAME)' -verbose down
 
 sqlc:
 	sqlc generate -f ./sqlc.yaml

@@ -5,22 +5,22 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"playground/domain"
+	"playground/app"
 	"playground/pkg/token"
 )
 
 type transferHandler struct {
-	u domain.TransferUsecase
+	u app.TransferUsecase
 }
 
-func NewTransferHandler(u domain.TransferUsecase) transferHandler {
+func NewTransferHandler(u app.TransferUsecase) transferHandler {
 	return transferHandler{
 		u: u,
 	}
 }
 
 func (h transferHandler) Create(c *gin.Context) {
-	var args domain.CreateTransferInputParams
+	var args app.CreateTransferInputParams
 	if err := c.ShouldBindJSON(&args); err != nil {
 		c.JSON(http.StatusBadRequest, errorResponse(err))
 		return

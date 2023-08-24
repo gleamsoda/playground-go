@@ -6,22 +6,22 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"playground/domain"
+	"playground/app"
 	"playground/pkg/token"
 )
 
 type walletHandler struct {
-	u domain.WalletUsecase
+	u app.WalletUsecase
 }
 
-func NewWalletHandler(u domain.WalletUsecase) walletHandler {
+func NewWalletHandler(u app.WalletUsecase) walletHandler {
 	return walletHandler{
 		u: u,
 	}
 }
 
 func (h walletHandler) Create(c *gin.Context) {
-	var args domain.CreateWalletInputParams
+	var args app.CreateWalletInputParams
 	if err := c.ShouldBindJSON(&args); err != nil {
 		c.JSON(http.StatusBadRequest, errorResponse(err))
 		return
@@ -42,7 +42,7 @@ func (h walletHandler) Get(c *gin.Context) {
 	}
 
 	authPayload := c.MustGet(authorizationPayloadKey).(*token.Payload)
-	if e, err := h.u.Get(c, domain.GetOrDeleteWalletInputParams{
+	if e, err := h.u.Get(c, app.GetOrDeleteWalletInputParams{
 		ID:     id,
 		UserID: authPayload.UserID,
 	}); err != nil {
@@ -53,7 +53,7 @@ func (h walletHandler) Get(c *gin.Context) {
 }
 
 func (h walletHandler) List(c *gin.Context) {
-	var args domain.ListWalletsInputParams
+	var args app.ListWalletsInputParams
 	if err := c.ShouldBindQuery(&args); err != nil {
 		c.JSON(http.StatusBadRequest, errorResponse(err))
 		return
@@ -76,7 +76,7 @@ func (h walletHandler) Delete(c *gin.Context) {
 	}
 
 	authPayload := c.MustGet(authorizationPayloadKey).(*token.Payload)
-	if err := h.u.Delete(c, domain.GetOrDeleteWalletInputParams{
+	if err := h.u.Delete(c, app.GetOrDeleteWalletInputParams{
 		ID:     id,
 		UserID: authPayload.UserID,
 	}); err != nil {

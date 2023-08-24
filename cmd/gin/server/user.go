@@ -5,21 +5,21 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"playground/domain"
+	"playground/app"
 )
 
 type userHandler struct {
-	u domain.UserUsecase
+	u app.UserUsecase
 }
 
-func NewUserHandler(u domain.UserUsecase) userHandler {
+func NewUserHandler(u app.UserUsecase) userHandler {
 	return userHandler{
 		u: u,
 	}
 }
 
 func (h userHandler) Create(c *gin.Context) {
-	var args domain.CreateUserInputParams
+	var args app.CreateUserInputParams
 	if err := c.ShouldBindJSON(&args); err != nil {
 		c.JSON(http.StatusBadRequest, errorResponse(err))
 		return
@@ -41,7 +41,7 @@ func (h userHandler) Get(c *gin.Context) {
 }
 
 func (h userHandler) Login(ctx *gin.Context) {
-	var args domain.LoginUserInputParams
+	var args app.LoginUserInputParams
 	if err := ctx.ShouldBindJSON(&args); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return

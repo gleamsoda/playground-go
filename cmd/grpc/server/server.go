@@ -8,11 +8,11 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
+	"playground/app/repository"
+	"playground/app/usecase"
 	"playground/cmd/grpc/server/gen"
 	"playground/config"
-	"playground/domain/usecase"
 	"playground/pkg/token"
-	"playground/repository/sqlc"
 )
 
 // NewServer creates a new gRPC server.
@@ -29,8 +29,8 @@ func NewServer(cfg config.Config) (*grpc.Server, error) {
 		return nil, fmt.Errorf("cannot create token maker: %w", err)
 	}
 
-	userRepo := sqlc.NewUserRepository(conn)
-	sessionRepo := sqlc.NewSessionRepository(conn)
+	userRepo := repository.NewUserRepository(conn)
+	sessionRepo := repository.NewSessionRepository(conn)
 	userUsecase := usecase.NewUserUsecase(userRepo, sessionRepo, tm, cfg)
 
 	ctrl := NewController(userUsecase)

@@ -1,26 +1,26 @@
-package sqlc
+package repository
 
 import (
 	"context"
 	"database/sql"
 
-	"playground/domain"
-	"playground/repository/sqlc/gen"
+	"playground/app"
+	"playground/app/repository/gen"
 )
 
 type UserRepository struct {
 	q *gen.Queries
 }
 
-var _ domain.UserRepository = (*UserRepository)(nil)
+var _ app.UserRepository = (*UserRepository)(nil)
 
-func NewUserRepository(db *sql.DB) domain.UserRepository {
+func NewUserRepository(db *sql.DB) app.UserRepository {
 	return &UserRepository{
 		q: gen.New(db),
 	}
 }
 
-func (r *UserRepository) Create(ctx context.Context, arg *domain.User) (*domain.User, error) {
+func (r *UserRepository) Create(ctx context.Context, arg *app.User) (*app.User, error) {
 	_, err := r.q.CreateUser(ctx, gen.CreateUserParams{
 		Username:       arg.Username,
 		FullName:       arg.FullName,
@@ -34,13 +34,13 @@ func (r *UserRepository) Create(ctx context.Context, arg *domain.User) (*domain.
 	return r.GetByUsername(ctx, arg.Username)
 }
 
-func (r *UserRepository) GetByUsername(ctx context.Context, username string) (*domain.User, error) {
+func (r *UserRepository) GetByUsername(ctx context.Context, username string) (*app.User, error) {
 	user, err := r.q.GetUserByUsername(ctx, username)
 	if err != nil {
 		return nil, err
 	}
 
-	return &domain.User{
+	return &app.User{
 		ID:             user.ID,
 		Username:       user.Username,
 		FullName:       user.FullName,

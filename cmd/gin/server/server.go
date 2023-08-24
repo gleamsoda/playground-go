@@ -8,10 +8,10 @@ import (
 	"github.com/go-playground/validator/v10"
 	_ "github.com/go-sql-driver/mysql"
 
+	"playground/app/repository"
+	"playground/app/usecase"
 	"playground/config"
-	"playground/domain/usecase"
 	"playground/pkg/token"
-	"playground/repository/sqlc"
 )
 
 func NewServer(cfg config.Config) (*gin.Engine, error) {
@@ -31,15 +31,15 @@ func NewServer(cfg config.Config) (*gin.Engine, error) {
 	}
 
 	// repositories
-	entryRepo := sqlc.NewEntryRepository(conn)
-	transferRepo := sqlc.NewTransferRepository(conn)
-	walletRepo := sqlc.NewWalletRepository(conn)
-	userRepo := sqlc.NewUserRepository(conn)
-	sessionRepo := sqlc.NewSessionRepository(conn)
+	entryRepo := repository.NewEntryRepository(conn)
+	transferRepo := repository.NewTransferRepository(conn)
+	walletRepo := repository.NewWalletRepository(conn)
+	userRepo := repository.NewUserRepository(conn)
+	sessionRepo := repository.NewSessionRepository(conn)
 
 	// usecases
 	entryUsecase := usecase.NewEntryUsecase(entryRepo, walletRepo)
-	transferUsecase := usecase.NewTransferUsecase(transferRepo, entryRepo, walletRepo, sqlc.NewTransactionManager(conn))
+	transferUsecase := usecase.NewTransferUsecase(transferRepo, entryRepo, walletRepo, repository.NewTransactionManager(conn))
 	walletUsecase := usecase.NewWalletUsecase(walletRepo)
 	userUsecase := usecase.NewUserUsecase(userRepo, sessionRepo, tm, cfg)
 

@@ -5,22 +5,22 @@ import (
 	"fmt"
 	"time"
 
+	"playground/app"
 	"playground/config"
-	"playground/domain"
 	"playground/pkg/password"
 	"playground/pkg/token"
 )
 
 type UserUsecase struct {
-	userRepo    domain.UserRepository
-	sessionRepo domain.SessionRepository
+	userRepo    app.UserRepository
+	sessionRepo app.SessionRepository
 	tokenMaker  token.Maker
 	cfg         config.Config
 }
 
-var _ domain.UserUsecase = (*UserUsecase)(nil)
+var _ app.UserUsecase = (*UserUsecase)(nil)
 
-func NewUserUsecase(userRepo domain.UserRepository, sessionRepo domain.SessionRepository, tokenMaker token.Maker, cfg config.Config) domain.UserUsecase {
+func NewUserUsecase(userRepo app.UserRepository, sessionRepo app.SessionRepository, tokenMaker token.Maker, cfg config.Config) app.UserUsecase {
 	return &UserUsecase{
 		userRepo:    userRepo,
 		sessionRepo: sessionRepo,
@@ -29,12 +29,12 @@ func NewUserUsecase(userRepo domain.UserRepository, sessionRepo domain.SessionRe
 	}
 }
 
-func (u *UserUsecase) Create(ctx context.Context, arg domain.CreateUserInputParams) (*domain.User, error) {
+func (u *UserUsecase) Create(ctx context.Context, arg app.CreateUserInputParams) (*app.User, error) {
 	hashedPassword, err := password.HashPassword(arg.Password)
 	if err != nil {
 		return nil, err
 	}
-	usr := domain.NewUser(
+	usr := app.NewUser(
 		arg.Username,
 		arg.FullName,
 		arg.Email,
@@ -43,11 +43,11 @@ func (u *UserUsecase) Create(ctx context.Context, arg domain.CreateUserInputPara
 	return u.userRepo.Create(ctx, usr)
 }
 
-func (u *UserUsecase) GetByUsername(ctx context.Context, username string) (*domain.User, error) {
+func (u *UserUsecase) GetByUsername(ctx context.Context, username string) (*app.User, error) {
 	return u.userRepo.GetByUsername(ctx, username)
 }
 
-func (u *UserUsecase) Login(ctx context.Context, arg domain.LoginUserInputParams) (*domain.LoginUserOutputParams, error) {
+func (u *UserUsecase) Login(ctx context.Context, arg app.LoginUserInputParams) (*app.LoginUserOutputParams, error) {
 	usr, err := u.userRepo.GetByUsername(ctx, arg.Username)
 	if err != nil {
 		return nil, err
@@ -72,7 +72,7 @@ func (u *UserUsecase) Login(ctx context.Context, arg domain.LoginUserInputParams
 		return nil, err
 	}
 
-	if err := u.sessionRepo.Create(ctx, domain.NewSession(
+	if err := u.sessionRepo.Create(ctx, app.NewSession(
 		rPayload.ID,
 		usr.ID,
 		rToken,
@@ -84,7 +84,7 @@ func (u *UserUsecase) Login(ctx context.Context, arg domain.LoginUserInputParams
 		return nil, err
 	}
 
-	return &domain.LoginUserOutputParams{
+	return &app.LoginUserOutputParams{
 		SessionID:             rPayload.ID,
 		AccessToken:           aToken,
 		AccessTokenExpiresAt:  aPayload.ExpiredAt,
@@ -94,7 +94,7 @@ func (u *UserUsecase) Login(ctx context.Context, arg domain.LoginUserInputParams
 	}, nil
 }
 
-func (u *UserUsecase) RenewAccessToken(ctx context.Context, refreshToken string) (*domain.RenewAccessTokenOutputParams, error) {
+func (u *UserUsecase) RenewAccessToken(ctx context.Context, refreshToken string) (*app.RenewAccessTokenOutputParams, error) {
 	rPayload, err := u.tokenMaker.VerifyToken(refreshToken)
 	if err != nil {
 		return nil, err
@@ -129,7 +129,7 @@ func (u *UserUsecase) RenewAccessToken(ctx context.Context, refreshToken string)
 		return nil, err
 	}
 
-	resp := &domain.RenewAccessTokenOutputParams{
+	resp := &app.RenewAccessTokenOutputParams{
 		AccessToken:          aToken,
 		AccessTokenExpiresAt: aPayload.ExpiredAt,
 	}
