@@ -7,22 +7,22 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"playground/domain"
+	"playground/app"
 	"playground/pkg/token"
 )
 
 type entryHandler struct {
-	u domain.EntryUsecase
+	u app.EntryUsecase
 }
 
-func NewEntryHandler(u domain.EntryUsecase) entryHandler {
+func NewEntryHandler(u app.EntryUsecase) entryHandler {
 	return entryHandler{
 		u: u,
 	}
 }
 
 func (h entryHandler) List(c *gin.Context) {
-	var args domain.ListEntriesInputParams
+	var args app.ListEntriesInputParams
 	if err := c.ShouldBindQuery(&args); err != nil {
 		c.JSON(http.StatusBadRequest, errorResponse(err))
 		return

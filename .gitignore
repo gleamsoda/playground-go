@@ -26,3 +26,6 @@ bin/
 # cover files
 coverage.out
 coverage.html
+
+# env
+.envrc

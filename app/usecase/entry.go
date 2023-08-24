@@ -4,24 +4,24 @@ import (
 	"context"
 	"errors"
 
-	"playground/domain"
+	"playground/app"
 )
 
 type EntryUsecase struct {
-	entryRepo  domain.EntryRepository
-	walletRepo domain.WalletRepository
+	entryRepo  app.EntryRepository
+	walletRepo app.WalletRepository
 }
 
-var _ domain.EntryUsecase = (*EntryUsecase)(nil)
+var _ app.EntryUsecase = (*EntryUsecase)(nil)
 
-func NewEntryUsecase(entryRepo domain.EntryRepository, walletRepo domain.WalletRepository) domain.EntryUsecase {
+func NewEntryUsecase(entryRepo app.EntryRepository, walletRepo app.WalletRepository) app.EntryUsecase {
 	return &EntryUsecase{
 		entryRepo:  entryRepo,
 		walletRepo: walletRepo,
 	}
 }
 
-func (u *EntryUsecase) List(ctx context.Context, arg domain.ListEntriesInputParams) ([]domain.Entry, error) {
+func (u *EntryUsecase) List(ctx context.Context, arg app.ListEntriesInputParams) ([]app.Entry, error) {
 	w, err := u.walletRepo.Get(ctx, arg.WalletID)
 	if err != nil {
 		return nil, err

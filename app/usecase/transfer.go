@@ -5,19 +5,19 @@ import (
 	"errors"
 	"fmt"
 
-	"playground/domain"
+	"playground/app"
 )
 
 type TransferUsecase struct {
-	transferRepo domain.TransferRepository
-	entryRepo    domain.EntryRepository
-	walletRepo   domain.WalletRepository
-	txManager    domain.TransactionManager
+	transferRepo app.TransferRepository
+	entryRepo    app.EntryRepository
+	walletRepo   app.WalletRepository
+	txManager    app.TransactionManager
 }
 
-var _ domain.TransferUsecase = (*TransferUsecase)(nil)
+var _ app.TransferUsecase = (*TransferUsecase)(nil)
 
-func NewTransferUsecase(transferRepo domain.TransferRepository, entryRepo domain.EntryRepository, walletRepo domain.WalletRepository, txManager domain.TransactionManager) domain.TransferUsecase {
+func NewTransferUsecase(transferRepo app.TransferRepository, entryRepo app.EntryRepository, walletRepo app.WalletRepository, txManager app.TransactionManager) app.TransferUsecase {
 	return &TransferUsecase{
 		transferRepo: transferRepo,
 		entryRepo:    entryRepo,
@@ -26,7 +26,7 @@ func NewTransferUsecase(transferRepo domain.TransferRepository, entryRepo domain
 	}
 }
 
-func (u *TransferUsecase) Create(ctx context.Context, arg domain.CreateTransferInputParams) (*domain.Transfer, error) {
+func (u *TransferUsecase) Create(ctx context.Context, arg app.CreateTransferInputParams) (*app.Transfer, error) {
 	fromWallet, err := u.validWallet(ctx, arg.FromWalletID, arg.Currency)
 	if err != nil {
 		return nil, err
@@ -40,22 +40,22 @@ func (u *TransferUsecase) Create(ctx context.Context, arg domain.CreateTransferI
 		return nil, err
 	}
 
-	var t *domain.Transfer
+	var t *app.Transfer
 
 	if err := u.txManager.Do(ctx, func(innerCtx context.Context) error {
 		var err error
 		tRepo := u.transferRepo.WithCtx(innerCtx)
 		eRepo := u.entryRepo.WithCtx(innerCtx)
 
-		t, err = tRepo.Create(innerCtx, domain.NewTransfer(arg.FromWalletID, arg.ToWalletID, arg.Amount))
+		t, err = tRepo.Create(innerCtx, app.NewTransfer(arg.FromWalletID, arg.ToWalletID, arg.Amount))
 		if err != nil {
 			return err
 		}
 
-		if _, err = eRepo.Create(innerCtx, domain.NewEntry(t.FromWalletID, -t.Amount)); err != nil {
+		if _, err = eRepo.Create(innerCtx, app.NewEntry(t.FromWalletID, -t.Amount)); err != nil {
 			return err
 		}
-		if _, err := eRepo.Create(innerCtx, domain.NewEntry(t.ToWalletID, t.Amount)); err != nil {
+		if _, err := eRepo.Create(innerCtx, app.NewEntry(t.ToWalletID, t.Amount)); err != nil {
 			return err
 		}
 
@@ -75,19 +75,19 @@ func (u *TransferUsecase) Create(ctx context.Context, arg domain.CreateTransferI
 
 func (u *TransferUsecase) addMoney(ctx context.Context, walletID1 int64, amount1 int64, walletID2 int64, amount2 int64) error {
 	wRepo := u.walletRepo.WithCtx(ctx)
-	if err := wRepo.AddWalletBalance(ctx, domain.AddWalletBalanceParams{
+	if err := wRepo.AddWalletBalance(ctx, app.AddWalletBalanceParams{
 		ID:     walletID1,
 		Amount: amount1,
 	}); err != nil {
 		return err
 	}
-	return wRepo.AddWalletBalance(ctx, domain.AddWalletBalanceParams{
+	return wRepo.AddWalletBalance(ctx, app.AddWalletBalanceParams{
 		ID:     walletID2,
 		Amount: amount2,
 	})
 }
 
-func (u *TransferUsecase) validWallet(ctx context.Context, walletD int64, currency string) (*domain.Wallet, error) {
+func (u *TransferUsecase) validWallet(ctx context.Context, walletD int64, currency string) (*app.Wallet, error) {
 	w, err := u.walletRepo.Get(ctx, walletD)
 	if err != nil {
 		return nil, err

@@ -19,8 +19,7 @@ type Config struct {
 // NewConfig reads configuration from file or environment variables.
 func NewConfig() (cfg Config, err error) {
 	viper.AddConfigPath(".")
-	viper.SetConfigName("app")
-	viper.SetConfigType("env")
+	viper.SetConfigFile(".env")
 	viper.AutomaticEnv()
 
 	if err = viper.ReadInConfig(); err != nil {

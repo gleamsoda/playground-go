@@ -9,11 +9,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 
+	"playground/app"
 	"playground/config"
-	"playground/domain"
 	"playground/pkg/password"
 	"playground/pkg/token"
-	mock_domain "playground/test/mock/domain"
+	mock_app "playground/test/mock/app"
 	mock_token "playground/test/mock/token"
 )
 
@@ -21,18 +21,18 @@ func TestUserUsecase_Create(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockUserRepo := mock_domain.NewMockUserRepository(ctrl)
+	mockUserRepo := mock_app.NewMockUserRepository(ctrl)
 	u := &UserUsecase{
 		userRepo: mockUserRepo,
 	}
 	ctx := context.Background()
-	args := domain.CreateUserInputParams{
+	args := app.CreateUserInputParams{
 		Username: "testuser",
 		FullName: "Test User",
 		Email:    "test@example.com",
 		Password: "password",
 	}
-	usr := &domain.User{ID: 1}
+	usr := &app.User{ID: 1}
 
 	mockUserRepo.EXPECT().Create(ctx, gomock.Any()).Return(usr, nil)
 
@@ -46,12 +46,12 @@ func TestUserUsecase_GetByUsername(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockUserRepo := mock_domain.NewMockUserRepository(ctrl)
+	mockUserRepo := mock_app.NewMockUserRepository(ctrl)
 	u := &UserUsecase{
 		userRepo: mockUserRepo,
 	}
 	ctx := context.Background()
-	usr := &domain.User{ID: 1}
+	usr := &app.User{ID: 1}
 
 	mockUserRepo.EXPECT().GetByUsername(ctx, "username").Return(usr, nil)
 
@@ -65,8 +65,8 @@ func TestUserUsecase_Login(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockUserRepo := mock_domain.NewMockUserRepository(ctrl)
-	mockSessionRepo := mock_domain.NewMockSessionRepository(ctrl)
+	mockUserRepo := mock_app.NewMockUserRepository(ctrl)
+	mockSessionRepo := mock_app.NewMockSessionRepository(ctrl)
 	mockTokenMaker := mock_token.NewMockMaker(ctrl)
 	cfg := config.Config{
 		AccessTokenDuration:  15 * time.Minute,
@@ -79,12 +79,12 @@ func TestUserUsecase_Login(t *testing.T) {
 		cfg:         cfg,
 	}
 	ctx := context.Background()
-	args := domain.LoginUserInputParams{
+	args := app.LoginUserInputParams{
 		Username: "testuser",
 		Password: "password",
 	}
 	pw, _ := password.HashPassword("password")
-	usr := &domain.User{
+	usr := &app.User{
 		ID:             1,
 		HashedPassword: pw,
 	}
@@ -106,7 +106,7 @@ func TestUserUsecase_RenewAccessToken(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockSessionRepo := mock_domain.NewMockSessionRepository(ctrl)
+	mockSessionRepo := mock_app.NewMockSessionRepository(ctrl)
 	mockTokenMaker := mock_token.NewMockMaker(ctrl)
 
 	cfg := config.Config{
@@ -126,7 +126,7 @@ func TestUserUsecase_RenewAccessToken(t *testing.T) {
 	}
 
 	t.Run("Session is blocked", func(t *testing.T) {
-		sess := &domain.Session{
+		sess := &app.Session{
 			UserID:       123,
 			IsBlocked:    true,
 			RefreshToken: "refresh_token",
@@ -142,7 +142,7 @@ func TestUserUsecase_RenewAccessToken(t *testing.T) {
 	})
 
 	t.Run("Incorrect session", func(t *testing.T) {
-		sess := &domain.Session{
+		sess := &app.Session{
 			UserID:       456,
 			IsBlocked:    false,
 			RefreshToken: "refresh_token",
@@ -158,7 +158,7 @@ func TestUserUsecase_RenewAccessToken(t *testing.T) {
 	})
 
 	t.Run("Session token mismatched", func(t *testing.T) {
-		sess := &domain.Session{
+		sess := &app.Session{
 			UserID:       123,
 			IsBlocked:    false,
 			RefreshToken: "incorrect_token",
@@ -174,7 +174,7 @@ func TestUserUsecase_RenewAccessToken(t *testing.T) {
 	})
 
 	t.Run("Session expired", func(t *testing.T) {
-		sess := &domain.Session{
+		sess := &app.Session{
 			UserID:       123,
 			IsBlocked:    false,
 			RefreshToken: "refresh_token",
@@ -190,7 +190,7 @@ func TestUserUsecase_RenewAccessToken(t *testing.T) {
 	})
 
 	t.Run("Success", func(t *testing.T) {
-		sess := &domain.Session{
+		sess := &app.Session{
 			UserID:       123,
 			IsBlocked:    false,
 			RefreshToken: "refresh_token",

@@ -1,33 +1,33 @@
-package sqlc
+package repository
 
 import (
 	"context"
 	"database/sql"
 
-	"playground/domain"
-	"playground/repository/sqlc/gen"
+	"playground/app"
+	"playground/app/repository/gen"
 )
 
 type EntryRepository struct {
 	q *gen.Queries
 }
 
-var _ domain.EntryRepository = (*EntryRepository)(nil)
+var _ app.EntryRepository = (*EntryRepository)(nil)
 
-func NewEntryRepository(db *sql.DB) domain.EntryRepository {
+func NewEntryRepository(db *sql.DB) app.EntryRepository {
 	return &EntryRepository{
 		q: gen.New(db),
 	}
 }
 
-func (r *EntryRepository) WithCtx(ctx context.Context) domain.EntryRepository {
+func (r *EntryRepository) WithCtx(ctx context.Context) app.EntryRepository {
 	if tx, ok := ctx.Value(TransactionKey).(*sql.Tx); ok {
 		r.q.WithTx(tx)
 	}
 	return r
 }
 
-func (r *EntryRepository) Create(ctx context.Context, arg *domain.Entry) (*domain.Entry, error) {
+func (r *EntryRepository) Create(ctx context.Context, arg *app.Entry) (*app.Entry, error) {
 	id, err := r.q.CreateEntry(ctx, gen.CreateEntryParams{
 		WalletID: arg.WalletID,
 		Amount:   arg.Amount,
@@ -39,13 +39,13 @@ func (r *EntryRepository) Create(ctx context.Context, arg *domain.Entry) (*domai
 	return r.Get(ctx, id)
 }
 
-func (r *EntryRepository) Get(ctx context.Context, id int64) (*domain.Entry, error) {
+func (r *EntryRepository) Get(ctx context.Context, id int64) (*app.Entry, error) {
 	entry, err := r.q.GetEntry(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 
-	return &domain.Entry{
+	return &app.Entry{
 		ID:        entry.ID,
 		WalletID:  entry.WalletID,
 		Amount:    entry.Amount,
@@ -53,7 +53,7 @@ func (r *EntryRepository) Get(ctx context.Context, id int64) (*domain.Entry, err
 	}, nil
 }
 
-func (r *EntryRepository) List(ctx context.Context, arg domain.ListEntriesInputParams) ([]domain.Entry, error) {
+func (r *EntryRepository) List(ctx context.Context, arg app.ListEntriesInputParams) ([]app.Entry, error) {
 	entries, err := r.q.ListEntries(ctx, gen.ListEntriesParams{
 		WalletID: arg.WalletID,
 		Limit:    arg.Limit,
@@ -63,9 +63,9 @@ func (r *EntryRepository) List(ctx context.Context, arg domain.ListEntriesInputP
 		return nil, err
 	}
 
-	var result []domain.Entry
+	var result []app.Entry
 	for _, entry := range entries {
-		result = append(result, domain.Entry{
+		result = append(result, app.Entry{
 			ID:        entry.ID,
 			WalletID:  entry.WalletID,
 			Amount:    entry.Amount,

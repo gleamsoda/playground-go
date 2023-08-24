@@ -1,4 +1,4 @@
-package sqlc
+package repository
 
 import (
 	"context"
@@ -6,23 +6,23 @@ import (
 
 	"github.com/google/uuid"
 
-	"playground/domain"
-	"playground/repository/sqlc/gen"
+	"playground/app"
+	"playground/app/repository/gen"
 )
 
 type SessionRepository struct {
 	q *gen.Queries
 }
 
-var _ domain.SessionRepository = (*SessionRepository)(nil)
+var _ app.SessionRepository = (*SessionRepository)(nil)
 
-func NewSessionRepository(db *sql.DB) domain.SessionRepository {
+func NewSessionRepository(db *sql.DB) app.SessionRepository {
 	return &SessionRepository{
 		q: gen.New(db),
 	}
 }
 
-func (r *SessionRepository) Create(ctx context.Context, arg *domain.Session) error {
+func (r *SessionRepository) Create(ctx context.Context, arg *app.Session) error {
 	return r.q.CreateSession(ctx, gen.CreateSessionParams{
 		ID:           arg.ID,
 		UserID:       arg.UserID,
@@ -34,13 +34,13 @@ func (r *SessionRepository) Create(ctx context.Context, arg *domain.Session) err
 	})
 }
 
-func (r *SessionRepository) Get(ctx context.Context, id uuid.UUID) (*domain.Session, error) {
+func (r *SessionRepository) Get(ctx context.Context, id uuid.UUID) (*app.Session, error) {
 	session, err := r.q.GetSession(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 
-	return &domain.Session{
+	return &app.Session{
 		ID:           session.ID,
 		UserID:       session.UserID,
 		RefreshToken: session.RefreshToken,

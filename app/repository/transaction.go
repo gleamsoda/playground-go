@@ -1,22 +1,22 @@
-package sqlc
+package repository
 
 import (
 	"database/sql"
 
 	"golang.org/x/net/context"
 
-	"playground/domain"
+	"playground/app"
 )
 
 type TransactionManager struct {
 	db *sql.DB
 }
 
-var _ domain.TransactionManager = (*TransactionManager)(nil)
+var _ app.TransactionManager = (*TransactionManager)(nil)
 
 const TransactionKey = "txKey"
 
-func NewTransactionManager(db *sql.DB) domain.TransactionManager {
+func NewTransactionManager(db *sql.DB) app.TransactionManager {
 	return &TransactionManager{
 		db: db,
 	}
