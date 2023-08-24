@@ -2,7 +2,7 @@ COVERAGE_OUT=coverage.out
 COVERAGE_HTML=coverage.html
 DB_SOURCE=root:example@tcp(127.0.0.1:3306)
 APP_NAME=playground
-GRPC_BASE=cmd/grpc/server
+GRPC_BASE=driver/grpc
 
 .PHONY: gin grpc test cover migrateup migratedown sqlc proto
 

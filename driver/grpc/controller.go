@@ -1,4 +1,4 @@
-package server
+package grpc
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"playground/app"
-	"playground/cmd/grpc/server/gen"
+	"playground/driver/grpc/gen"
 	"playground/pkg/validator"
 )
 

@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 
 	"playground/app"
-	"playground/app/repository/gen"
+	"playground/app/repository/sqlc/gen"
 )
 
 type SessionRepository struct {

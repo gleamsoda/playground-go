@@ -1,4 +1,4 @@
-package server
+package gin
 
 import (
 	"net/http"

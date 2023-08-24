@@ -5,7 +5,7 @@ import (
 	"database/sql"
 
 	"playground/app"
-	"playground/app/repository/gen"
+	"playground/app/repository/sqlc/gen"
 )
 
 type EntryRepository struct {

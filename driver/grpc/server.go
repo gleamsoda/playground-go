@@ -1,4 +1,4 @@
-package server
+package grpc
 
 import (
 	"database/sql"
@@ -10,8 +10,8 @@ import (
 
 	"playground/app/repository"
 	"playground/app/usecase"
-	"playground/cmd/grpc/server/gen"
 	"playground/config"
+	"playground/driver/grpc/gen"
 	"playground/pkg/token"
 )
 
@@ -34,9 +34,9 @@ func NewServer(cfg config.Config) (*grpc.Server, error) {
 	userUsecase := usecase.NewUserUsecase(userRepo, sessionRepo, tm, cfg)
 
 	ctrl := NewController(userUsecase)
-	svr := grpc.NewServer()
-	gen.RegisterPlaygroundServer(svr, ctrl)
-	reflection.Register(svr)
+	svc := grpc.NewServer()
+	gen.RegisterPlaygroundServer(svc, ctrl)
+	reflection.Register(svc)
 
-	return svr, nil
+	return svc, nil
 }

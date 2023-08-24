@@ -1,7 +1,8 @@
-package server
+package gin
 
 import (
 	"database/sql"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -14,7 +15,7 @@ import (
 	"playground/pkg/token"
 )
 
-func NewServer(cfg config.Config) (*gin.Engine, error) {
+func NewServer(cfg config.Config) (*http.Server, error) {
 	conn, err := sql.Open("mysql", cfg.DBSource)
 	if err != nil {
 		return nil, err
@@ -64,5 +65,8 @@ func NewServer(cfg config.Config) (*gin.Engine, error) {
 	authRoutes.GET("/wallets/:id/entries", entryHandler.List)
 	authRoutes.POST("/transfers", transferHandler.Create)
 
-	return svr, nil
+	return &http.Server{
+		Addr:    cfg.HTTPServerAddress,
+		Handler: svr,
+	}, nil
 }
