@@ -16,8 +16,8 @@ cover:
 	go tool cover -html=$(COVERAGE_OUT) -o $(COVERAGE_HTML)
 
 mock:
-	mockgen playground/app AccountRepository,TransferRepository,UserRepository > ./test/mock/app/repository.go
-	mockgen playground/app AccountUsecase,TransferUsecase,UserUsecase > ./test/mock/app/usecase.go
+	mockgen playground/app Repository > ./test/mock/app/repository.go
+	mockgen playground/app Usecase > ./test/mock/app/usecase.go
 	mockgen playground/pkg/token Manager > ./test/mock/token/manager.go
 
 sqlc:

@@ -28,10 +28,9 @@ func NewServer(cfg config.Config) (*grpc.Server, error) {
 	if err != nil {
 		return nil, fmt.Errorf("cannot create token maker: %w", err)
 	}
-	ur := repository.NewUserRepository(conn)
-	uu := usecase.NewUserUsecase(ur, tm, cfg.AccessTokenDuration, cfg.RefreshTokenDuration)
-
-	ctrl := NewController(uu)
+	r := repository.NewRepository(conn)
+	u := usecase.NewUsecase(r, tm, cfg.AccessTokenDuration, cfg.RefreshTokenDuration)
+	ctrl := NewController(u)
 	svr := grpc.NewServer()
 	gen.RegisterPlaygroundServer(svr, ctrl)
 	reflection.Register(svr)

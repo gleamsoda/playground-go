@@ -8,16 +8,6 @@ import (
 	"playground/app"
 )
 
-type transferHandler struct {
-	u app.TransferUsecase
-}
-
-func NewTransferHandler(u app.TransferUsecase) transferHandler {
-	return transferHandler{
-		u: u,
-	}
-}
-
 type transferRequest struct {
 	FromAccountID int64  `json:"from_account_id" binding:"required,min=1"`
 	ToAccountID   int64  `json:"to_account_id" binding:"required,min=1"`
@@ -25,7 +15,7 @@ type transferRequest struct {
 	Currency      string `json:"currency" binding:"required,currency"`
 }
 
-func (h transferHandler) createTransfer(c *gin.Context) {
+func (h handler) createTransfer(c *gin.Context) {
 	var req transferRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, errorResponse(err))

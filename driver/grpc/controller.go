@@ -15,12 +15,12 @@ import (
 
 type Controller struct {
 	gen.UnimplementedPlaygroundServer
-	userUsecase app.UserUsecase
+	u app.Usecase
 }
 
-func NewController(userUsecase app.UserUsecase) *Controller {
+func NewController(u app.Usecase) *Controller {
 	return &Controller{
-		userUsecase: userUsecase,
+		u: u,
 	}
 }
 

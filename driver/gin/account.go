@@ -8,21 +8,11 @@ import (
 	"playground/app"
 )
 
-type accountHandler struct {
-	u app.AccountUsecase
-}
-
-func NewAccountHandler(u app.AccountUsecase) *accountHandler {
-	return &accountHandler{
-		u: u,
-	}
-}
-
 type createAccountRequest struct {
 	Currency string `json:"currency" binding:"required,currency"`
 }
 
-func (h accountHandler) createAccount(c *gin.Context) {
+func (h handler) createAccount(c *gin.Context) {
 	var req createAccountRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, errorResponse(err))
@@ -45,7 +35,7 @@ type getAccountRequest struct {
 	ID int64 `uri:"id" binding:"required,min=1"`
 }
 
-func (h accountHandler) getAccount(c *gin.Context) {
+func (h handler) getAccount(c *gin.Context) {
 	var req getAccountRequest
 	if err := c.ShouldBindUri(&req); err != nil {
 		c.JSON(http.StatusBadRequest, errorResponse(err))
@@ -64,7 +54,7 @@ type listAccountRequest struct {
 	Offset int32 `form:"offset"`
 }
 
-func (h accountHandler) listAccounts(c *gin.Context) {
+func (h handler) listAccounts(c *gin.Context) {
 	var req listAccountRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
 		c.JSON(http.StatusBadRequest, errorResponse(err))

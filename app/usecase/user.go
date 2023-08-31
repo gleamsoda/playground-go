@@ -7,31 +7,14 @@ import (
 
 	"playground/app"
 	"playground/pkg/password"
-	"playground/pkg/token"
 )
 
-type UserUsecase struct {
-	ur                   app.UserRepository
-	tm                   token.Manager
-	accessTokenDuration  time.Duration
-	refreshTokenDuration time.Duration
-}
-
-func NewUserUsecase(ur app.UserRepository, tm token.Manager, accessTokenDuration, refreshTokenDuration time.Duration) app.UserUsecase {
-	return &UserUsecase{
-		ur:                   ur,
-		tm:                   tm,
-		accessTokenDuration:  accessTokenDuration,
-		refreshTokenDuration: refreshTokenDuration,
-	}
-}
-
-func (u *UserUsecase) CreateUser(ctx context.Context, args *app.CreateUserParams) (*app.User, error) {
+func (u *Usecase) CreateUser(ctx context.Context, args *app.CreateUserParams) (*app.User, error) {
 	hashedPassword, err := password.HashPassword(args.Password)
 	if err != nil {
 		return nil, err
 	}
-	return u.ur.CreateUser(ctx, app.NewUser(
+	return u.r.CreateUser(ctx, app.NewUser(
 		args.Username,
 		hashedPassword,
 		args.FullName,
@@ -39,8 +22,8 @@ func (u *UserUsecase) CreateUser(ctx context.Context, args *app.CreateUserParams
 	))
 }
 
-func (u *UserUsecase) Login(ctx context.Context, args *app.LoginUserParams) (*app.LoginUserOutputParams, error) {
-	usr, err := u.ur.GetUser(ctx, args.Username)
+func (u *Usecase) LoginUser(ctx context.Context, args *app.LoginUserParams) (*app.LoginUserOutputParams, error) {
+	usr, err := u.r.GetUser(ctx, args.Username)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +47,7 @@ func (u *UserUsecase) Login(ctx context.Context, args *app.LoginUserParams) (*ap
 		return nil, err
 	}
 
-	if err := u.ur.CreateSession(ctx, app.NewSession(
+	if err := u.r.CreateSession(ctx, app.NewSession(
 		rPayload.ID,
 		usr.Username,
 		rToken,
@@ -86,13 +69,13 @@ func (u *UserUsecase) Login(ctx context.Context, args *app.LoginUserParams) (*ap
 	}, nil
 }
 
-func (u *UserUsecase) RenewAccessToken(ctx context.Context, refreshToken string) (*app.RenewAccessTokenOutputParams, error) {
+func (u *Usecase) RenewAccessToken(ctx context.Context, refreshToken string) (*app.RenewAccessTokenOutputParams, error) {
 	rPayload, err := u.tm.Verify(refreshToken)
 	if err != nil {
 		return nil, err
 	}
 
-	sess, err := u.ur.GetSession(ctx, rPayload.ID)
+	sess, err := u.r.GetSession(ctx, rPayload.ID)
 	if err != nil {
 		return nil, err
 	}

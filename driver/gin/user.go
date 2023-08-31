@@ -8,16 +8,6 @@ import (
 	"playground/app"
 )
 
-type userHandler struct {
-	u app.UserUsecase
-}
-
-func NewUserHandler(u app.UserUsecase) userHandler {
-	return userHandler{
-		u: u,
-	}
-}
-
 type createUserRequest struct {
 	Username string `json:"username" binding:"required,alphanum"`
 	Password string `json:"password" binding:"required,min=6"`
@@ -25,7 +15,7 @@ type createUserRequest struct {
 	Email    string `json:"email" binding:"required,email"`
 }
 
-func (h userHandler) createUser(c *gin.Context) {
+func (h handler) createUser(c *gin.Context) {
 	var req createUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, errorResponse(err))
@@ -49,14 +39,14 @@ type loginUserRequest struct {
 	Password string `json:"password" binding:"required,min=6"`
 }
 
-func (h userHandler) login(ctx *gin.Context) {
+func (h handler) loginUser(ctx *gin.Context) {
 	var req loginUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
-	if param, err := h.u.Login(ctx, &app.LoginUserParams{
+	if param, err := h.u.LoginUser(ctx, &app.LoginUserParams{
 		Username:  req.Username,
 		Password:  req.Password,
 		UserAgent: ctx.Request.UserAgent(),
@@ -72,7 +62,7 @@ type renewAccessTokenRequest struct {
 	RefreshToken string `json:"refresh_token" binding:"required"`
 }
 
-func (h userHandler) renewAccessToken(ctx *gin.Context) {
+func (h handler) renewAccessToken(ctx *gin.Context) {
 	var req renewAccessTokenRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))

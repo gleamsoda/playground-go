@@ -25,7 +25,7 @@ func (c *Controller) CreateUser(ctx context.Context, req *gen.CreateUserRequest)
 		Email:    req.GetEmail(),
 		Password: req.GetPassword(),
 	}
-	u, err := c.userUsecase.CreateUser(ctx, args)
+	u, err := c.u.CreateUser(ctx, args)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to create user: %s", err)
 	}
@@ -66,7 +66,7 @@ func (c *Controller) LoginUser(ctx context.Context, req *gen.LoginUserRequest) (
 		UserAgent: meta.UserAgent,
 		ClientIP:  meta.ClientIP,
 	}
-	r, err := c.userUsecase.Login(ctx, args)
+	r, err := c.u.LoginUser(ctx, args)
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to find user")

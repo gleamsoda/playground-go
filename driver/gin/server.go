@@ -32,31 +32,23 @@ func NewServer(cfg config.Config) (*http.Server, error) {
 	}
 
 	// repositories
-	ur := repository.NewUserRepository(conn)
-	ar := repository.NewAccountRepository(conn)
-	tr := repository.NewTransferRepository(conn)
-
+	r := repository.NewRepository(conn)
 	// usecases
-	uu := usecase.NewUserUsecase(ur, tm, cfg.AccessTokenDuration, cfg.RefreshTokenDuration)
-	au := usecase.NewAccountUsecase(ar)
-	tu := usecase.NewTransferUsecase(tr, ar)
-
+	u := usecase.NewUsecase(r, tm, cfg.AccessTokenDuration, cfg.RefreshTokenDuration)
 	// handlers
-	uh := NewUserHandler(uu)
-	ah := NewAccountHandler(au)
-	th := NewTransferHandler(tu)
+	h := NewHandler(u)
 
 	svr := gin.Default()
 	svr.GET("/health", health(conn))
-	svr.POST("/users", uh.createUser)
-	svr.POST("/login", uh.login)
-	svr.POST("/tokens/renew_access", uh.renewAccessToken)
+	svr.POST("/users", h.createUser)
+	svr.POST("/login", h.loginUser)
+	svr.POST("/tokens/renew_access", h.renewAccessToken)
 
 	auth := svr.Group("/").Use(authMiddleware(tm))
-	auth.POST("/accounts", ah.createAccount)
-	auth.GET("/accounts/:id", ah.getAccount)
-	auth.GET("/accounts", ah.listAccounts)
-	auth.POST("/transfers", th.createTransfer)
+	auth.POST("/accounts", h.createAccount)
+	auth.GET("/accounts/:id", h.getAccount)
+	auth.GET("/accounts", h.listAccounts)
+	auth.POST("/transfers", h.createTransfer)
 
 	return &http.Server{
 		Addr:    cfg.HTTPServerAddress,

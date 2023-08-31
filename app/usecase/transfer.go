@@ -8,19 +8,7 @@ import (
 	"playground/app"
 )
 
-type TransferUsecase struct {
-	ar app.AccountRepository
-	tr app.TransferRepository
-}
-
-func NewTransferUsecase(tr app.TransferRepository, ar app.AccountRepository) app.TransferUsecase {
-	return &TransferUsecase{
-		tr: tr,
-		ar: ar,
-	}
-}
-
-func (u *TransferUsecase) CreateTransfer(ctx context.Context, args *app.CreateTransferParams) (*app.Transfer, error) {
+func (u *Usecase) CreateTransfer(ctx context.Context, args *app.CreateTransferParams) (*app.Transfer, error) {
 	fromAccount, err := u.validAccount(ctx, args.FromAccountID, args.Currency)
 	if err != nil {
 		return nil, err
@@ -33,11 +21,11 @@ func (u *TransferUsecase) CreateTransfer(ctx context.Context, args *app.CreateTr
 		return nil, err
 	}
 
-	return u.tr.CreateTransfer(ctx, app.NewTransfer(args.FromAccountID, args.ToAccountID, args.Amount))
+	return u.r.CreateTransfer(ctx, app.NewTransfer(args.FromAccountID, args.ToAccountID, args.Amount))
 }
 
-func (u *TransferUsecase) validAccount(ctx context.Context, accountID int64, currency string) (*app.Account, error) {
-	a, err := u.ar.GetAccount(ctx, accountID)
+func (u *Usecase) validAccount(ctx context.Context, accountID int64, currency string) (*app.Account, error) {
+	a, err := u.r.GetAccount(ctx, accountID)
 	if err != nil {
 		return nil, err
 	}

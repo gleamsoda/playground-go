@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"database/sql"
 
 	"github.com/google/uuid"
 
@@ -10,19 +9,7 @@ import (
 	"playground/app/repository/sqlc/gen"
 )
 
-type UserRepository struct {
-	db *sql.DB
-	q  *gen.Queries
-}
-
-func NewUserRepository(db *sql.DB) app.UserRepository {
-	return &UserRepository{
-		db: db,
-		q:  gen.New(db),
-	}
-}
-
-func (r *UserRepository) CreateUser(ctx context.Context, args *app.User) (*app.User, error) {
+func (r *Repository) CreateUser(ctx context.Context, args *app.User) (*app.User, error) {
 	if _, err := r.q.CreateUser(ctx, &gen.CreateUserParams{
 		Username:       args.Username,
 		FullName:       args.FullName,
@@ -35,7 +22,7 @@ func (r *UserRepository) CreateUser(ctx context.Context, args *app.User) (*app.U
 	return r.GetUser(ctx, args.Username)
 }
 
-func (r *UserRepository) GetUser(ctx context.Context, username string) (*app.User, error) {
+func (r *Repository) GetUser(ctx context.Context, username string) (*app.User, error) {
 	u, err := r.q.GetUser(ctx, username)
 	if err != nil {
 		return nil, err
@@ -51,7 +38,7 @@ func (r *UserRepository) GetUser(ctx context.Context, username string) (*app.Use
 	}, nil
 }
 
-func (r *UserRepository) CreateSession(ctx context.Context, args *app.Session) error {
+func (r *Repository) CreateSession(ctx context.Context, args *app.Session) error {
 	return r.q.CreateSession(ctx, &gen.CreateSessionParams{
 		ID:           args.ID,
 		Username:     args.Username,
@@ -63,7 +50,7 @@ func (r *UserRepository) CreateSession(ctx context.Context, args *app.Session) e
 	})
 }
 
-func (r *UserRepository) GetSession(ctx context.Context, id uuid.UUID) (*app.Session, error) {
+func (r *Repository) GetSession(ctx context.Context, id uuid.UUID) (*app.Session, error) {
 	s, err := r.q.GetSession(ctx, id)
 	if err != nil {
 		return nil, err
