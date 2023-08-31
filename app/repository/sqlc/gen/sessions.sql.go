@@ -15,7 +15,7 @@ import (
 const createSession = `-- name: CreateSession :exec
 INSERT INTO sessions (
   id,
-  user_id,
+  username,
   refresh_token,
   user_agent,
   client_ip,
@@ -28,7 +28,7 @@ INSERT INTO sessions (
 
 type CreateSessionParams struct {
 	ID           uuid.UUID `json:"id"`
-	UserID       int64     `json:"user_id"`
+	Username     string    `json:"username"`
 	RefreshToken string    `json:"refresh_token"`
 	UserAgent    string    `json:"user_agent"`
 	ClientIp     string    `json:"client_ip"`
@@ -36,10 +36,10 @@ type CreateSessionParams struct {
 	ExpiresAt    time.Time `json:"expires_at"`
 }
 
-func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) error {
+func (q *Queries) CreateSession(ctx context.Context, arg *CreateSessionParams) error {
 	_, err := q.db.ExecContext(ctx, createSession,
 		arg.ID,
-		arg.UserID,
+		arg.Username,
 		arg.RefreshToken,
 		arg.UserAgent,
 		arg.ClientIp,
@@ -50,7 +50,7 @@ func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) er
 }
 
 const getSession = `-- name: GetSession :one
-SELECT id, user_id, refresh_token, user_agent, client_ip, is_blocked, expires_at, created_at FROM sessions
+SELECT id, username, refresh_token, user_agent, client_ip, is_blocked, expires_at, created_at FROM sessions
 WHERE id = ? LIMIT 1
 `
 
@@ -59,7 +59,7 @@ func (q *Queries) GetSession(ctx context.Context, id uuid.UUID) (*Session, error
 	var i Session
 	err := row.Scan(
 		&i.ID,
-		&i.UserID,
+		&i.Username,
 		&i.RefreshToken,
 		&i.UserAgent,
 		&i.ClientIp,

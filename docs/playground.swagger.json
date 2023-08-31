@@ -151,10 +151,6 @@
     "protoUser": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "string",
-          "format": "int64"
-        },
         "username": {
           "type": "string"
         },

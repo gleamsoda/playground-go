@@ -1,6 +1,6 @@
 CREATE TABLE `sessions` (
   `id` char(36) PRIMARY KEY,
-  `user_id` bigint NOT NULL,
+  `username` varchar(255) NOT NULL,
   `refresh_token` text NOT NULL,
   `user_agent` varchar(255) NOT NULL,
   `client_ip` varchar(255) NOT NULL,

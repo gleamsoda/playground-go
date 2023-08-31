@@ -6,39 +6,41 @@ import "google/protobuf/timestamp.proto";
 import "google/api/annotations.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
 
-option go_package = "playground/cmd/grpc/gen";
+option go_package = "playground/driver/grpc/gen";
 
+// clang-format off
 option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
-	info: {
-		title: "Playground API";
-		version: "0.1";
-		contact: {
-			name: "gleamsoda";
-			url: "https://github.com/gleamsoda";
-			email: "gleamsoda99@gmail.com";
-		};
-	};
+    info: {
+        title: "Playground API";
+        version: "0.1";
+        contact: {
+            name: "gleamsoda";
+            url: "https://github.com/gleamsoda";
+            email: "gleamsoda99@gmail.com";
+        };
+    };
 };
+// clang-format on
 
 service Playground {
-    rpc CreateUser (CreateUserRequest) returns (CreateUserResponse) {
+    rpc CreateUser(CreateUserRequest) returns (CreateUserResponse) {
         option (google.api.http) = {
             post: "/v1/create_user"
             body: "*"
         };
-		// option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-		// 	description: "Use this API to create a new user";
-		// 	summary: "Create new user";
+        // option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+        // 	description: "Use this API to create a new user";
+        // 	summary: "Create new user";
         // };
     }
-    rpc LoginUser (LoginUserRequest) returns (LoginUserResponse) {
+    rpc LoginUser(LoginUserRequest) returns (LoginUserResponse) {
         option (google.api.http) = {
             post: "/v1/login_user"
             body: "*"
         };
-		// option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-		// 	description: "Use this API to login user and get access token & refresh token";
-		// 	summary: "Login user";
+        // option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+        // 	description: "Use this API to login user and get access token & refresh token";
+        // 	summary: "Login user";
         // };
     }
 }
@@ -69,9 +71,8 @@ message LoginUserResponse {
 }
 
 message User {
-    int64 id = 1;
-    string username = 2;
-    string full_name = 3;
-    string email = 4;
-    google.protobuf.Timestamp created_at = 5;
+    string username = 1;
+    string full_name = 2;
+    string email = 3;
+    google.protobuf.Timestamp created_at = 4;
 }

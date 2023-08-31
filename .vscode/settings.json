@@ -2,4 +2,9 @@
     "gopls": {
         "formatting.local": "playground",
     },
+    "protoc": {
+        "options": [
+            "--proto_path=driver/grpc/proto"
+        ]
+    }
 }

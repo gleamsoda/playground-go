@@ -49,7 +49,7 @@ func FuzzValidateUsername(f *testing.F) {
 }
 
 func FuzzValidateFullName(f *testing.F) {
-	testcases := []string{"John Doe", "Alice", "1234567890", "Yo"}
+	testcases := []string{"John Doe", "Alice", "Yo", "Yamada Taro"}
 	for _, tc := range testcases {
 		f.Add(tc)
 	}

@@ -26,44 +26,37 @@ func NewServer(cfg config.Config) (*http.Server, error) {
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		_ = v.RegisterValidation("currency", validCurrency)
 	}
-	tm, err := token.NewPasetoMaker(cfg.TokenSymmetricKey)
+	tm, err := token.NewPasetoManager(cfg.TokenSymmetricKey)
 	if err != nil {
 		return nil, err
 	}
 
 	// repositories
-	entryRepo := repository.NewEntryRepository(conn)
-	transferRepo := repository.NewTransferRepository(conn)
-	walletRepo := repository.NewWalletRepository(conn)
-	userRepo := repository.NewUserRepository(conn)
-	sessionRepo := repository.NewSessionRepository(conn)
+	ur := repository.NewUserRepository(conn)
+	ar := repository.NewAccountRepository(conn)
+	tr := repository.NewTransferRepository(conn)
 
 	// usecases
-	entryUsecase := usecase.NewEntryUsecase(entryRepo, walletRepo)
-	transferUsecase := usecase.NewTransferUsecase(transferRepo, entryRepo, walletRepo, repository.NewTransactionManager(conn))
-	walletUsecase := usecase.NewWalletUsecase(walletRepo)
-	userUsecase := usecase.NewUserUsecase(userRepo, sessionRepo, tm, cfg)
+	uu := usecase.NewUserUsecase(ur, tm, cfg.AccessTokenDuration, cfg.RefreshTokenDuration)
+	au := usecase.NewAccountUsecase(ar)
+	tu := usecase.NewTransferUsecase(tr, ar)
 
 	// handlers
-	entryHandler := NewEntryHandler(entryUsecase)
-	transferHandler := NewTransferHandler(transferUsecase)
-	walletHandler := NewWalletHandler(walletUsecase)
-	userHandler := NewUserHandler(userUsecase)
+	uh := NewUserHandler(uu)
+	ah := NewAccountHandler(au)
+	th := NewTransferHandler(tu)
 
 	svr := gin.Default()
 	svr.GET("/health", health(conn))
-	svr.POST("/users", userHandler.Create)
-	svr.GET("/users/:username", userHandler.Get)
-	svr.POST("/login", userHandler.Login)
-	svr.POST("/tokens/renew_access", userHandler.RenewAccessToken)
+	svr.POST("/users", uh.createUser)
+	svr.POST("/login", uh.login)
+	svr.POST("/tokens/renew_access", uh.renewAccessToken)
 
-	authRoutes := svr.Group("/").Use(authMiddleware(tm))
-	authRoutes.GET("/wallets", walletHandler.List)
-	authRoutes.POST("/wallets", walletHandler.Create)
-	authRoutes.GET("/wallets/:id", walletHandler.Get)
-	authRoutes.DELETE("/wallets/:id", walletHandler.Delete)
-	authRoutes.GET("/wallets/:id/entries", entryHandler.List)
-	authRoutes.POST("/transfers", transferHandler.Create)
+	auth := svr.Group("/").Use(authMiddleware(tm))
+	auth.POST("/accounts", ah.createAccount)
+	auth.GET("/accounts/:id", ah.getAccount)
+	auth.GET("/accounts", ah.listAccounts)
+	auth.POST("/transfers", th.createTransfer)
 
 	return &http.Server{
 		Addr:    cfg.HTTPServerAddress,

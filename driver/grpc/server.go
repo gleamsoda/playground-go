@@ -24,19 +24,17 @@ func NewServer(cfg config.Config) (*grpc.Server, error) {
 	if err := conn.Ping(); err != nil {
 		return nil, err
 	}
-	tm, err := token.NewPasetoMaker(cfg.TokenSymmetricKey)
+	tm, err := token.NewPasetoManager(cfg.TokenSymmetricKey)
 	if err != nil {
 		return nil, fmt.Errorf("cannot create token maker: %w", err)
 	}
+	ur := repository.NewUserRepository(conn)
+	uu := usecase.NewUserUsecase(ur, tm, cfg.AccessTokenDuration, cfg.RefreshTokenDuration)
 
-	userRepo := repository.NewUserRepository(conn)
-	sessionRepo := repository.NewSessionRepository(conn)
-	userUsecase := usecase.NewUserUsecase(userRepo, sessionRepo, tm, cfg)
+	ctrl := NewController(uu)
+	svr := grpc.NewServer()
+	gen.RegisterPlaygroundServer(svr, ctrl)
+	reflection.Register(svr)
 
-	ctrl := NewController(userUsecase)
-	svc := grpc.NewServer()
-	gen.RegisterPlaygroundServer(svc, ctrl)
-	reflection.Register(svc)
-
-	return svc, nil
+	return svr, nil
 }

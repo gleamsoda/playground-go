@@ -1,7 +1,7 @@
 -- name: CreateTransfer :execlastid
 INSERT INTO transfers (
-  from_wallet_id,
-  to_wallet_id,
+  from_account_id,
+  to_account_id,
   amount
 ) VALUES (
   ?, ?, ?
@@ -10,3 +10,12 @@ INSERT INTO transfers (
 -- name: GetTransfer :one
 SELECT * FROM transfers
 WHERE id = ? LIMIT 1;
+
+-- name: ListTransfers :many
+SELECT * FROM transfers
+WHERE 
+    from_account_id = ? OR
+    to_account_id = ?
+ORDER BY id
+LIMIT ?
+OFFSET ?;

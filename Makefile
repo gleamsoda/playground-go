@@ -4,13 +4,10 @@ DB_SOURCE=root:example@tcp(127.0.0.1:3306)
 APP_NAME=playground
 GRPC_BASE=driver/grpc
 
-.PHONY: gin grpc test cover migrateup migratedown sqlc proto
+.PHONY: build test cover mock sqlc proto migrate/up migrate/down
 
-gin:
-	go build -o bin/gin ./cmd/gin/main.go
-
-grpc:
-	go build -o bin/grpc ./cmd/grpc/main.go
+build:
+	go build -o bin/playground ./cmd/playground/main.go
 
 test:
 	go test -v -cover ./... -coverprofile=$(COVERAGE_OUT)
@@ -19,15 +16,9 @@ cover:
 	go tool cover -html=$(COVERAGE_OUT) -o $(COVERAGE_HTML)
 
 mock:
-	mockgen playground/app EntryRepository,SessionRepository,TransferRepository,UserRepository,WalletRepository > ./test/mock/app/repository.go
-	mockgen playground/app EntryUsecase,TransferUsecase,UserUsecase,WalletUsecase > ./test/mock/app/usecase.go
-	mockgen playground/pkg/token Maker > ./test/mock/token/maker.go
-
-migrateup:
-	migrate -path tools/migrations -database 'mysql://$(DB_SOURCE)/$(APP_NAME)' -verbose up
-
-migratedown:
-	migrate -path tools/migrations -database 'mysql://$(DB_SOURCE)/$(APP_NAME)' -verbose down
+	mockgen playground/app AccountRepository,TransferRepository,UserRepository > ./test/mock/app/repository.go
+	mockgen playground/app AccountUsecase,TransferUsecase,UserUsecase > ./test/mock/app/usecase.go
+	mockgen playground/pkg/token Manager > ./test/mock/token/manager.go
 
 sqlc:
 	sqlc generate -f ./sqlc.yaml
@@ -41,3 +32,9 @@ proto:
 		--grpc-gateway_out=$(GRPC_BASE)/gen --grpc-gateway_opt paths=source_relative \
 		--openapiv2_out=./docs --openapiv2_opt=allow_merge=true,merge_file_name=$(APP_NAME) \
     	$(GRPC_BASE)/proto/*.proto
+
+migrate/up:
+	migrate -path tools/migrations -database 'mysql://$(DB_SOURCE)/$(APP_NAME)' -verbose up
+
+migrate/down:
+	migrate -path tools/migrations -database 'mysql://$(DB_SOURCE)/$(APP_NAME)' -verbose down

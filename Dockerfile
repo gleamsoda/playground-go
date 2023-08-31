@@ -1,5 +1,5 @@
 # Build stage
-FROM golang:1.20-bullseye AS builder
+FROM golang:1.21-bullseye AS builder
 WORKDIR /app
 # Copy the whole directory to the WORKDIR
 COPY . .
@@ -18,5 +18,5 @@ COPY wait-for .
 COPY tools/migrations ./migrations
 
 EXPOSE 8080
-CMD [ "/app/gin" ]
-ENTRYPOINT [ "/app/start.sh" ]
+CMD [ "gin" ]
+ENTRYPOINT [ "/app/start.sh", "/app/playground" ]

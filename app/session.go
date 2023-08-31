@@ -1,7 +1,6 @@
 package app
 
 import (
-	"context"
 	"time"
 
 	"github.com/google/uuid"
@@ -9,7 +8,7 @@ import (
 
 type Session struct {
 	ID           uuid.UUID `json:"id"`
-	UserID       int64     `json:"user_id"`
+	Username     string    `json:"username"`
 	RefreshToken string    `json:"refresh_token"`
 	UserAgent    string    `json:"user_agent"`
 	ClientIP     string    `json:"client_ip"`
@@ -18,15 +17,10 @@ type Session struct {
 	CreatedAt    time.Time `json:"created_at"`
 }
 
-type SessionRepository interface {
-	Create(ctx context.Context, arg *Session) error
-	Get(ctx context.Context, id uuid.UUID) (*Session, error)
-}
-
-func NewSession(id uuid.UUID, userID int64, refreshToken, userAgent, clientIP string, IsBlocked bool, expiresAt time.Time) *Session {
+func NewSession(id uuid.UUID, username string, refreshToken, userAgent, clientIP string, IsBlocked bool, expiresAt time.Time) *Session {
 	return &Session{
 		ID:           id,
-		UserID:       userID,
+		Username:     username,
 		RefreshToken: refreshToken,
 		UserAgent:    userAgent,
 		ClientIP:     clientIP,

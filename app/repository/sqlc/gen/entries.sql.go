@@ -11,7 +11,7 @@ import (
 
 const createEntry = `-- name: CreateEntry :execlastid
 INSERT INTO entries (
-  wallet_id,
+  account_id,
   amount
 ) VALUES (
   ?, ?
@@ -19,12 +19,12 @@ INSERT INTO entries (
 `
 
 type CreateEntryParams struct {
-	WalletID int64 `json:"wallet_id"`
-	Amount   int64 `json:"amount"`
+	AccountID int64 `json:"account_id"`
+	Amount    int64 `json:"amount"`
 }
 
-func (q *Queries) CreateEntry(ctx context.Context, arg CreateEntryParams) (int64, error) {
-	result, err := q.db.ExecContext(ctx, createEntry, arg.WalletID, arg.Amount)
+func (q *Queries) CreateEntry(ctx context.Context, arg *CreateEntryParams) (int64, error) {
+	result, err := q.db.ExecContext(ctx, createEntry, arg.AccountID, arg.Amount)
 	if err != nil {
 		return 0, err
 	}
@@ -32,7 +32,7 @@ func (q *Queries) CreateEntry(ctx context.Context, arg CreateEntryParams) (int64
 }
 
 const getEntry = `-- name: GetEntry :one
-SELECT id, wallet_id, amount, created_at FROM entries
+SELECT id, account_id, amount, created_at FROM entries
 WHERE id = ? LIMIT 1
 `
 
@@ -41,7 +41,7 @@ func (q *Queries) GetEntry(ctx context.Context, id int64) (*Entry, error) {
 	var i Entry
 	err := row.Scan(
 		&i.ID,
-		&i.WalletID,
+		&i.AccountID,
 		&i.Amount,
 		&i.CreatedAt,
 	)
@@ -49,21 +49,21 @@ func (q *Queries) GetEntry(ctx context.Context, id int64) (*Entry, error) {
 }
 
 const listEntries = `-- name: ListEntries :many
-SELECT id, wallet_id, amount, created_at FROM entries
-WHERE wallet_id = ?
+SELECT id, account_id, amount, created_at FROM entries
+WHERE account_id = ?
 ORDER BY id
 LIMIT ?
 OFFSET ?
 `
 
 type ListEntriesParams struct {
-	WalletID int64 `json:"wallet_id"`
-	Limit    int32 `json:"limit"`
-	Offset   int32 `json:"offset"`
+	AccountID int64 `json:"account_id"`
+	Limit     int32 `json:"limit"`
+	Offset    int32 `json:"offset"`
 }
 
-func (q *Queries) ListEntries(ctx context.Context, arg ListEntriesParams) ([]*Entry, error) {
-	rows, err := q.db.QueryContext(ctx, listEntries, arg.WalletID, arg.Limit, arg.Offset)
+func (q *Queries) ListEntries(ctx context.Context, arg *ListEntriesParams) ([]*Entry, error) {
+	rows, err := q.db.QueryContext(ctx, listEntries, arg.AccountID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +73,7 @@ func (q *Queries) ListEntries(ctx context.Context, arg ListEntriesParams) ([]*En
 		var i Entry
 		if err := rows.Scan(
 			&i.ID,
-			&i.WalletID,
+			&i.AccountID,
 			&i.Amount,
 			&i.CreatedAt,
 		); err != nil {

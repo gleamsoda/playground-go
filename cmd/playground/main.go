@@ -91,7 +91,7 @@ func runGRPC(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	svc, err := grpc.NewServer(cfg)
+	svr, err := grpc.NewServer(cfg)
 	if err != nil {
 		return err
 	}
@@ -110,7 +110,7 @@ func runGRPC(cmd *cobra.Command, args []string) error {
 	go func() { // run gRPC server
 		defer close(serviceErrCh)
 		log.Printf("start gRPC server at %s", l.Addr())
-		if err := svc.Serve(l); err != nil {
+		if err := svr.Serve(l); err != nil {
 			serviceErrCh <- err
 		}
 	}()
@@ -129,7 +129,7 @@ func runGRPC(cmd *cobra.Command, args []string) error {
 			log.Println(err)
 		}
 		log.Println("shutting down gRPC server gracefully...")
-		svc.GracefulStop()
+		svr.GracefulStop()
 		log.Println("shutdown gRPC server complete")
 	case err := <-serviceErrCh:
 		if err := shutdownGateway(gw); err != nil {
@@ -138,7 +138,7 @@ func runGRPC(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("gRPC server error: %v", err)
 	case gatewayErr := <-gatewayErrCh:
 		log.Println("shutting down gRPC server gracefully...")
-		svc.GracefulStop()
+		svr.GracefulStop()
 		log.Println("shutdown gRPC server complete")
 		return fmt.Errorf("gateway server error: %v", gatewayErr)
 	}

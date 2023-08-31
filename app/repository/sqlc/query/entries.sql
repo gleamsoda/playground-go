@@ -1,6 +1,6 @@
 -- name: CreateEntry :execlastid
 INSERT INTO entries (
-  wallet_id,
+  account_id,
   amount
 ) VALUES (
   ?, ?
@@ -12,7 +12,7 @@ WHERE id = ? LIMIT 1;
 
 -- name: ListEntries :many
 SELECT * FROM entries
-WHERE wallet_id = ?
+WHERE account_id = ?
 ORDER BY id
 LIMIT ?
 OFFSET ?;

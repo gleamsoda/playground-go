@@ -6,78 +6,70 @@ import (
 	"time"
 
 	"playground/app"
-	"playground/config"
 	"playground/pkg/password"
 	"playground/pkg/token"
 )
 
 type UserUsecase struct {
-	userRepo    app.UserRepository
-	sessionRepo app.SessionRepository
-	tokenMaker  token.Maker
-	cfg         config.Config
+	ur                   app.UserRepository
+	tm                   token.Manager
+	accessTokenDuration  time.Duration
+	refreshTokenDuration time.Duration
 }
 
-var _ app.UserUsecase = (*UserUsecase)(nil)
-
-func NewUserUsecase(userRepo app.UserRepository, sessionRepo app.SessionRepository, tokenMaker token.Maker, cfg config.Config) app.UserUsecase {
+func NewUserUsecase(ur app.UserRepository, tm token.Manager, accessTokenDuration, refreshTokenDuration time.Duration) app.UserUsecase {
 	return &UserUsecase{
-		userRepo:    userRepo,
-		sessionRepo: sessionRepo,
-		tokenMaker:  tokenMaker,
-		cfg:         cfg,
+		ur:                   ur,
+		tm:                   tm,
+		accessTokenDuration:  accessTokenDuration,
+		refreshTokenDuration: refreshTokenDuration,
 	}
 }
 
-func (u *UserUsecase) Create(ctx context.Context, arg app.CreateUserInputParams) (*app.User, error) {
-	hashedPassword, err := password.HashPassword(arg.Password)
+func (u *UserUsecase) CreateUser(ctx context.Context, args *app.CreateUserParams) (*app.User, error) {
+	hashedPassword, err := password.HashPassword(args.Password)
 	if err != nil {
 		return nil, err
 	}
-	usr := app.NewUser(
-		arg.Username,
-		arg.FullName,
-		arg.Email,
+	return u.ur.CreateUser(ctx, app.NewUser(
+		args.Username,
 		hashedPassword,
-	)
-	return u.userRepo.Create(ctx, usr)
+		args.FullName,
+		args.Email,
+	))
 }
 
-func (u *UserUsecase) GetByUsername(ctx context.Context, username string) (*app.User, error) {
-	return u.userRepo.GetByUsername(ctx, username)
-}
-
-func (u *UserUsecase) Login(ctx context.Context, arg app.LoginUserInputParams) (*app.LoginUserOutputParams, error) {
-	usr, err := u.userRepo.GetByUsername(ctx, arg.Username)
+func (u *UserUsecase) Login(ctx context.Context, args *app.LoginUserParams) (*app.LoginUserOutputParams, error) {
+	usr, err := u.ur.GetUser(ctx, args.Username)
 	if err != nil {
 		return nil, err
 	}
-	if err := password.CheckPassword(arg.Password, usr.HashedPassword); err != nil {
+	if err := password.CheckPassword(args.Password, usr.HashedPassword); err != nil {
 		return nil, err
 	}
 
-	aToken, aPayload, err := u.tokenMaker.CreateToken(
-		usr.ID,
-		u.cfg.AccessTokenDuration,
+	aToken, aPayload, err := u.tm.Create(
+		usr.Username,
+		u.accessTokenDuration,
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	rToken, rPayload, err := u.tokenMaker.CreateToken(
-		usr.ID,
-		u.cfg.RefreshTokenDuration,
+	rToken, rPayload, err := u.tm.Create(
+		usr.Username,
+		u.refreshTokenDuration,
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := u.sessionRepo.Create(ctx, app.NewSession(
+	if err := u.ur.CreateSession(ctx, app.NewSession(
 		rPayload.ID,
-		usr.ID,
+		usr.Username,
 		rToken,
-		arg.UserAgent,
-		arg.ClientIP,
+		args.UserAgent,
+		args.ClientIP,
 		false,
 		rPayload.ExpiredAt,
 	)); err != nil {
@@ -95,35 +87,31 @@ func (u *UserUsecase) Login(ctx context.Context, arg app.LoginUserInputParams) (
 }
 
 func (u *UserUsecase) RenewAccessToken(ctx context.Context, refreshToken string) (*app.RenewAccessTokenOutputParams, error) {
-	rPayload, err := u.tokenMaker.VerifyToken(refreshToken)
+	rPayload, err := u.tm.Verify(refreshToken)
 	if err != nil {
 		return nil, err
 	}
 
-	sess, err := u.sessionRepo.Get(ctx, rPayload.ID)
+	sess, err := u.ur.GetSession(ctx, rPayload.ID)
 	if err != nil {
 		return nil, err
 	}
 	if sess.IsBlocked {
-		err := fmt.Errorf("blocked session")
-		return nil, err
+		return nil, fmt.Errorf("blocked session")
 	}
-	if sess.UserID != rPayload.UserID {
-		err := fmt.Errorf("incorrect session user")
-		return nil, err
+	if sess.Username != rPayload.Username {
+		return nil, fmt.Errorf("incorrect session user")
 	}
 	if sess.RefreshToken != refreshToken {
-		err := fmt.Errorf("mismatched session token")
-		return nil, err
+		return nil, fmt.Errorf("mismatched session token")
 	}
 	if time.Now().After(sess.ExpiresAt) {
-		err := fmt.Errorf("expired session")
-		return nil, err
+		return nil, fmt.Errorf("expired session")
 	}
 
-	aToken, aPayload, err := u.tokenMaker.CreateToken(
-		rPayload.UserID,
-		u.cfg.AccessTokenDuration,
+	aToken, aPayload, err := u.tm.Create(
+		rPayload.Username,
+		u.accessTokenDuration,
 	)
 	if err != nil {
 		return nil, err

@@ -12,9 +12,9 @@ import (
 const createUser = `-- name: CreateUser :execlastid
 INSERT INTO users (
   username,
+  hashed_password,
   full_name,
-  email,
-  hashed_password
+  email
 ) VALUES (
   ?, ?, ?, ?
 )
@@ -22,17 +22,17 @@ INSERT INTO users (
 
 type CreateUserParams struct {
 	Username       string `json:"username"`
+	HashedPassword string `json:"hashed_password"`
 	FullName       string `json:"full_name"`
 	Email          string `json:"email"`
-	HashedPassword string `json:"hashed_password"`
 }
 
-func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (int64, error) {
+func (q *Queries) CreateUser(ctx context.Context, arg *CreateUserParams) (int64, error) {
 	result, err := q.db.ExecContext(ctx, createUser,
 		arg.Username,
+		arg.HashedPassword,
 		arg.FullName,
 		arg.Email,
-		arg.HashedPassword,
 	)
 	if err != nil {
 		return 0, err
@@ -40,20 +40,20 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (int64, 
 	return result.LastInsertId()
 }
 
-const getUserByUsername = `-- name: GetUserByUsername :one
-SELECT id, username, full_name, email, hashed_password, created_at FROM users
+const getUser = `-- name: GetUser :one
+SELECT username, hashed_password, full_name, email, password_changed_at, created_at FROM users
 WHERE username = ? LIMIT 1
 `
 
-func (q *Queries) GetUserByUsername(ctx context.Context, username string) (*User, error) {
-	row := q.db.QueryRowContext(ctx, getUserByUsername, username)
+func (q *Queries) GetUser(ctx context.Context, username string) (*User, error) {
+	row := q.db.QueryRowContext(ctx, getUser, username)
 	var i User
 	err := row.Scan(
-		&i.ID,
 		&i.Username,
+		&i.HashedPassword,
 		&i.FullName,
 		&i.Email,
-		&i.HashedPassword,
+		&i.PasswordChangedAt,
 		&i.CreatedAt,
 	)
 	return &i, err

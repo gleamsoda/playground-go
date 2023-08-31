@@ -11,20 +11,22 @@ import (
 )
 
 type Querier interface {
-	AddWalletBalance(ctx context.Context, arg AddWalletBalanceParams) error
-	CreateEntry(ctx context.Context, arg CreateEntryParams) (int64, error)
-	CreateSession(ctx context.Context, arg CreateSessionParams) error
-	CreateTransfer(ctx context.Context, arg CreateTransferParams) (int64, error)
-	CreateUser(ctx context.Context, arg CreateUserParams) (int64, error)
-	CreateWallet(ctx context.Context, arg CreateWalletParams) (int64, error)
-	DeleteWallet(ctx context.Context, id int64) error
+	AddAccountBalance(ctx context.Context, arg *AddAccountBalanceParams) error
+	CreateAccount(ctx context.Context, arg *CreateAccountParams) (int64, error)
+	CreateEntry(ctx context.Context, arg *CreateEntryParams) (int64, error)
+	CreateSession(ctx context.Context, arg *CreateSessionParams) error
+	CreateTransfer(ctx context.Context, arg *CreateTransferParams) (int64, error)
+	CreateUser(ctx context.Context, arg *CreateUserParams) (int64, error)
+	DeleteAccount(ctx context.Context, id int64) error
+	GetAccount(ctx context.Context, id int64) (*Account, error)
 	GetEntry(ctx context.Context, id int64) (*Entry, error)
 	GetSession(ctx context.Context, id uuid.UUID) (*Session, error)
 	GetTransfer(ctx context.Context, id int64) (*Transfer, error)
-	GetUserByUsername(ctx context.Context, username string) (*User, error)
-	GetWallet(ctx context.Context, id int64) (*Wallet, error)
-	ListEntries(ctx context.Context, arg ListEntriesParams) ([]*Entry, error)
-	ListWallets(ctx context.Context, arg ListWalletsParams) ([]*Wallet, error)
+	GetUser(ctx context.Context, username string) (*User, error)
+	ListAccounts(ctx context.Context, arg *ListAccountsParams) ([]*Account, error)
+	ListEntries(ctx context.Context, arg *ListEntriesParams) ([]*Entry, error)
+	ListTransfers(ctx context.Context, arg *ListTransfersParams) ([]*Transfer, error)
+	UpdateAccount(ctx context.Context, arg *UpdateAccountParams) error
 }
 
 var _ Querier = (*Queries)(nil)

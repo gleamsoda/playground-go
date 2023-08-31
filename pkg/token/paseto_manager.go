@@ -8,19 +8,19 @@ import (
 	"github.com/o1egl/paseto"
 )
 
-// PasetoMaker TokenMakerのPaseto実装。流行ってはいない
-type PasetoMaker struct {
+// PasetoManager ManagerのPaseto実装。流行ってはいない
+type PasetoManager struct {
 	paseto       *paseto.V2
 	symmetricKey []byte
 }
 
-// NewPasetoMaker creates a new PasetoMaker
-func NewPasetoMaker(symmetricKey string) (Maker, error) {
+// NewPasetoManager creates a new PasetoManager
+func NewPasetoManager(symmetricKey string) (Manager, error) {
 	if len(symmetricKey) != chacha20poly1305.KeySize {
 		return nil, fmt.Errorf("invalid key size: must be exactly %d characters", chacha20poly1305.KeySize)
 	}
 
-	maker := &PasetoMaker{
+	maker := &PasetoManager{
 		paseto:       paseto.NewV2(),
 		symmetricKey: []byte(symmetricKey),
 	}
@@ -28,9 +28,9 @@ func NewPasetoMaker(symmetricKey string) (Maker, error) {
 	return maker, nil
 }
 
-// CreateToken creates a new token for a specific id and duration
-func (maker *PasetoMaker) CreateToken(id int64, duration time.Duration) (string, *Payload, error) {
-	payload, err := NewPayload(id, duration)
+// Create creates a new token for a specific id and duration
+func (maker *PasetoManager) Create(username string, duration time.Duration) (string, *Payload, error) {
+	payload, err := NewPayload(username, duration)
 	if err != nil {
 		return "", payload, err
 	}
@@ -39,8 +39,8 @@ func (maker *PasetoMaker) CreateToken(id int64, duration time.Duration) (string,
 	return token, payload, err
 }
 
-// VerifyToken checks if the token is valid or not
-func (maker *PasetoMaker) VerifyToken(token string) (*Payload, error) {
+// Verify checks if the token is valid or not
+func (maker *PasetoManager) Verify(token string) (*Payload, error) {
 	payload := &Payload{}
 
 	err := maker.paseto.Decrypt(token, maker.symmetricKey, payload, nil)

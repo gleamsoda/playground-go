@@ -4,48 +4,79 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/google/uuid"
+
 	"playground/app"
 	"playground/app/repository/sqlc/gen"
 )
 
 type UserRepository struct {
-	q *gen.Queries
+	db *sql.DB
+	q  *gen.Queries
 }
-
-var _ app.UserRepository = (*UserRepository)(nil)
 
 func NewUserRepository(db *sql.DB) app.UserRepository {
 	return &UserRepository{
-		q: gen.New(db),
+		db: db,
+		q:  gen.New(db),
 	}
 }
 
-func (r *UserRepository) Create(ctx context.Context, arg *app.User) (*app.User, error) {
-	_, err := r.q.CreateUser(ctx, gen.CreateUserParams{
-		Username:       arg.Username,
-		FullName:       arg.FullName,
-		Email:          arg.Email,
-		HashedPassword: arg.HashedPassword,
-	})
-	if err != nil {
+func (r *UserRepository) CreateUser(ctx context.Context, args *app.User) (*app.User, error) {
+	if _, err := r.q.CreateUser(ctx, &gen.CreateUserParams{
+		Username:       args.Username,
+		FullName:       args.FullName,
+		Email:          args.Email,
+		HashedPassword: args.HashedPassword,
+	}); err != nil {
 		return nil, err
 	}
 
-	return r.GetByUsername(ctx, arg.Username)
+	return r.GetUser(ctx, args.Username)
 }
 
-func (r *UserRepository) GetByUsername(ctx context.Context, username string) (*app.User, error) {
-	user, err := r.q.GetUserByUsername(ctx, username)
+func (r *UserRepository) GetUser(ctx context.Context, username string) (*app.User, error) {
+	u, err := r.q.GetUser(ctx, username)
 	if err != nil {
 		return nil, err
 	}
 
 	return &app.User{
-		ID:             user.ID,
-		Username:       user.Username,
-		FullName:       user.FullName,
-		Email:          user.Email,
-		HashedPassword: user.HashedPassword,
-		CreatedAt:      user.CreatedAt,
+		Username:          u.Username,
+		HashedPassword:    u.HashedPassword,
+		FullName:          u.FullName,
+		Email:             u.Email,
+		PasswordChangedAt: u.PasswordChangedAt,
+		CreatedAt:         u.CreatedAt,
+	}, nil
+}
+
+func (r *UserRepository) CreateSession(ctx context.Context, args *app.Session) error {
+	return r.q.CreateSession(ctx, &gen.CreateSessionParams{
+		ID:           args.ID,
+		Username:     args.Username,
+		RefreshToken: args.RefreshToken,
+		UserAgent:    args.UserAgent,
+		ClientIp:     args.ClientIP,
+		IsBlocked:    args.IsBlocked,
+		ExpiresAt:    args.ExpiresAt,
+	})
+}
+
+func (r *UserRepository) GetSession(ctx context.Context, id uuid.UUID) (*app.Session, error) {
+	s, err := r.q.GetSession(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &app.Session{
+		ID:           s.ID,
+		Username:     s.Username,
+		RefreshToken: s.RefreshToken,
+		UserAgent:    s.UserAgent,
+		ClientIP:     s.ClientIp,
+		IsBlocked:    s.IsBlocked,
+		ExpiresAt:    s.ExpiresAt,
+		CreatedAt:    s.CreatedAt,
 	}, nil
 }

@@ -1,13 +1,13 @@
 -- name: CreateUser :execlastid
 INSERT INTO users (
   username,
+  hashed_password,
   full_name,
-  email,
-  hashed_password
+  email
 ) VALUES (
   ?, ?, ?, ?
 );
 
--- name: GetUserByUsername :one
+-- name: GetUser :one
 SELECT * FROM users
 WHERE username = ? LIMIT 1;

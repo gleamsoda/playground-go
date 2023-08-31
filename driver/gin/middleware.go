@@ -18,7 +18,7 @@ const (
 )
 
 // authMiddleware creates a gin middleware for authorization
-func authMiddleware(tokenmaker token.Maker) gin.HandlerFunc {
+func authMiddleware(tm token.Manager) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		authorizationHeader := ctx.GetHeader(authorizationHeaderKey)
 
@@ -43,7 +43,7 @@ func authMiddleware(tokenmaker token.Maker) gin.HandlerFunc {
 		}
 
 		accessToken := fields[1]
-		payload, err := tokenmaker.VerifyToken(accessToken)
+		payload, err := tm.Verify(accessToken)
 		if err != nil {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(err))
 			return

@@ -27,6 +27,7 @@ services:
         "/app/wait-for",
         "mysql:3306",
         "--",
-        "/app/start.sh"
+        "/app/start.sh",
+        "/app/playground"
       ]
-    command: [ "/app/gin" ]
+    command: [ "gin" ]

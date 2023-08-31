@@ -9,94 +9,43 @@ import (
 )
 
 type TransferUsecase struct {
-	transferRepo app.TransferRepository
-	entryRepo    app.EntryRepository
-	walletRepo   app.WalletRepository
-	txManager    app.TransactionManager
+	ar app.AccountRepository
+	tr app.TransferRepository
 }
 
-var _ app.TransferUsecase = (*TransferUsecase)(nil)
-
-func NewTransferUsecase(transferRepo app.TransferRepository, entryRepo app.EntryRepository, walletRepo app.WalletRepository, txManager app.TransactionManager) app.TransferUsecase {
+func NewTransferUsecase(tr app.TransferRepository, ar app.AccountRepository) app.TransferUsecase {
 	return &TransferUsecase{
-		transferRepo: transferRepo,
-		entryRepo:    entryRepo,
-		walletRepo:   walletRepo,
-		txManager:    txManager,
+		tr: tr,
+		ar: ar,
 	}
 }
 
-func (u *TransferUsecase) Create(ctx context.Context, arg app.CreateTransferInputParams) (*app.Transfer, error) {
-	fromWallet, err := u.validWallet(ctx, arg.FromWalletID, arg.Currency)
+func (u *TransferUsecase) CreateTransfer(ctx context.Context, args *app.CreateTransferParams) (*app.Transfer, error) {
+	fromAccount, err := u.validAccount(ctx, args.FromAccountID, args.Currency)
 	if err != nil {
 		return nil, err
 	}
-	if fromWallet.UserID != arg.RequestUserID {
-		err := errors.New("from wallet doesn't belong to the authenticated user")
+	if fromAccount.Owner != args.RequestUsername {
+		err := errors.New("from account doesn't belong to the authenticated user")
 		return nil, err
 	}
-	_, err = u.validWallet(ctx, arg.ToWalletID, arg.Currency)
-	if err != nil {
-		return nil, err
-	}
-
-	var t *app.Transfer
-
-	if err := u.txManager.Do(ctx, func(innerCtx context.Context) error {
-		var err error
-		tRepo := u.transferRepo.WithCtx(innerCtx)
-		eRepo := u.entryRepo.WithCtx(innerCtx)
-
-		t, err = tRepo.Create(innerCtx, app.NewTransfer(arg.FromWalletID, arg.ToWalletID, arg.Amount))
-		if err != nil {
-			return err
-		}
-
-		if _, err = eRepo.Create(innerCtx, app.NewEntry(t.FromWalletID, -t.Amount)); err != nil {
-			return err
-		}
-		if _, err := eRepo.Create(innerCtx, app.NewEntry(t.ToWalletID, t.Amount)); err != nil {
-			return err
-		}
-
-		// avoid deadlock
-		if arg.FromWalletID < arg.ToWalletID {
-			err = u.addMoney(innerCtx, t.FromWalletID, -t.Amount, t.ToWalletID, t.Amount)
-		} else {
-			err = u.addMoney(innerCtx, t.ToWalletID, t.Amount, t.FromWalletID, -t.Amount)
-		}
-		return err
-	}); err != nil {
+	if _, err = u.validAccount(ctx, args.ToAccountID, args.Currency); err != nil {
 		return nil, err
 	}
 
-	return t, err
+	return u.tr.CreateTransfer(ctx, app.NewTransfer(args.FromAccountID, args.ToAccountID, args.Amount))
 }
 
-func (u *TransferUsecase) addMoney(ctx context.Context, walletID1 int64, amount1 int64, walletID2 int64, amount2 int64) error {
-	wRepo := u.walletRepo.WithCtx(ctx)
-	if err := wRepo.AddWalletBalance(ctx, app.AddWalletBalanceParams{
-		ID:     walletID1,
-		Amount: amount1,
-	}); err != nil {
-		return err
-	}
-	return wRepo.AddWalletBalance(ctx, app.AddWalletBalanceParams{
-		ID:     walletID2,
-		Amount: amount2,
-	})
-}
-
-func (u *TransferUsecase) validWallet(ctx context.Context, walletD int64, currency string) (*app.Wallet, error) {
-	w, err := u.walletRepo.Get(ctx, walletD)
+func (u *TransferUsecase) validAccount(ctx context.Context, accountID int64, currency string) (*app.Account, error) {
+	a, err := u.ar.GetAccount(ctx, accountID)
 	if err != nil {
 		return nil, err
 	}
 
-	if w.Currency != currency {
-		err := fmt.Errorf("w [%d] currency mismatch: %s vs %s", w.ID, w.Currency, currency)
+	if a.Currency != currency {
+		err := fmt.Errorf("account [%d] currency mismatch: %s vs %s", a.ID, a.Currency, currency)
 		return nil, err
 	}
 
-	return w, nil
+	return a, nil
 }

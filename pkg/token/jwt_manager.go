@@ -10,22 +10,22 @@ import (
 
 const minSecretKeySize = 32
 
-// JWTMaker TokenMakerのJWT実装
-type JWTMaker struct {
+// JWTManager ManagerのJWT実装
+type JWTManager struct {
 	secretKey string
 }
 
-// NewJWTMaker creates a new JWTMaker
-func NewJWTMaker(secretKey string) (Maker, error) {
+// NewJWTManager creates a new JWTManager
+func NewJWTManager(secretKey string) (Manager, error) {
 	if len(secretKey) < minSecretKeySize {
 		return nil, fmt.Errorf("invalid key size: must be at least %d characters", minSecretKeySize)
 	}
-	return &JWTMaker{secretKey}, nil
+	return &JWTManager{secretKey}, nil
 }
 
-// CreateToken creates a new token for a specific id and duration
-func (maker *JWTMaker) CreateToken(userID int64, duration time.Duration) (string, *Payload, error) {
-	payload, err := NewPayload(userID, duration)
+// Create creates a new token for a specific id and duration
+func (maker *JWTManager) Create(username string, duration time.Duration) (string, *Payload, error) {
+	payload, err := NewPayload(username, duration)
 	if err != nil {
 		return "", payload, err
 	}
@@ -35,8 +35,8 @@ func (maker *JWTMaker) CreateToken(userID int64, duration time.Duration) (string
 	return token, payload, err
 }
 
-// VerifyToken checks if the token is valid or not
-func (maker *JWTMaker) VerifyToken(token string) (*Payload, error) {
+// Verify checks if the token is valid or not
+func (maker *JWTManager) Verify(token string) (*Payload, error) {
 	keyFunc := func(token *jwt.Token) (interface{}, error) {
 		_, ok := token.Method.(*jwt.SigningMethodHMAC)
 		if !ok {
