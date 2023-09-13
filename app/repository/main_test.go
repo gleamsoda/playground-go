@@ -20,7 +20,7 @@ func TestMain(m *testing.M) {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	conn, err := sql.Open("mysql", cfg.DBSource)
+	conn, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%d)/playground?parseTime=true", cfg.DBUser, cfg.DBPassword, cfg.DBHost, cfg.DBPort))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

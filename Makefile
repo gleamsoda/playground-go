@@ -1,8 +1,7 @@
-COVERAGE_OUT=coverage.out
-COVERAGE_HTML=coverage.html
-DB_SOURCE=root:example@tcp(127.0.0.1:3306)
 APP_NAME=playground
 GRPC_BASE=driver/grpc
+COVERAGE_OUT=coverage.out
+COVERAGE_HTML=coverage.html
 
 .PHONY: build test cover mock sqlc proto migrate/up migrate/down
 
@@ -34,7 +33,7 @@ proto:
     	$(GRPC_BASE)/proto/*.proto
 
 migrate/up:
-	migrate -path tools/migrations -database 'mysql://$(DB_SOURCE)/$(APP_NAME)' -verbose up
+	migrate -path tools/migrations -database 'mysql://${DB_USER}:${DB_PASSWORD}@tcp(${DB_HOST}:${DB_PORT})/$(APP_NAME)' -verbose up
 
 migrate/down:
-	migrate -path tools/migrations -database 'mysql://$(DB_SOURCE)/$(APP_NAME)' -verbose down
+	migrate -path tools/migrations -database 'mysql://${DB_USER}:${DB_PASSWORD}@tcp(${DB_HOST}:${DB_PORT})/$(APP_NAME)' -verbose down

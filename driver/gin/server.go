@@ -2,6 +2,7 @@ package gin
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -16,7 +17,7 @@ import (
 )
 
 func NewServer(cfg config.Config) (*http.Server, error) {
-	conn, err := sql.Open("mysql", cfg.DBSource)
+	conn, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%d)/playground?parseTime=true", cfg.DBUser, cfg.DBPassword, cfg.DBHost, cfg.DBPort))
 	if err != nil {
 		return nil, err
 	}

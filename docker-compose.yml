@@ -19,7 +19,10 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - DB_SOURCE=root:example@tcp(mysql:3306)/playground?parseTime=true
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=root
+      - DB_PASSWORD=example
     depends_on:
       - mysql
     entrypoint:

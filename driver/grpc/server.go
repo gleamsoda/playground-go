@@ -17,7 +17,7 @@ import (
 
 // NewServer creates a new gRPC server.
 func NewServer(cfg config.Config) (*grpc.Server, error) {
-	conn, err := sql.Open("mysql", cfg.DBSource)
+	conn, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%d)/playground?parseTime=true", cfg.DBUser, cfg.DBPassword, cfg.DBHost, cfg.DBPort))
 	if err != nil {
 		return nil, err
 	}

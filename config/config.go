@@ -9,8 +9,10 @@ import (
 )
 
 type Config struct {
-	DBDriver             string        `mapstructure:"DB_DRIVER"`
-	DBSource             string        `mapstructure:"DB_SOURCE"`
+	DBHost               string        `mapstructure:"DB_HOST"`
+	DBPort               int           `mapstructure:"DB_PORT"`
+	DBUser               string        `mapstructure:"DB_USER"`
+	DBPassword           string        `mapstructure:"DB_PASSWORD"`
 	HTTPServerAddress    string        `mapstructure:"HTTP_SERVER_ADDRESS"`
 	GRPCServerAddress    string        `mapstructure:"GRPC_SERVER_ADDRESS"`
 	TokenSymmetricKey    string        `mapstructure:"TOKEN_SYMMETRIC_KEY"`
