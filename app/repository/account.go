@@ -58,3 +58,18 @@ func (r *Repository) ListAccounts(ctx context.Context, args *app.ListAccountsPar
 
 	return result, nil
 }
+
+func (r *Repository) UpdateAccount(ctx context.Context, args *app.Account) (*app.Account, error) {
+	err := r.q.UpdateAccount(ctx, &gen.UpdateAccountParams{
+		ID:      args.ID,
+		Balance: args.Balance,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return r.GetAccount(ctx, args.ID)
+}
+
+func (r *Repository) DeleteAccount(ctx context.Context, id int64) error {
+	return r.q.DeleteAccount(ctx, id)
+}

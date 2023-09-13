@@ -7,6 +7,7 @@ package gen
 
 import (
 	"context"
+	"time"
 )
 
 const createUser = `-- name: CreateUser :execlastid
@@ -57,4 +58,34 @@ func (q *Queries) GetUser(ctx context.Context, username string) (*User, error) {
 		&i.CreatedAt,
 	)
 	return &i, err
+}
+
+const updateUser = `-- name: UpdateUser :exec
+UPDATE users
+SET
+  hashed_password = ?,
+  password_changed_at = ?,
+  full_name = ?,
+  email = ?
+WHERE
+  username = ?
+`
+
+type UpdateUserParams struct {
+	HashedPassword    string    `json:"hashed_password"`
+	PasswordChangedAt time.Time `json:"password_changed_at"`
+	FullName          string    `json:"full_name"`
+	Email             string    `json:"email"`
+	Username          string    `json:"username"`
+}
+
+func (q *Queries) UpdateUser(ctx context.Context, arg *UpdateUserParams) error {
+	_, err := q.db.ExecContext(ctx, updateUser,
+		arg.HashedPassword,
+		arg.PasswordChangedAt,
+		arg.FullName,
+		arg.Email,
+		arg.Username,
+	)
+	return err
 }

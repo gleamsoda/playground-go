@@ -38,6 +38,21 @@ func (r *Repository) GetUser(ctx context.Context, username string) (*app.User, e
 	}, nil
 }
 
+func (r *Repository) UpdateUser(ctx context.Context, args *app.User) (*app.User, error) {
+	err := r.q.UpdateUser(ctx, &gen.UpdateUserParams{
+		Username:          args.Username,
+		FullName:          args.FullName,
+		Email:             args.Email,
+		HashedPassword:    args.HashedPassword,
+		PasswordChangedAt: args.PasswordChangedAt,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return r.GetUser(ctx, args.Username)
+}
+
 func (r *Repository) CreateSession(ctx context.Context, args *app.Session) error {
 	return r.q.CreateSession(ctx, &gen.CreateSessionParams{
 		ID:           args.ID,

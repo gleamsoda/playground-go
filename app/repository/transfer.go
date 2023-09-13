@@ -80,6 +80,31 @@ func (r *Repository) GetTransfer(ctx context.Context, id int64) (*app.Transfer, 
 	}, nil
 }
 
+func (r *Repository) ListTransfers(ctx context.Context, args *app.ListTransfersParams) ([]app.Transfer, error) {
+	ts, err := r.q.ListTransfers(ctx, &gen.ListTransfersParams{
+		FromAccountID: args.FromAccountID,
+		ToAccountID:   args.ToAccountID,
+		Limit:         args.Limit,
+		Offset:        args.Offset,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	result := []app.Transfer{}
+	for _, t := range ts {
+		result = append(result, app.Transfer{
+			ID:            t.ID,
+			FromAccountID: t.FromAccountID,
+			ToAccountID:   t.ToAccountID,
+			Amount:        t.Amount,
+			CreatedAt:     t.CreatedAt,
+		})
+	}
+
+	return result, nil
+}
+
 func (r *Repository) CreateEntry(ctx context.Context, args *app.Entry) (*app.Entry, error) {
 	id, err := r.q.CreateEntry(ctx, &gen.CreateEntryParams{
 		AccountID: args.AccountID,

@@ -28,3 +28,10 @@ type CreateTransferParams struct {
 	Amount          int64  `json:"amount"`
 	Currency        string `json:"currency"`
 }
+
+type ListTransfersParams struct {
+	FromAccountID int64 `json:"from_account_id"`
+	ToAccountID   int64 `json:"to_account_id"`
+	Limit         int32 `json:"limit"`
+	Offset        int32 `json:"offset"`
+}

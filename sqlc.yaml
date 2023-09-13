@@ -18,3 +18,4 @@ sql:
         emit_json_tags: true # jsonタグを生成する
         emit_result_struct_pointers: true # クエリの結果をポインタにする
         emit_params_struct_pointers: true # クエリのパラメータをポインタにする
+        emit_pointers_for_null_types: true # (sql.NullString -> *string) # mysql driver not supported

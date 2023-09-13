@@ -1,6 +1,8 @@
 package config
 
 import (
+	"reflect"
+	"strings"
 	"time"
 
 	"github.com/spf13/viper"
@@ -18,14 +20,26 @@ type Config struct {
 
 // NewConfig reads configuration from file or environment variables.
 func NewConfig() (cfg Config, err error) {
-	viper.AddConfigPath(".")
-	viper.SetConfigFile(".env")
-	viper.AutomaticEnv()
-
-	if err = viper.ReadInConfig(); err != nil {
-		return
-	}
-
+	bindEnv(cfg)
 	err = viper.Unmarshal(&cfg)
 	return
+}
+
+func bindEnv(iface interface{}, ps ...string) {
+	iv := reflect.ValueOf(iface)
+	it := reflect.TypeOf(iface)
+	for i := 0; i < it.NumField(); i++ {
+		v := iv.Field(i)
+		t := it.Field(i)
+		tv, ok := t.Tag.Lookup("mapstructure")
+		if !ok {
+			continue
+		}
+		switch v.Kind() {
+		case reflect.Struct:
+			bindEnv(v.Interface(), append(ps, tv)...)
+		default:
+			_ = viper.BindEnv(strings.Join(append(ps, tv), "."))
+		}
+	}
 }
