@@ -19,9 +19,9 @@ import (
 	"github.com/spf13/cobra"
 
 	"playground/config"
-	casynq "playground/driver/asynq"
-	"playground/driver/gin"
-	"playground/driver/grpc"
+	casynq "playground/internal/delivery/asynq"
+	"playground/internal/delivery/gin"
+	"playground/internal/delivery/grpc"
 )
 
 func main() {

@@ -4,7 +4,7 @@
     },
     "protoc": {
         "options": [
-            "--proto_path=driver/grpc/proto"
+            "--proto_path=internal/delivery/grpc/proto"
         ]
     }
 }

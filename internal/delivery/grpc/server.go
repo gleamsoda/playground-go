@@ -13,7 +13,7 @@ import (
 	"playground/app/repository"
 	"playground/app/usecase"
 	"playground/config"
-	"playground/driver/grpc/gen"
+	"playground/internal/delivery/grpc/gen"
 	"playground/internal/pkg/token"
 )
 

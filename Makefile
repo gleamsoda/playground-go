@@ -1,5 +1,5 @@
 APP_NAME=playground
-GRPC_BASE=driver/grpc
+GRPC_BASE=internal/delivery/grpc
 COVERAGE_OUT=coverage.out
 COVERAGE_HTML=coverage.html
 

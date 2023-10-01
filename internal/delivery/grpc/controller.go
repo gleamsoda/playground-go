@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	"playground/app"
-	"playground/driver/grpc/gen"
+	"playground/internal/delivery/grpc/gen"
 	"playground/internal/pkg/token"
 )
 

@@ -11,7 +11,7 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 
 	"playground/config"
-	"playground/driver/grpc/gen"
+	"playground/internal/delivery/grpc/gen"
 )
 
 // NewServer creates a new gRPC gateway server.

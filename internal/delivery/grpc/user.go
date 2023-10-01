@@ -10,8 +10,8 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"playground/app"
-	"playground/driver/grpc/gen"
-	"playground/driver/grpc/validator"
+	"playground/internal/delivery/grpc/gen"
+	"playground/internal/delivery/grpc/validator"
 	"playground/internal/pkg/apperr"
 )
 
