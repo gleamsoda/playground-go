@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 
+	"github.com/morikuni/failure"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -11,6 +12,7 @@ import (
 	"playground/app"
 	"playground/driver/grpc/gen"
 	"playground/driver/grpc/validator"
+	"playground/pkg/apperrors"
 )
 
 func (c *Controller) CreateUser(ctx context.Context, req *gen.CreateUserRequest) (*gen.CreateUserResponse, error) {
@@ -83,12 +85,105 @@ func (c *Controller) LoginUser(ctx context.Context, req *gen.LoginUserRequest) (
 	return rsp, nil
 }
 
+func (c *Controller) UpdateUser(ctx context.Context, req *gen.UpdateUserRequest) (*gen.UpdateUserResponse, error) {
+	authPayload, err := c.authorizeUser(ctx)
+	if err != nil {
+		return nil, unauthenticatedError(err)
+	}
+	violations := validateUpdateUserRequest(req)
+	if violations != nil {
+		return nil, invalidArgumentError(violations)
+	}
+
+	args := &app.UpdateUserParams{
+		ReqUsername: authPayload.Username,
+		Username:    req.GetUsername(),
+		Password:    req.Password,
+		FullName:    req.FullName,
+		Email:       req.Email,
+	}
+	u, err := c.u.UpdateUser(ctx, args)
+	if err != nil {
+		if code, ok := failure.CodeOf(err); ok {
+			switch code {
+			case apperrors.NotFound:
+				return nil, status.Errorf(codes.NotFound, "user not found")
+			case apperrors.Unauthorized:
+				return nil, status.Errorf(codes.PermissionDenied, "cannot update other user's info")
+			default:
+				return nil, status.Errorf(codes.Internal, "failed to update user: %s", err)
+			}
+		}
+		return nil, status.Errorf(codes.Internal, "failed to update user: %s", err)
+	}
+
+	rsp := &gen.UpdateUserResponse{
+		User: convertUser(u),
+	}
+	return rsp, nil
+}
+
+func (c *Controller) VerifyEmail(ctx context.Context, req *gen.VerifyEmailRequest) (*gen.VerifyEmailResponse, error) {
+	violations := validateVerifyEmailRequest(req)
+	if violations != nil {
+		return nil, invalidArgumentError(violations)
+	}
+
+	usr, err := c.u.VerifyEmail(ctx, &app.VerifyEmailParams{
+		EmailID:    req.GetEmailId(),
+		SecretCode: req.GetSecretCode(),
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to verify email")
+	}
+
+	rsp := &gen.VerifyEmailResponse{
+		IsVerified: usr.IsEmailVerified,
+	}
+	return rsp, nil
+}
+
 func validateLoginUserRequest(req *gen.LoginUserRequest) (violations []*errdetails.BadRequest_FieldViolation) {
 	if err := validator.ValidateUsername(req.GetUsername()); err != nil {
 		violations = append(violations, fieldViolation("username", err))
 	}
 	if err := validator.ValidatePassword(req.GetPassword()); err != nil {
 		violations = append(violations, fieldViolation("password", err))
+	}
+
+	return violations
+}
+
+func validateUpdateUserRequest(req *gen.UpdateUserRequest) (violations []*errdetails.BadRequest_FieldViolation) {
+	if err := validator.ValidateUsername(req.GetUsername()); err != nil {
+		violations = append(violations, fieldViolation("username", err))
+	}
+	if req.Password != nil {
+		if err := validator.ValidatePassword(req.GetPassword()); err != nil {
+			violations = append(violations, fieldViolation("password", err))
+		}
+	}
+	if req.FullName != nil {
+		if err := validator.ValidateFullName(req.GetFullName()); err != nil {
+			violations = append(violations, fieldViolation("full_name", err))
+		}
+	}
+	if req.Email != nil {
+		if err := validator.ValidateEmail(req.GetEmail()); err != nil {
+			violations = append(violations, fieldViolation("email", err))
+		}
+	}
+
+	return violations
+}
+
+func validateVerifyEmailRequest(req *gen.VerifyEmailRequest) (violations []*errdetails.BadRequest_FieldViolation) {
+	if err := validator.ValidateEmailId(req.GetEmailId()); err != nil {
+		violations = append(violations, fieldViolation("email_id", err))
+	}
+
+	if err := validator.ValidateSecretCode(req.GetSecretCode()); err != nil {
+		violations = append(violations, fieldViolation("secret_code", err))
 	}
 
 	return violations

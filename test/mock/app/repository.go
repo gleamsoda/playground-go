@@ -95,6 +95,35 @@ func (mr *MockRepositoryMockRecorder) CreateUser(arg0, arg1 interface{}) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUser", reflect.TypeOf((*MockRepository)(nil).CreateUser), arg0, arg1)
 }
 
+// CreateVerifyEmail mocks base method.
+func (m *MockRepository) CreateVerifyEmail(arg0 context.Context, arg1 *app.VerifyEmail) (*app.VerifyEmail, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateVerifyEmail", arg0, arg1)
+	ret0, _ := ret[0].(*app.VerifyEmail)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateVerifyEmail indicates an expected call of CreateVerifyEmail.
+func (mr *MockRepositoryMockRecorder) CreateVerifyEmail(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateVerifyEmail", reflect.TypeOf((*MockRepository)(nil).CreateVerifyEmail), arg0, arg1)
+}
+
+// DeleteAccount mocks base method.
+func (m *MockRepository) DeleteAccount(arg0 context.Context, arg1 int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteAccount", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteAccount indicates an expected call of DeleteAccount.
+func (mr *MockRepositoryMockRecorder) DeleteAccount(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAccount", reflect.TypeOf((*MockRepository)(nil).DeleteAccount), arg0, arg1)
+}
+
 // GetAccount mocks base method.
 func (m *MockRepository) GetAccount(arg0 context.Context, arg1 int64) (*app.Account, error) {
 	m.ctrl.T.Helper()
@@ -125,6 +154,21 @@ func (mr *MockRepositoryMockRecorder) GetSession(arg0, arg1 interface{}) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSession", reflect.TypeOf((*MockRepository)(nil).GetSession), arg0, arg1)
 }
 
+// GetTransfer mocks base method.
+func (m *MockRepository) GetTransfer(arg0 context.Context, arg1 int64) (*app.Transfer, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTransfer", arg0, arg1)
+	ret0, _ := ret[0].(*app.Transfer)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTransfer indicates an expected call of GetTransfer.
+func (mr *MockRepositoryMockRecorder) GetTransfer(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTransfer", reflect.TypeOf((*MockRepository)(nil).GetTransfer), arg0, arg1)
+}
+
 // GetUser mocks base method.
 func (m *MockRepository) GetUser(arg0 context.Context, arg1 string) (*app.User, error) {
 	m.ctrl.T.Helper()
@@ -153,4 +197,80 @@ func (m *MockRepository) ListAccounts(arg0 context.Context, arg1 *app.ListAccoun
 func (mr *MockRepositoryMockRecorder) ListAccounts(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListAccounts", reflect.TypeOf((*MockRepository)(nil).ListAccounts), arg0, arg1)
+}
+
+// ListTransfers mocks base method.
+func (m *MockRepository) ListTransfers(arg0 context.Context, arg1 *app.ListTransfersParams) ([]app.Transfer, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListTransfers", arg0, arg1)
+	ret0, _ := ret[0].([]app.Transfer)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListTransfers indicates an expected call of ListTransfers.
+func (mr *MockRepositoryMockRecorder) ListTransfers(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListTransfers", reflect.TypeOf((*MockRepository)(nil).ListTransfers), arg0, arg1)
+}
+
+// UpdateAccount mocks base method.
+func (m *MockRepository) UpdateAccount(arg0 context.Context, arg1 *app.Account) (*app.Account, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateAccount", arg0, arg1)
+	ret0, _ := ret[0].(*app.Account)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateAccount indicates an expected call of UpdateAccount.
+func (mr *MockRepositoryMockRecorder) UpdateAccount(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAccount", reflect.TypeOf((*MockRepository)(nil).UpdateAccount), arg0, arg1)
+}
+
+// UpdateUser mocks base method.
+func (m *MockRepository) UpdateUser(arg0 context.Context, arg1 *app.User) (*app.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateUser", arg0, arg1)
+	ret0, _ := ret[0].(*app.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateUser indicates an expected call of UpdateUser.
+func (mr *MockRepositoryMockRecorder) UpdateUser(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUser", reflect.TypeOf((*MockRepository)(nil).UpdateUser), arg0, arg1)
+}
+
+// UpdateUserEmailVerified mocks base method.
+func (m *MockRepository) UpdateUserEmailVerified(arg0 context.Context, arg1 *app.VerifyEmailParams) (*app.User, *app.VerifyEmail, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateUserEmailVerified", arg0, arg1)
+	ret0, _ := ret[0].(*app.User)
+	ret1, _ := ret[1].(*app.VerifyEmail)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// UpdateUserEmailVerified indicates an expected call of UpdateUserEmailVerified.
+func (mr *MockRepositoryMockRecorder) UpdateUserEmailVerified(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserEmailVerified", reflect.TypeOf((*MockRepository)(nil).UpdateUserEmailVerified), arg0, arg1)
+}
+
+// UpdateVerifyEmail mocks base method.
+func (m *MockRepository) UpdateVerifyEmail(arg0 context.Context, arg1 *app.VerifyEmail) (*app.VerifyEmail, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateVerifyEmail", arg0, arg1)
+	ret0, _ := ret[0].(*app.VerifyEmail)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateVerifyEmail indicates an expected call of UpdateVerifyEmail.
+func (mr *MockRepositoryMockRecorder) UpdateVerifyEmail(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateVerifyEmail", reflect.TypeOf((*MockRepository)(nil).UpdateVerifyEmail), arg0, arg1)
 }

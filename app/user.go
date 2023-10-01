@@ -8,11 +8,12 @@ import (
 
 type User struct {
 	Username          string    `json:"username"`
-	HashedPassword    string    `json:"hashed_password"`
+	HashedPassword    string    `json:"-"`
 	FullName          string    `json:"full_name"`
 	Email             string    `json:"email"`
 	PasswordChangedAt time.Time `json:"password_changed_at"`
 	CreatedAt         time.Time `json:"created_at"`
+	IsEmailVerified   bool      `json:"is_email_verified"`
 }
 
 func NewUser(username, hashedPassword, fullName, email string) *User {
@@ -45,6 +46,14 @@ type LoginUserOutputParams struct {
 	RefreshToken          string    `json:"refresh_token"`
 	RefreshTokenExpiresAt time.Time `json:"refresh_token_expires_at"`
 	User                  *User     `json:"user"`
+}
+
+type UpdateUserParams struct {
+	ReqUsername string  `binding:"required,alphanum"`
+	Username    string  `json:"username" binding:"required,alphanum"`
+	Password    *string `json:"password" binding:"min=6"`
+	FullName    *string `json:"full_name" binding:""`
+	Email       *string `json:"email" binding:"email"`
 }
 
 type RenewAccessTokenOutputParams struct {

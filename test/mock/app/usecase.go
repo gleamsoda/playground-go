@@ -7,6 +7,7 @@ package mock_app
 import (
 	context "context"
 	app "playground/app"
+	mq "playground/app/mq"
 	reflect "reflect"
 
 	gomock "go.uber.org/mock/gomock"
@@ -81,7 +82,7 @@ func (mr *MockUsecaseMockRecorder) CreateUser(arg0, arg1 interface{}) *gomock.Ca
 }
 
 // GetAccount mocks base method.
-func (m *MockUsecase) GetAccount(arg0 context.Context, arg1 int64) (*app.Account, error) {
+func (m *MockUsecase) GetAccount(arg0 context.Context, arg1 *app.GetAccountsParams) (*app.Account, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAccount", arg0, arg1)
 	ret0, _ := ret[0].(*app.Account)
@@ -138,4 +139,49 @@ func (m *MockUsecase) RenewAccessToken(arg0 context.Context, arg1 string) (*app.
 func (mr *MockUsecaseMockRecorder) RenewAccessToken(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RenewAccessToken", reflect.TypeOf((*MockUsecase)(nil).RenewAccessToken), arg0, arg1)
+}
+
+// SendVerifyEmail mocks base method.
+func (m *MockUsecase) SendVerifyEmail(arg0 context.Context, arg1 *mq.SendVerifyEmailPayload) (*app.VerifyEmail, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SendVerifyEmail", arg0, arg1)
+	ret0, _ := ret[0].(*app.VerifyEmail)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SendVerifyEmail indicates an expected call of SendVerifyEmail.
+func (mr *MockUsecaseMockRecorder) SendVerifyEmail(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendVerifyEmail", reflect.TypeOf((*MockUsecase)(nil).SendVerifyEmail), arg0, arg1)
+}
+
+// UpdateUser mocks base method.
+func (m *MockUsecase) UpdateUser(arg0 context.Context, arg1 *app.UpdateUserParams) (*app.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateUser", arg0, arg1)
+	ret0, _ := ret[0].(*app.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateUser indicates an expected call of UpdateUser.
+func (mr *MockUsecaseMockRecorder) UpdateUser(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUser", reflect.TypeOf((*MockUsecase)(nil).UpdateUser), arg0, arg1)
+}
+
+// VerifyEmail mocks base method.
+func (m *MockUsecase) VerifyEmail(arg0 context.Context, arg1 *app.VerifyEmailParams) (*app.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "VerifyEmail", arg0, arg1)
+	ret0, _ := ret[0].(*app.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// VerifyEmail indicates an expected call of VerifyEmail.
+func (mr *MockUsecaseMockRecorder) VerifyEmail(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "VerifyEmail", reflect.TypeOf((*MockUsecase)(nil).VerifyEmail), arg0, arg1)
 }

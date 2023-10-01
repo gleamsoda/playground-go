@@ -3,7 +3,7 @@ GRPC_BASE=driver/grpc
 COVERAGE_OUT=coverage.out
 COVERAGE_HTML=coverage.html
 
-.PHONY: build test cover mock sqlc proto migrate/up migrate/down
+.PHONY: build test cover mock sqlc proto migrate/up migrate/down evans
 
 build:
 	go build -o bin/playground ./cmd/playground/main.go
@@ -17,6 +17,7 @@ cover:
 mock:
 	mockgen playground/app Repository > ./test/mock/app/repository.go
 	mockgen playground/app Usecase > ./test/mock/app/usecase.go
+	mockgen playground/app/mq Producer > ./test/mock/app/mq/mq.go
 	mockgen playground/pkg/token Manager > ./test/mock/token/manager.go
 
 sqlc:
@@ -33,7 +34,10 @@ proto:
     	$(GRPC_BASE)/proto/*.proto
 
 migrate/up:
-	migrate -path tools/migrations -database 'mysql://${DB_USER}:${DB_PASSWORD}@tcp(${DB_HOST}:${DB_PORT})/$(APP_NAME)' -verbose up
+	migrate -path db/migrations -database 'mysql://${DB_USER}:${DB_PASSWORD}@tcp(${DB_HOST}:${DB_PORT})/$(APP_NAME)' -verbose up
 
 migrate/down:
-	migrate -path tools/migrations -database 'mysql://${DB_USER}:${DB_PASSWORD}@tcp(${DB_HOST}:${DB_PORT})/$(APP_NAME)' -verbose down
+	migrate -path db/migrations -database 'mysql://${DB_USER}:${DB_PASSWORD}@tcp(${DB_HOST}:${DB_PORT})/$(APP_NAME)' -verbose down
+
+evans:
+	evans --host localhost --port 9090 -r repl

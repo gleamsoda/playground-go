@@ -4,23 +4,29 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"net"
 	"net/http"
+	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/mysql"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 
 	"playground/config"
+	casynq "playground/driver/asynq"
 	"playground/driver/gin"
 	"playground/driver/grpc"
 )
 
 func main() {
 	if err := NewCmdRoot().Execute(); err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err)
 	}
 }
 
@@ -30,7 +36,7 @@ func NewCmdRoot() *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
-	cmd.AddCommand(NewCmdGin(), NewCmdGRPC())
+	cmd.AddCommand(NewCmdGin(), NewCmdGRPC(), NewCmdAsynq())
 	return cmd
 }
 
@@ -52,11 +58,44 @@ func NewCmdGRPC() *cobra.Command {
 	return cmd
 }
 
+func NewCmdAsynq() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "asynq",
+		Short: "Run asynq",
+		RunE:  runAsynq,
+	}
+	return cmd
+}
+
+func runAsynq(cmd *cobra.Command, args []string) error {
+	cfg, err := config.NewConfig()
+	if err != nil {
+		return err
+	}
+	if cfg.Environment == "development" {
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	}
+	runDBMigration(cfg)
+
+	srv, err := casynq.NewConsumer(cfg)
+	if err != nil {
+		return err
+	}
+
+	log.Info().Msg("start task processor")
+	srv.Start()
+	return nil
+}
+
 func runGin(cmd *cobra.Command, args []string) error {
 	cfg, err := config.NewConfig()
 	if err != nil {
 		return err
 	}
+	if cfg.Environment == "development" {
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	}
+	runDBMigration(cfg)
 	srv, err := gin.NewServer(cfg)
 	if err != nil {
 		return err
@@ -66,20 +105,20 @@ func runGin(cmd *cobra.Command, args []string) error {
 	errCh := make(chan error, 1)
 	go func() {
 		defer close(errCh)
-		if err := srv.ListenAndServe(); errors.Is(err, http.ErrServerClosed) {
+		if err := srv.Start(); errors.Is(err, http.ErrServerClosed) {
 			errCh <- err
 		}
 	}()
 
 	select {
 	case <-ctx.Done():
-		log.Println("shutting down gracefully...")
+		log.Info().Msg("shutting down gracefully...")
 		shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 1*time.Minute)
 		defer shutdownCancel()
-		if err := srv.Shutdown(shutdownCtx); err != nil {
+		if err := srv.Stop(shutdownCtx); err != nil {
 			return fmt.Errorf("failed to shutdown gracefully: %v", err)
 		}
-		log.Println("shutdown complete")
+		log.Info().Msg("shutdown complete")
 	case err := <-errCh:
 		return fmt.Errorf("error: %v", err)
 	}
@@ -91,6 +130,10 @@ func runGRPC(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	if cfg.Environment == "development" {
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	}
+	runDBMigration(cfg)
 	svr, err := grpc.NewServer(cfg)
 	if err != nil {
 		return err
@@ -109,7 +152,7 @@ func runGRPC(cmd *cobra.Command, args []string) error {
 	serviceErrCh := make(chan error, 1)
 	go func() { // run gRPC server
 		defer close(serviceErrCh)
-		log.Printf("start gRPC server at %s", l.Addr())
+		log.Info().Msgf("start gRPC server at %s", l.Addr())
 		if err := svr.Serve(l); err != nil {
 			serviceErrCh <- err
 		}
@@ -117,7 +160,7 @@ func runGRPC(cmd *cobra.Command, args []string) error {
 	gatewayErrCh := make(chan error, 1)
 	go func() { // run gateway server
 		defer close(gatewayErrCh)
-		log.Printf("start gateway server at %s", gw.Addr)
+		log.Info().Msgf("start gateway server at %s", gw.Addr)
 		if err := gw.ListenAndServe(); err != nil {
 			gatewayErrCh <- err
 		}
@@ -126,32 +169,45 @@ func runGRPC(cmd *cobra.Command, args []string) error {
 	select {
 	case <-ctx.Done():
 		if err := shutdownGateway(gw); err != nil {
-			log.Println(err)
+			log.Error().Err(err)
 		}
-		log.Println("shutting down gRPC server gracefully...")
+		log.Info().Msg("shutting down gRPC server gracefully...")
 		svr.GracefulStop()
-		log.Println("shutdown gRPC server complete")
+		log.Info().Msg("shutdown gRPC server complete")
 	case err := <-serviceErrCh:
 		if err := shutdownGateway(gw); err != nil {
-			log.Println(err)
+			log.Error().Err(err)
 		}
 		return fmt.Errorf("gRPC server error: %v", err)
 	case gatewayErr := <-gatewayErrCh:
-		log.Println("shutting down gRPC server gracefully...")
+		log.Info().Msg("shutting down gRPC server gracefully...")
 		svr.GracefulStop()
-		log.Println("shutdown gRPC server complete")
+		log.Info().Msg("shutdown gRPC server complete")
 		return fmt.Errorf("gateway server error: %v", gatewayErr)
 	}
 	return nil
 }
 
 func shutdownGateway(gw *http.Server) error {
-	log.Println("shutting down gateway server gracefully...")
+	log.Info().Msg("shutting down gateway server gracefully...")
 	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 1*time.Minute)
 	defer shutdownCancel()
 	if err := gw.Shutdown(shutdownCtx); err != nil {
 		return fmt.Errorf("gateway server error: failed to shutdown gracefully: %v", err)
 	}
-	log.Println("shutdown gateway server complete")
+	log.Info().Msg("shutdown gateway server complete")
 	return nil
+}
+
+func runDBMigration(cfg config.Config) {
+	migration, err := migrate.New(cfg.MigrationURL, fmt.Sprintf("mysql://%s:%s@tcp(%s:%d)/playground?parseTime=true", cfg.DBUser, cfg.DBPassword, cfg.DBHost, cfg.DBPort))
+	if err != nil {
+		log.Fatal().Err(err).Msg("cannot create new migrate instance")
+	}
+
+	if err = migration.Up(); err != nil && err != migrate.ErrNoChange {
+		log.Fatal().Err(err).Msg("failed to run migrate up")
+	}
+
+	log.Info().Msg("db migrated successfully")
 }

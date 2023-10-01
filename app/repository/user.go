@@ -2,11 +2,15 @@ package repository
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 
 	"github.com/google/uuid"
+	"github.com/morikuni/failure"
 
 	"playground/app"
 	"playground/app/repository/sqlc/gen"
+	"playground/pkg/apperrors"
 )
 
 func (r *Repository) CreateUser(ctx context.Context, args *app.User) (*app.User, error) {
@@ -25,6 +29,9 @@ func (r *Repository) CreateUser(ctx context.Context, args *app.User) (*app.User,
 func (r *Repository) GetUser(ctx context.Context, username string) (*app.User, error) {
 	u, err := r.q.GetUser(ctx, username)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, failure.Translate(err, apperrors.NotFound)
+		}
 		return nil, err
 	}
 
@@ -47,6 +54,9 @@ func (r *Repository) UpdateUser(ctx context.Context, args *app.User) (*app.User,
 		PasswordChangedAt: args.PasswordChangedAt,
 	})
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, failure.Translate(err, apperrors.NotFound)
+		}
 		return nil, err
 	}
 

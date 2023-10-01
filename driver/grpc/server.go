@@ -5,9 +5,11 @@ import (
 	"fmt"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/hibiken/asynq"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
+	"playground/app/mq"
 	"playground/app/repository"
 	"playground/app/usecase"
 	"playground/config"
@@ -28,10 +30,13 @@ func NewServer(cfg config.Config) (*grpc.Server, error) {
 	if err != nil {
 		return nil, fmt.Errorf("cannot create token maker: %w", err)
 	}
+	p := mq.NewAsynqProducer(asynq.RedisClientOpt{
+		Addr: cfg.RedisAddress,
+	})
 	r := repository.NewRepository(conn)
-	u := usecase.NewUsecase(r, tm, cfg.AccessTokenDuration, cfg.RefreshTokenDuration)
-	ctrl := NewController(u)
-	svr := grpc.NewServer()
+	u := usecase.NewUsecase(r, p, nil, tm, cfg.AccessTokenDuration, cfg.RefreshTokenDuration)
+	ctrl := NewController(u, tm)
+	svr := grpc.NewServer(grpc.UnaryInterceptor(GRPCLogger))
 	gen.RegisterPlaygroundServer(svr, ctrl)
 	reflection.Register(svr)
 

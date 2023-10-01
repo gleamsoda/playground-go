@@ -20,4 +20,7 @@ type Repository interface {
 	UpdateUser(ctx context.Context, args *User) (*User, error)
 	CreateSession(ctx context.Context, args *Session) error
 	GetSession(ctx context.Context, id uuid.UUID) (*Session, error)
+	CreateVerifyEmail(ctx context.Context, args *VerifyEmail) (*VerifyEmail, error)
+	UpdateVerifyEmail(ctx context.Context, args *VerifyEmail) (*VerifyEmail, error)
+	UpdateUserEmailVerified(ctx context.Context, args *VerifyEmailParams) (*User, *VerifyEmail, error)
 }

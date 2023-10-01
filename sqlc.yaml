@@ -1,7 +1,7 @@
 # https://docs.sqlc.dev/en/stable/reference/config.html
 version: "2"
 sql:
-  - schema: "tools/migrations" # マイグレーションのディレクトリ OR 単一のSQLファイルへのパス OR パスのリスト
+  - schema: "db/migrations" # マイグレーションのディレクトリ OR 単一のSQLファイルへのパス OR パスのリスト
     queries: "app/repository/sqlc/query" # SQLクエリのディレクトリ OR 単一のSQLファイルへのパス OR パスのリスト
     engine: "mysql" # or postgresql
     gen:

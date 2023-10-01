@@ -4,8 +4,11 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/morikuni/failure"
 
 	"playground/app"
+	"playground/pkg/apperrors"
+	"playground/pkg/token"
 )
 
 type createAccountRequest struct {
@@ -19,10 +22,10 @@ func (h handler) createAccount(c *gin.Context) {
 		return
 	}
 
-	// TODO: Auth
+	authPayload := c.MustGet(authorizationPayloadKey).(*token.Payload)
 	if a, err := h.u.CreateAccount(c, &app.CreateAccountParams{
-		Owner:    "example",
-		Balance:  1000000,
+		Owner:    authPayload.Username,
+		Balance:  0,
 		Currency: req.Currency,
 	}); err != nil {
 		c.JSON(http.StatusInternalServerError, errorResponse(err))
@@ -42,7 +45,22 @@ func (h handler) getAccount(c *gin.Context) {
 		return
 	}
 
-	if a, err := h.u.GetAccount(c, req.ID); err != nil {
+	authPayload := c.MustGet(authorizationPayloadKey).(*token.Payload)
+	if a, err := h.u.GetAccount(c, &app.GetAccountsParams{
+		ID:    req.ID,
+		Owner: authPayload.Username,
+	}); err != nil {
+		if code, ok := failure.CodeOf(err); ok {
+			switch code {
+			case apperrors.NotFound:
+				c.JSON(http.StatusNotFound, errorResponse(err))
+			case apperrors.Unauthorized:
+				c.JSON(http.StatusUnauthorized, errorResponse(err))
+			default:
+				c.JSON(http.StatusInternalServerError, errorResponse(err))
+			}
+			return
+		}
 		c.JSON(http.StatusInternalServerError, errorResponse(err))
 	} else {
 		c.JSON(http.StatusOK, a)
@@ -61,9 +79,9 @@ func (h handler) listAccounts(c *gin.Context) {
 		return
 	}
 
-	// TODO: Get Owner from AuthPayload
+	authPayload := c.MustGet(authorizationPayloadKey).(*token.Payload)
 	if as, err := h.u.ListAccounts(c, &app.ListAccountsParams{
-		Owner:  "example",
+		Owner:  authPayload.Username,
 		Limit:  req.Limit,
 		Offset: req.Offset,
 	}); err != nil {

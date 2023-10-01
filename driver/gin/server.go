@@ -1,29 +1,29 @@
 package gin
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/hibiken/asynq"
 
+	"playground/app/mq"
 	"playground/app/repository"
 	"playground/app/usecase"
 	"playground/config"
 	"playground/pkg/token"
 )
 
-func NewServer(cfg config.Config) (*http.Server, error) {
-	conn, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%d)/playground?parseTime=true", cfg.DBUser, cfg.DBPassword, cfg.DBHost, cfg.DBPort))
-	if err != nil {
-		return nil, err
-	}
-	if err := conn.Ping(); err != nil {
-		return nil, err
-	}
+type Server struct {
+	server *http.Server
+	tm     token.Manager
+}
+
+func NewServer(cfg config.Config) (*Server, error) {
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		_ = v.RegisterValidation("currency", validCurrency)
 	}
@@ -33,26 +33,35 @@ func NewServer(cfg config.Config) (*http.Server, error) {
 	}
 
 	// repositories
+	conn, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%d)/playground?parseTime=true", cfg.DBUser, cfg.DBPassword, cfg.DBHost, cfg.DBPort))
+	if err != nil {
+		return nil, err
+	}
+	if err := conn.Ping(); err != nil {
+		return nil, err
+	}
+	p := mq.NewAsynqProducer(asynq.RedisClientOpt{
+		Addr: cfg.RedisAddress,
+	})
 	r := repository.NewRepository(conn)
 	// usecases
-	u := usecase.NewUsecase(r, tm, cfg.AccessTokenDuration, cfg.RefreshTokenDuration)
+	u := usecase.NewUsecase(r, p, nil, tm, cfg.AccessTokenDuration, cfg.RefreshTokenDuration)
 	// handlers
-	h := NewHandler(u)
+	svr := NewHandler(u, authMiddleware(tm))
 
-	svr := gin.Default()
-	svr.GET("/health", health(conn))
-	svr.POST("/users", h.createUser)
-	svr.POST("/login", h.loginUser)
-	svr.POST("/tokens/renew_access", h.renewAccessToken)
-
-	auth := svr.Group("/").Use(authMiddleware(tm))
-	auth.POST("/accounts", h.createAccount)
-	auth.GET("/accounts/:id", h.getAccount)
-	auth.GET("/accounts", h.listAccounts)
-	auth.POST("/transfers", h.createTransfer)
-
-	return &http.Server{
-		Addr:    cfg.HTTPServerAddress,
-		Handler: svr,
+	return &Server{
+		server: &http.Server{
+			Addr:    cfg.HTTPServerAddress,
+			Handler: svr,
+		},
+		tm: tm,
 	}, nil
+}
+
+func (s *Server) Start() error {
+	return s.server.ListenAndServe()
+}
+
+func (s *Server) Stop(ctx context.Context) error {
+	return s.server.Shutdown(ctx)
 }

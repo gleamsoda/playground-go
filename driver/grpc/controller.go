@@ -11,16 +11,19 @@ import (
 
 	"playground/app"
 	"playground/driver/grpc/gen"
+	"playground/pkg/token"
 )
 
 type Controller struct {
 	gen.UnimplementedPlaygroundServer
-	u app.Usecase
+	u  app.Usecase
+	tm token.Manager
 }
 
-func NewController(u app.Usecase) *Controller {
+func NewController(u app.Usecase, tm token.Manager) *Controller {
 	return &Controller{
-		u: u,
+		u:  u,
+		tm: tm,
 	}
 }
 
@@ -65,4 +68,8 @@ func invalidArgumentError(violations []*errdetails.BadRequest_FieldViolation) er
 	}
 
 	return statusDetails.Err()
+}
+
+func unauthenticatedError(err error) error {
+	return status.Errorf(codes.Unauthenticated, "unauthorized: %s", err)
 }

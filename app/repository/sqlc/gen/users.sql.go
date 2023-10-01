@@ -42,7 +42,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg *CreateUserParams) (int64,
 }
 
 const getUser = `-- name: GetUser :one
-SELECT username, hashed_password, full_name, email, password_changed_at, created_at FROM users
+SELECT username, hashed_password, full_name, email, password_changed_at, created_at, is_email_verified FROM users
 WHERE username = ? LIMIT 1
 `
 
@@ -56,6 +56,7 @@ func (q *Queries) GetUser(ctx context.Context, username string) (*User, error) {
 		&i.Email,
 		&i.PasswordChangedAt,
 		&i.CreatedAt,
+		&i.IsEmailVerified,
 	)
 	return &i, err
 }
@@ -66,7 +67,8 @@ SET
   hashed_password = ?,
   password_changed_at = ?,
   full_name = ?,
-  email = ?
+  email = ?,
+  is_email_verified = ?
 WHERE
   username = ?
 `
@@ -76,6 +78,7 @@ type UpdateUserParams struct {
 	PasswordChangedAt time.Time `json:"password_changed_at"`
 	FullName          string    `json:"full_name"`
 	Email             string    `json:"email"`
+	IsEmailVerified   bool      `json:"is_email_verified"`
 	Username          string    `json:"username"`
 }
 
@@ -85,6 +88,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg *UpdateUserParams) error {
 		arg.PasswordChangedAt,
 		arg.FullName,
 		arg.Email,
+		arg.IsEmailVerified,
 		arg.Username,
 	)
 	return err

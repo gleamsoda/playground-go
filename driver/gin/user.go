@@ -4,8 +4,10 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/morikuni/failure"
 
 	"playground/app"
+	"playground/pkg/apperrors"
 )
 
 type createUserRequest struct {
@@ -52,6 +54,17 @@ func (h handler) loginUser(ctx *gin.Context) {
 		UserAgent: ctx.Request.UserAgent(),
 		ClientIP:  ctx.ClientIP(),
 	}); err != nil {
+		if code, ok := failure.CodeOf(err); ok {
+			switch code {
+			case apperrors.NotFound:
+				ctx.JSON(http.StatusNotFound, errorResponse(err))
+			case apperrors.Unauthorized:
+				ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+			default:
+				ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+			}
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 	} else {
 		ctx.JSON(http.StatusOK, param)

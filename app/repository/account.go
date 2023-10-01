@@ -2,9 +2,14 @@ package repository
 
 import (
 	"context"
+	"database/sql"
+	"errors"
+
+	"github.com/morikuni/failure"
 
 	"playground/app"
 	"playground/app/repository/sqlc/gen"
+	"playground/pkg/apperrors"
 )
 
 func (r *Repository) CreateAccount(ctx context.Context, args *app.Account) (*app.Account, error) {
@@ -23,6 +28,9 @@ func (r *Repository) CreateAccount(ctx context.Context, args *app.Account) (*app
 func (r *Repository) GetAccount(ctx context.Context, id int64) (*app.Account, error) {
 	a, err := r.q.GetAccount(ctx, id)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, failure.Translate(err, apperrors.NotFound)
+		}
 		return nil, err
 	}
 

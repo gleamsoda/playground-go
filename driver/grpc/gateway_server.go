@@ -30,9 +30,10 @@ func NewGatewayServer(ctx context.Context, cfg config.Config) (*http.Server, err
 	if err := gen.RegisterPlaygroundHandlerFromEndpoint(ctx, mux, cfg.GRPCServerAddress, opts); err != nil {
 		return nil, fmt.Errorf("cannot register handler server: %w", err)
 	}
+	h := HTTPLogger(mux)
 
 	return &http.Server{
 		Addr:    cfg.HTTPServerAddress,
-		Handler: mux,
+		Handler: h,
 	}, nil
 }

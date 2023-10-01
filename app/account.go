@@ -18,6 +18,11 @@ type CreateAccountParams struct {
 	Currency string `json:"currency"`
 }
 
+type GetAccountsParams struct {
+	ID    int64  `json:"id"`
+	Owner string `json:"owner"`
+}
+
 type ListAccountsParams struct {
 	Owner  string `json:"owner"`
 	Limit  int32  `json:"limit"`
