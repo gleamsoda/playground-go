@@ -52,16 +52,16 @@ func (mr *MockManagerMockRecorder) Create(username, duration interface{}) *gomoc
 }
 
 // Verify mocks base method.
-func (m *MockManager) Verify(token string) (*token.Payload, error) {
+func (m *MockManager) Verify(t string) (*token.Payload, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Verify", token)
+	ret := m.ctrl.Call(m, "Verify", t)
 	ret0, _ := ret[0].(*token.Payload)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Verify indicates an expected call of Verify.
-func (mr *MockManagerMockRecorder) Verify(token interface{}) *gomock.Call {
+func (mr *MockManagerMockRecorder) Verify(t interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Verify", reflect.TypeOf((*MockManager)(nil).Verify), token)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Verify", reflect.TypeOf((*MockManager)(nil).Verify), t)
 }
