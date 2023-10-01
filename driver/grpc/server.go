@@ -14,7 +14,7 @@ import (
 	"playground/app/usecase"
 	"playground/config"
 	"playground/driver/grpc/gen"
-	"playground/pkg/token"
+	"playground/internal/pkg/token"
 )
 
 // NewServer creates a new gRPC server.

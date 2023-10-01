@@ -5,8 +5,8 @@ import (
 
 	"playground/app"
 	"playground/app/mq"
-	"playground/pkg/mail"
-	"playground/pkg/token"
+	"playground/internal/pkg/mail"
+	"playground/internal/pkg/token"
 )
 
 type Usecase struct {

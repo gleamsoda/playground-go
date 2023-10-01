@@ -8,14 +8,14 @@ import (
 
 	"playground/app"
 	"playground/app/repository/sqlc/gen"
-	"playground/pkg/apperrors"
+	"playground/internal/pkg/apperr"
 )
 
 func (r *Repository) GetVerifyEmail(ctx context.Context, id int64) (*app.VerifyEmail, error) {
 	ve, err := r.q.GetVerifyEmail(ctx, id)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, failure.Translate(err, apperrors.NotFound)
+			return nil, failure.Translate(err, apperr.NotFound)
 		}
 		return nil, err
 	}
@@ -70,14 +70,14 @@ func (r *Repository) UpdateUserEmailVerified(ctx context.Context, args *app.Veri
 		ve, err = q.GetVerifyEmail(ctx, args.EmailID)
 		if err != nil {
 			if err == sql.ErrNoRows {
-				return failure.Translate(err, apperrors.NotFound)
+				return failure.Translate(err, apperr.NotFound)
 			}
 			return err
 		}
 		u, err = q.GetUser(ctx, ve.Username)
 		if err != nil {
 			if err == sql.ErrNoRows {
-				return failure.Translate(err, apperrors.NotFound)
+				return failure.Translate(err, apperr.NotFound)
 			}
 			return err
 		}
@@ -95,7 +95,7 @@ func (r *Repository) UpdateUserEmailVerified(ctx context.Context, args *app.Veri
 		u, err = q.GetUser(ctx, u.Username)
 		if err != nil {
 			if err == sql.ErrNoRows {
-				return failure.Translate(err, apperrors.NotFound)
+				return failure.Translate(err, apperr.NotFound)
 			}
 			return err
 		}

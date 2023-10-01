@@ -12,8 +12,8 @@ import (
 	"testing"
 
 	"playground/app"
-	"playground/pkg/apperrors"
-	"playground/pkg/password"
+	"playground/internal/pkg/apperr"
+	"playground/internal/pkg/password"
 	mock_app "playground/test/mock/app"
 
 	"github.com/gin-gonic/gin"
@@ -33,7 +33,7 @@ func (e eqCreateUserParamsMatcher) Matches(x interface{}) bool {
 		return false
 	}
 
-	err := password.CheckPassword(e.password, arg.HashedPassword)
+	err := password.Verify(e.password, arg.HashedPassword)
 	if err != nil {
 		return false
 	}
@@ -237,7 +237,7 @@ func TestLoginUserAPI(t *testing.T) {
 				store.EXPECT().
 					GetUser(gomock.Any(), gomock.Any()).
 					Times(1).
-					Return(nil, failure.Translate(sql.ErrNoRows, apperrors.NotFound))
+					Return(nil, failure.Translate(sql.ErrNoRows, apperr.NotFound))
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusNotFound, recorder.Code)
@@ -321,7 +321,7 @@ func TestLoginUserAPI(t *testing.T) {
 
 func randomUser(t *testing.T) (*app.User, string) {
 	pwd := app.RandomString(6)
-	hashedPassword, err := password.HashPassword(pwd)
+	hashedPassword, err := password.Hash(pwd)
 	require.NoError(t, err)
 
 	u := app.NewUser(app.RandomOwner(), hashedPassword, app.RandomOwner(), app.RandomEmail())

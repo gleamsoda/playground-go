@@ -7,21 +7,21 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func TestHashPassword(t *testing.T) {
+func TestHash(t *testing.T) {
 	password := "password"
-	hashedPassword, err := HashPassword(password)
+	hashedPassword, err := Hash(password)
 	assert.NoError(t, err)
 	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 	assert.NoError(t, err, "failed to verify hashed password")
 }
 
-func TestCheckPassword(t *testing.T) {
+func TestVerify(t *testing.T) {
 	password := "password"
-	hashedPassword, _ := HashPassword(password)
+	hashedPassword, _ := Hash(password)
 
-	err := CheckPassword(password, string(hashedPassword))
+	err := Verify(password, string(hashedPassword))
 	assert.NoError(t, err, "Expected password check to succeed")
 
-	err = CheckPassword("wrongpassword", string(hashedPassword))
+	err = Verify("wrongpassword", string(hashedPassword))
 	assert.Error(t, err, "Expected password check to fail")
 }

@@ -10,7 +10,7 @@ import (
 
 	"playground/app"
 	"playground/app/repository/sqlc/gen"
-	"playground/pkg/apperrors"
+	"playground/internal/pkg/apperr"
 )
 
 func (r *Repository) CreateUser(ctx context.Context, args *app.User) (*app.User, error) {
@@ -30,7 +30,7 @@ func (r *Repository) GetUser(ctx context.Context, username string) (*app.User, e
 	u, err := r.q.GetUser(ctx, username)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, failure.Translate(err, apperrors.NotFound)
+			return nil, failure.Translate(err, apperr.NotFound)
 		}
 		return nil, err
 	}
@@ -55,7 +55,7 @@ func (r *Repository) UpdateUser(ctx context.Context, args *app.User) (*app.User,
 	})
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, failure.Translate(err, apperrors.NotFound)
+			return nil, failure.Translate(err, apperr.NotFound)
 		}
 		return nil, err
 	}

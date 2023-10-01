@@ -15,7 +15,7 @@ import (
 	"playground/app/repository"
 	"playground/app/usecase"
 	"playground/config"
-	"playground/pkg/token"
+	"playground/internal/pkg/token"
 )
 
 type Server struct {

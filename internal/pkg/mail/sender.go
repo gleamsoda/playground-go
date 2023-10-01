@@ -7,11 +7,6 @@ import (
 	"github.com/jordan-wright/email"
 )
 
-const (
-	smtpAuthAddress   = "smtp.gmail.com"
-	smtpServerAddress = "smtp.gmail.com:587"
-)
-
 type Sender interface {
 	Send(
 		subject string,
@@ -22,6 +17,11 @@ type Sender interface {
 		attachFiles []string,
 	) error
 }
+
+const (
+	smtpAuthAddress   = "smtp.gmail.com"
+	smtpServerAddress = "smtp.gmail.com:587"
+)
 
 type GmailSender struct {
 	name              string

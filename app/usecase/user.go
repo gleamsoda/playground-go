@@ -11,12 +11,12 @@ import (
 
 	"playground/app"
 	"playground/app/mq"
-	"playground/pkg/apperrors"
-	"playground/pkg/password"
+	"playground/internal/pkg/apperr"
+	"playground/internal/pkg/password"
 )
 
 func (u *Usecase) CreateUser(ctx context.Context, args *app.CreateUserParams) (*app.User, error) {
-	hashedPassword, err := password.HashPassword(args.Password)
+	hashedPassword, err := password.Hash(args.Password)
 	if err != nil {
 		return nil, err
 	}
@@ -45,8 +45,8 @@ func (u *Usecase) LoginUser(ctx context.Context, args *app.LoginUserParams) (*ap
 	if err != nil {
 		return nil, err
 	}
-	if err := password.CheckPassword(args.Password, usr.HashedPassword); err != nil {
-		return nil, failure.Translate(err, apperrors.Unauthorized)
+	if err := password.Verify(args.Password, usr.HashedPassword); err != nil {
+		return nil, failure.Translate(err, apperr.Unauthorized)
 	}
 
 	aToken, aPayload, err := u.tm.Create(
@@ -127,7 +127,7 @@ func (u *Usecase) RenewAccessToken(ctx context.Context, refreshToken string) (*a
 
 func (u *Usecase) UpdateUser(ctx context.Context, args *app.UpdateUserParams) (*app.User, error) {
 	if args.Username != args.ReqUsername {
-		return nil, failure.Translate(fmt.Errorf("cannot update other user's info"), apperrors.Unauthorized)
+		return nil, failure.Translate(fmt.Errorf("cannot update other user's info"), apperr.Unauthorized)
 	}
 
 	usr, err := u.r.GetUser(ctx, args.Username)
@@ -142,7 +142,7 @@ func (u *Usecase) UpdateUser(ctx context.Context, args *app.UpdateUserParams) (*
 		usr.Email = *args.Email
 	}
 	if args.Password != nil {
-		hashedPassword, err := password.HashPassword(*args.Password)
+		hashedPassword, err := password.Hash(*args.Password)
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "failed to hash password: %s", err)
 		}

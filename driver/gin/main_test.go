@@ -16,7 +16,7 @@ import (
 	"playground/app/mq"
 	"playground/app/usecase"
 	"playground/config"
-	"playground/pkg/token"
+	"playground/internal/pkg/token"
 )
 
 func newTestServer(t *testing.T, r app.Repository) *Server {

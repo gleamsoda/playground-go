@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
 
-	"playground/pkg/token"
+	"playground/internal/pkg/token"
 )
 
 func addAuthorization(

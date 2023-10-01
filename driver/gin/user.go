@@ -7,7 +7,7 @@ import (
 	"github.com/morikuni/failure"
 
 	"playground/app"
-	"playground/pkg/apperrors"
+	"playground/internal/pkg/apperr"
 )
 
 type createUserRequest struct {
@@ -56,9 +56,9 @@ func (h handler) loginUser(ctx *gin.Context) {
 	}); err != nil {
 		if code, ok := failure.CodeOf(err); ok {
 			switch code {
-			case apperrors.NotFound:
+			case apperr.NotFound:
 				ctx.JSON(http.StatusNotFound, errorResponse(err))
-			case apperrors.Unauthorized:
+			case apperr.Unauthorized:
 				ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 			default:
 				ctx.JSON(http.StatusInternalServerError, errorResponse(err))

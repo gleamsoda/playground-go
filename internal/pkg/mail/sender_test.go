@@ -23,9 +23,7 @@ func TestSendEmailWithGmail(t *testing.T) {
 	<h1>Hello world</h1>
 	<p>This is a test message from <a href="http://techschool.guru">Tech School</a></p>
 	`
-	to := []string{"gleamsoda99@gmail.com"}
-	attachFiles := []string{"../../README.md"}
-
-	err = sender.Send(subject, content, to, nil, nil, attachFiles)
+	to := []string{"example@example.com"}
+	err = sender.Send(subject, content, to, nil, nil, nil)
 	require.NoError(t, err)
 }

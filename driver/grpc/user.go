@@ -12,7 +12,7 @@ import (
 	"playground/app"
 	"playground/driver/grpc/gen"
 	"playground/driver/grpc/validator"
-	"playground/pkg/apperrors"
+	"playground/internal/pkg/apperr"
 )
 
 func (c *Controller) CreateUser(ctx context.Context, req *gen.CreateUserRequest) (*gen.CreateUserResponse, error) {
@@ -106,9 +106,9 @@ func (c *Controller) UpdateUser(ctx context.Context, req *gen.UpdateUserRequest)
 	if err != nil {
 		if code, ok := failure.CodeOf(err); ok {
 			switch code {
-			case apperrors.NotFound:
+			case apperr.NotFound:
 				return nil, status.Errorf(codes.NotFound, "user not found")
-			case apperrors.Unauthorized:
+			case apperr.Unauthorized:
 				return nil, status.Errorf(codes.PermissionDenied, "cannot update other user's info")
 			default:
 				return nil, status.Errorf(codes.Internal, "failed to update user: %s", err)

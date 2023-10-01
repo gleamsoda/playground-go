@@ -11,7 +11,7 @@ import (
 
 	"playground/app"
 	"playground/driver/grpc/gen"
-	"playground/pkg/token"
+	"playground/internal/pkg/token"
 )
 
 type Controller struct {

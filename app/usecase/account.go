@@ -7,7 +7,7 @@ import (
 	"github.com/morikuni/failure"
 
 	"playground/app"
-	"playground/pkg/apperrors"
+	"playground/internal/pkg/apperr"
 )
 
 func (u *Usecase) CreateAccount(ctx context.Context, args *app.CreateAccountParams) (*app.Account, error) {
@@ -21,7 +21,7 @@ func (u *Usecase) GetAccount(ctx context.Context, args *app.GetAccountsParams) (
 	}
 	if a.Owner != args.Owner {
 		err := errors.New("account doesn't belong to the authenticated user")
-		return nil, failure.Translate(err, apperrors.Unauthorized)
+		return nil, failure.Translate(err, apperr.Unauthorized)
 	}
 	return a, nil
 }

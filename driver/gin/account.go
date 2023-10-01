@@ -7,8 +7,8 @@ import (
 	"github.com/morikuni/failure"
 
 	"playground/app"
-	"playground/pkg/apperrors"
-	"playground/pkg/token"
+	"playground/internal/pkg/apperr"
+	"playground/internal/pkg/token"
 )
 
 type createAccountRequest struct {
@@ -52,9 +52,9 @@ func (h handler) getAccount(c *gin.Context) {
 	}); err != nil {
 		if code, ok := failure.CodeOf(err); ok {
 			switch code {
-			case apperrors.NotFound:
+			case apperr.NotFound:
 				c.JSON(http.StatusNotFound, errorResponse(err))
-			case apperrors.Unauthorized:
+			case apperr.Unauthorized:
 				c.JSON(http.StatusUnauthorized, errorResponse(err))
 			default:
 				c.JSON(http.StatusInternalServerError, errorResponse(err))

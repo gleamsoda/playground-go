@@ -17,8 +17,8 @@ import (
 	"go.uber.org/mock/gomock"
 
 	"playground/app"
-	"playground/pkg/apperrors"
-	"playground/pkg/token"
+	"playground/internal/pkg/apperr"
+	"playground/internal/pkg/token"
 	mock_app "playground/test/mock/app"
 )
 
@@ -91,7 +91,7 @@ func TestGetAccountAPI(t *testing.T) {
 				store.EXPECT().
 					GetAccount(gomock.Any(), gomock.Eq(account.ID)).
 					Times(1).
-					Return(&app.Account{}, failure.Translate(sql.ErrNoRows, apperrors.NotFound))
+					Return(&app.Account{}, failure.Translate(sql.ErrNoRows, apperr.NotFound))
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusNotFound, recorder.Code)

@@ -9,7 +9,7 @@ import (
 
 	"playground/app"
 	"playground/app/repository/sqlc/gen"
-	"playground/pkg/apperrors"
+	"playground/internal/pkg/apperr"
 )
 
 func (r *Repository) CreateAccount(ctx context.Context, args *app.Account) (*app.Account, error) {
@@ -29,7 +29,7 @@ func (r *Repository) GetAccount(ctx context.Context, id int64) (*app.Account, er
 	a, err := r.q.GetAccount(ctx, id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, failure.Translate(err, apperrors.NotFound)
+			return nil, failure.Translate(err, apperr.NotFound)
 		}
 		return nil, err
 	}

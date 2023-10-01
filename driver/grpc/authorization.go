@@ -7,7 +7,7 @@ import (
 
 	"google.golang.org/grpc/metadata"
 
-	"playground/pkg/token"
+	"playground/internal/pkg/token"
 )
 
 const (

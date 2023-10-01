@@ -11,8 +11,8 @@ import (
 	"playground/app/repository"
 	"playground/app/usecase"
 	"playground/config"
-	"playground/pkg/mail"
-	"playground/pkg/token"
+	"playground/internal/pkg/mail"
+	"playground/internal/pkg/token"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/hibiken/asynq"

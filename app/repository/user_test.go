@@ -8,11 +8,11 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"playground/app"
-	"playground/pkg/password"
+	"playground/internal/pkg/password"
 )
 
 func createRandomUser(t *testing.T) *app.User {
-	hashedPassword, err := password.HashPassword(app.RandomString(6))
+	hashedPassword, err := password.Hash(app.RandomString(6))
 	require.NoError(t, err)
 
 	arg := &app.User{
@@ -88,7 +88,7 @@ func TestUpdateUserOnlyPassword(t *testing.T) {
 	oldUser := createRandomUser(t)
 	oldHashedPassword := oldUser.HashedPassword
 	newPassword := app.RandomString(6)
-	newHashedPassword, err := password.HashPassword(newPassword)
+	newHashedPassword, err := password.Hash(newPassword)
 	require.NoError(t, err)
 	oldUser.HashedPassword = newHashedPassword
 
@@ -110,7 +110,7 @@ func TestUpdateUserAllFields(t *testing.T) {
 	newFullName := app.RandomOwner()
 	newEmail := app.RandomEmail()
 	newPassword := app.RandomString(6)
-	newHashedPassword, err := password.HashPassword(newPassword)
+	newHashedPassword, err := password.Hash(newPassword)
 	require.NoError(t, err)
 
 	oldUser.FullName = newFullName
