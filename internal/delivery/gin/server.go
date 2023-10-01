@@ -11,11 +11,11 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/hibiken/asynq"
 
-	"playground/app/mq"
-	"playground/app/repository"
-	"playground/app/usecase"
-	"playground/config"
+	"playground/internal/config"
 	"playground/internal/pkg/token"
+	"playground/internal/wallet/mq"
+	"playground/internal/wallet/repository"
+	"playground/internal/wallet/usecase"
 )
 
 type Server struct {

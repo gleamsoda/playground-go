@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/morikuni/failure"
 
-	"playground/app"
 	"playground/internal/pkg/apperr"
+	"playground/internal/wallet"
 )
 
 type createUserRequest struct {
@@ -24,7 +24,7 @@ func (h handler) createUser(c *gin.Context) {
 		return
 	}
 
-	if e, err := h.u.CreateUser(c, &app.CreateUserParams{
+	if e, err := h.u.CreateUser(c, &wallet.CreateUserParams{
 		Username: req.Username,
 		Password: req.Password,
 		FullName: req.FullName,
@@ -48,7 +48,7 @@ func (h handler) loginUser(ctx *gin.Context) {
 		return
 	}
 
-	if param, err := h.u.LoginUser(ctx, &app.LoginUserParams{
+	if param, err := h.u.LoginUser(ctx, &wallet.LoginUserParams{
 		Username:  req.Username,
 		Password:  req.Password,
 		UserAgent: ctx.Request.UserAgent(),

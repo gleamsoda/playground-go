@@ -11,24 +11,24 @@ import (
 	"reflect"
 	"testing"
 
-	"playground/app"
-	"playground/internal/pkg/apperr"
-	"playground/internal/pkg/password"
-	mock_app "playground/test/mock/app"
-
 	"github.com/gin-gonic/gin"
 	"github.com/morikuni/failure"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
+
+	"playground/internal/pkg/apperr"
+	"playground/internal/pkg/password"
+	"playground/internal/wallet"
+	mock_wallet "playground/test/mock/wallet"
 )
 
 type eqCreateUserParamsMatcher struct {
-	arg      *app.User
+	arg      *wallet.User
 	password string
 }
 
 func (e eqCreateUserParamsMatcher) Matches(x interface{}) bool {
-	arg, ok := x.(*app.User)
+	arg, ok := x.(*wallet.User)
 	if !ok {
 		return false
 	}
@@ -46,7 +46,7 @@ func (e eqCreateUserParamsMatcher) String() string {
 	return fmt.Sprintf("matches arg %v and password %v", e.arg, e.password)
 }
 
-func EqCreateUserParams(arg *app.User, password string) gomock.Matcher {
+func EqCreateUserParams(arg *wallet.User, password string) gomock.Matcher {
 	return eqCreateUserParamsMatcher{arg, password}
 }
 
@@ -56,7 +56,7 @@ func TestCreateUserAPI(t *testing.T) {
 	testCases := []struct {
 		name          string
 		body          gin.H
-		buildStubs    func(store *mock_app.MockRepository)
+		buildStubs    func(store *mock_wallet.MockRepository)
 		checkResponse func(recoder *httptest.ResponseRecorder)
 	}{
 		{
@@ -67,8 +67,8 @@ func TestCreateUserAPI(t *testing.T) {
 				"full_name": user.FullName,
 				"email":     user.Email,
 			},
-			buildStubs: func(store *mock_app.MockRepository) {
-				arg := &app.User{
+			buildStubs: func(store *mock_wallet.MockRepository) {
+				arg := &wallet.User{
 					Username: user.Username,
 					FullName: user.FullName,
 					Email:    user.Email,
@@ -91,11 +91,11 @@ func TestCreateUserAPI(t *testing.T) {
 				"full_name": user.FullName,
 				"email":     user.Email,
 			},
-			buildStubs: func(store *mock_app.MockRepository) {
+			buildStubs: func(store *mock_wallet.MockRepository) {
 				store.EXPECT().
 					CreateUser(gomock.Any(), gomock.Any()).
 					Times(1).
-					Return(&app.User{}, sql.ErrConnDone)
+					Return(&wallet.User{}, sql.ErrConnDone)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -109,11 +109,11 @@ func TestCreateUserAPI(t *testing.T) {
 		// 		"full_name": user.FullName,
 		// 		"email":     user.Email,
 		// 	},
-		// 	buildStubs: func(store *mock_app.MockRepository) {
+		// 	buildStubs: func(store *mock_wallet.MockRepository) {
 		// 		store.EXPECT().
 		// 			CreateUser(gomock.Any(), gomock.Any()).
 		// 			Times(1).
-		// 			Return(&app.User{}, db.ErrUniqueViolation)
+		// 			Return(&wallet.User{}, db.ErrUniqueViolation)
 		// 	},
 		// 	checkResponse: func(recorder *httptest.ResponseRecorder) {
 		// 		require.Equal(t, http.StatusForbidden, recorder.Code)
@@ -127,7 +127,7 @@ func TestCreateUserAPI(t *testing.T) {
 				"full_name": user.FullName,
 				"email":     user.Email,
 			},
-			buildStubs: func(store *mock_app.MockRepository) {
+			buildStubs: func(store *mock_wallet.MockRepository) {
 				store.EXPECT().
 					CreateUser(gomock.Any(), gomock.Any()).
 					Times(0)
@@ -144,7 +144,7 @@ func TestCreateUserAPI(t *testing.T) {
 				"full_name": user.FullName,
 				"email":     "invalid-email",
 			},
-			buildStubs: func(store *mock_app.MockRepository) {
+			buildStubs: func(store *mock_wallet.MockRepository) {
 				store.EXPECT().
 					CreateUser(gomock.Any(), gomock.Any()).
 					Times(0)
@@ -161,7 +161,7 @@ func TestCreateUserAPI(t *testing.T) {
 				"full_name": user.FullName,
 				"email":     user.Email,
 			},
-			buildStubs: func(store *mock_app.MockRepository) {
+			buildStubs: func(store *mock_wallet.MockRepository) {
 				store.EXPECT().
 					CreateUser(gomock.Any(), gomock.Any()).
 					Times(0)
@@ -179,7 +179,7 @@ func TestCreateUserAPI(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			store := mock_app.NewMockRepository(ctrl)
+			store := mock_wallet.NewMockRepository(ctrl)
 			tc.buildStubs(store)
 
 			server := newTestServer(t, store)
@@ -205,7 +205,7 @@ func TestLoginUserAPI(t *testing.T) {
 	testCases := []struct {
 		name          string
 		body          gin.H
-		buildStubs    func(store *mock_app.MockRepository)
+		buildStubs    func(store *mock_wallet.MockRepository)
 		checkResponse func(recoder *httptest.ResponseRecorder)
 	}{
 		{
@@ -214,7 +214,7 @@ func TestLoginUserAPI(t *testing.T) {
 				"username": user.Username,
 				"password": password,
 			},
-			buildStubs: func(store *mock_app.MockRepository) {
+			buildStubs: func(store *mock_wallet.MockRepository) {
 				store.EXPECT().
 					GetUser(gomock.Any(), gomock.Eq(user.Username)).
 					Times(1).
@@ -233,7 +233,7 @@ func TestLoginUserAPI(t *testing.T) {
 				"username": "NotFound",
 				"password": password,
 			},
-			buildStubs: func(store *mock_app.MockRepository) {
+			buildStubs: func(store *mock_wallet.MockRepository) {
 				store.EXPECT().
 					GetUser(gomock.Any(), gomock.Any()).
 					Times(1).
@@ -249,7 +249,7 @@ func TestLoginUserAPI(t *testing.T) {
 				"username": user.Username,
 				"password": "incorrect",
 			},
-			buildStubs: func(store *mock_app.MockRepository) {
+			buildStubs: func(store *mock_wallet.MockRepository) {
 				store.EXPECT().
 					GetUser(gomock.Any(), gomock.Eq(user.Username)).
 					Times(1).
@@ -265,11 +265,11 @@ func TestLoginUserAPI(t *testing.T) {
 				"username": user.Username,
 				"password": password,
 			},
-			buildStubs: func(store *mock_app.MockRepository) {
+			buildStubs: func(store *mock_wallet.MockRepository) {
 				store.EXPECT().
 					GetUser(gomock.Any(), gomock.Any()).
 					Times(1).
-					Return(&app.User{}, sql.ErrConnDone)
+					Return(&wallet.User{}, sql.ErrConnDone)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -281,7 +281,7 @@ func TestLoginUserAPI(t *testing.T) {
 				"username": "invalid-user#1",
 				"password": password,
 			},
-			buildStubs: func(store *mock_app.MockRepository) {
+			buildStubs: func(store *mock_wallet.MockRepository) {
 				store.EXPECT().
 					GetUser(gomock.Any(), gomock.Any()).
 					Times(0)
@@ -299,7 +299,7 @@ func TestLoginUserAPI(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			store := mock_app.NewMockRepository(ctrl)
+			store := mock_wallet.NewMockRepository(ctrl)
 			tc.buildStubs(store)
 
 			server := newTestServer(t, store)
@@ -319,20 +319,20 @@ func TestLoginUserAPI(t *testing.T) {
 	}
 }
 
-func randomUser(t *testing.T) (*app.User, string) {
-	pwd := app.RandomString(6)
+func randomUser(t *testing.T) (*wallet.User, string) {
+	pwd := wallet.RandomString(6)
 	hashedPassword, err := password.Hash(pwd)
 	require.NoError(t, err)
 
-	u := app.NewUser(app.RandomOwner(), hashedPassword, app.RandomOwner(), app.RandomEmail())
+	u := wallet.NewUser(wallet.RandomOwner(), hashedPassword, wallet.RandomOwner(), wallet.RandomEmail())
 	return u, pwd
 }
 
-func requireBodyMatchUser(t *testing.T, body *bytes.Buffer, user *app.User) {
+func requireBodyMatchUser(t *testing.T, body *bytes.Buffer, user *wallet.User) {
 	data, err := io.ReadAll(body)
 	require.NoError(t, err)
 
-	var gotUser *app.User
+	var gotUser *wallet.User
 	err = json.Unmarshal(data, &gotUser)
 
 	require.NoError(t, err)

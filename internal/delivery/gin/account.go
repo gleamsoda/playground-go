@@ -6,9 +6,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/morikuni/failure"
 
-	"playground/app"
 	"playground/internal/pkg/apperr"
 	"playground/internal/pkg/token"
+	"playground/internal/wallet"
 )
 
 type createAccountRequest struct {
@@ -23,7 +23,7 @@ func (h handler) createAccount(c *gin.Context) {
 	}
 
 	authPayload := c.MustGet(authorizationPayloadKey).(*token.Payload)
-	if a, err := h.u.CreateAccount(c, &app.CreateAccountParams{
+	if a, err := h.u.CreateAccount(c, &wallet.CreateAccountParams{
 		Owner:    authPayload.Username,
 		Balance:  0,
 		Currency: req.Currency,
@@ -46,7 +46,7 @@ func (h handler) getAccount(c *gin.Context) {
 	}
 
 	authPayload := c.MustGet(authorizationPayloadKey).(*token.Payload)
-	if a, err := h.u.GetAccount(c, &app.GetAccountsParams{
+	if a, err := h.u.GetAccount(c, &wallet.GetAccountsParams{
 		ID:    req.ID,
 		Owner: authPayload.Username,
 	}); err != nil {
@@ -80,7 +80,7 @@ func (h handler) listAccounts(c *gin.Context) {
 	}
 
 	authPayload := c.MustGet(authorizationPayloadKey).(*token.Payload)
-	if as, err := h.u.ListAccounts(c, &app.ListAccountsParams{
+	if as, err := h.u.ListAccounts(c, &wallet.ListAccountsParams{
 		Owner:  authPayload.Username,
 		Limit:  req.Limit,
 		Offset: req.Offset,

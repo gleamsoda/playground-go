@@ -12,14 +12,14 @@ import (
 	"github.com/hibiken/asynq"
 	"github.com/stretchr/testify/require"
 
-	"playground/app"
-	"playground/app/mq"
-	"playground/app/usecase"
-	"playground/config"
+	"playground/internal/config"
 	"playground/internal/pkg/token"
+	"playground/internal/wallet"
+	"playground/internal/wallet/mq"
+	"playground/internal/wallet/usecase"
 )
 
-func newTestServer(t *testing.T, r app.Repository) *Server {
+func newTestServer(t *testing.T, r wallet.Repository) *Server {
 	cfg, err := config.NewConfig()
 	if err != nil {
 		log.Fatal(err)

@@ -3,14 +3,14 @@ package gin
 import (
 	"github.com/gin-gonic/gin"
 
-	"playground/app"
+	"playground/internal/wallet"
 )
 
 type handler struct {
-	u app.Usecase
+	u wallet.Usecase
 }
 
-func NewHandler(u app.Usecase, authMiddleware gin.HandlerFunc) *gin.Engine {
+func NewHandler(u wallet.Usecase, authMiddleware gin.HandlerFunc) *gin.Engine {
 	r := &handler{u: u}
 
 	svr := gin.Default()

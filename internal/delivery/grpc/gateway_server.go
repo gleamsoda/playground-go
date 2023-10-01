@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/encoding/protojson"
 
-	"playground/config"
+	"playground/internal/config"
 	"playground/internal/delivery/grpc/gen"
 )
 

@@ -3,9 +3,9 @@ package mail
 import (
 	"testing"
 
-	"playground/config"
-
 	"github.com/stretchr/testify/require"
+
+	"playground/internal/config"
 )
 
 func TestSendEmailWithGmail(t *testing.T) {

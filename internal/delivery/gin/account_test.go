@@ -16,10 +16,10 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 
-	"playground/app"
 	"playground/internal/pkg/apperr"
 	"playground/internal/pkg/token"
-	mock_app "playground/test/mock/app"
+	"playground/internal/wallet"
+	mock_wallet "playground/test/mock/wallet"
 )
 
 func TestGetAccountAPI(t *testing.T) {
@@ -30,7 +30,7 @@ func TestGetAccountAPI(t *testing.T) {
 		name          string
 		accountID     int64
 		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Manager)
-		buildStubs    func(store *mock_app.MockRepository)
+		buildStubs    func(store *mock_wallet.MockRepository)
 		checkResponse func(t *testing.T, recoder *httptest.ResponseRecorder)
 	}{
 		{
@@ -39,7 +39,7 @@ func TestGetAccountAPI(t *testing.T) {
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Manager) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
-			buildStubs: func(store *mock_app.MockRepository) {
+			buildStubs: func(store *mock_wallet.MockRepository) {
 				store.EXPECT().
 					GetAccount(gomock.Any(), gomock.Eq(account.ID)).
 					Times(1).
@@ -56,7 +56,7 @@ func TestGetAccountAPI(t *testing.T) {
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Manager) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, "unauthorized_user", time.Minute)
 			},
-			buildStubs: func(store *mock_app.MockRepository) {
+			buildStubs: func(store *mock_wallet.MockRepository) {
 				store.EXPECT().
 					GetAccount(gomock.Any(), gomock.Eq(account.ID)).
 					Times(1).
@@ -71,7 +71,7 @@ func TestGetAccountAPI(t *testing.T) {
 			accountID: account.ID,
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Manager) {
 			},
-			buildStubs: func(store *mock_app.MockRepository) {
+			buildStubs: func(store *mock_wallet.MockRepository) {
 				store.EXPECT().
 					GetAccount(gomock.Any(), gomock.Any()).
 					Times(0)
@@ -87,11 +87,11 @@ func TestGetAccountAPI(t *testing.T) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
 
-			buildStubs: func(store *mock_app.MockRepository) {
+			buildStubs: func(store *mock_wallet.MockRepository) {
 				store.EXPECT().
 					GetAccount(gomock.Any(), gomock.Eq(account.ID)).
 					Times(1).
-					Return(&app.Account{}, failure.Translate(sql.ErrNoRows, apperr.NotFound))
+					Return(&wallet.Account{}, failure.Translate(sql.ErrNoRows, apperr.NotFound))
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusNotFound, recorder.Code)
@@ -103,11 +103,11 @@ func TestGetAccountAPI(t *testing.T) {
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Manager) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
-			buildStubs: func(store *mock_app.MockRepository) {
+			buildStubs: func(store *mock_wallet.MockRepository) {
 				store.EXPECT().
 					GetAccount(gomock.Any(), gomock.Eq(account.ID)).
 					Times(1).
-					Return(&app.Account{}, sql.ErrConnDone)
+					Return(&wallet.Account{}, sql.ErrConnDone)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -119,7 +119,7 @@ func TestGetAccountAPI(t *testing.T) {
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Manager) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
-			buildStubs: func(store *mock_app.MockRepository) {
+			buildStubs: func(store *mock_wallet.MockRepository) {
 				store.EXPECT().
 					GetAccount(gomock.Any(), gomock.Any()).
 					Times(0)
@@ -137,7 +137,7 @@ func TestGetAccountAPI(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			store := mock_app.NewMockRepository(ctrl)
+			store := mock_wallet.NewMockRepository(ctrl)
 			tc.buildStubs(store)
 
 			server := newTestServer(t, store)
@@ -162,7 +162,7 @@ func TestCreateAccountAPI(t *testing.T) {
 		name          string
 		body          gin.H
 		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Manager)
-		buildStubs    func(store *mock_app.MockRepository)
+		buildStubs    func(store *mock_wallet.MockRepository)
 		checkResponse func(recoder *httptest.ResponseRecorder)
 	}{
 		{
@@ -173,8 +173,8 @@ func TestCreateAccountAPI(t *testing.T) {
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Manager) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
-			buildStubs: func(store *mock_app.MockRepository) {
-				arg := &app.Account{
+			buildStubs: func(store *mock_wallet.MockRepository) {
+				arg := &wallet.Account{
 					Owner:    account.Owner,
 					Currency: account.Currency,
 					Balance:  0,
@@ -196,7 +196,7 @@ func TestCreateAccountAPI(t *testing.T) {
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Manager) {
 			},
-			buildStubs: func(store *mock_app.MockRepository) {
+			buildStubs: func(store *mock_wallet.MockRepository) {
 				store.EXPECT().
 					CreateAccount(gomock.Any(), gomock.Any()).
 					Times(0)
@@ -213,11 +213,11 @@ func TestCreateAccountAPI(t *testing.T) {
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Manager) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
-			buildStubs: func(store *mock_app.MockRepository) {
+			buildStubs: func(store *mock_wallet.MockRepository) {
 				store.EXPECT().
 					CreateAccount(gomock.Any(), gomock.Any()).
 					Times(1).
-					Return(&app.Account{}, sql.ErrConnDone)
+					Return(&wallet.Account{}, sql.ErrConnDone)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -231,7 +231,7 @@ func TestCreateAccountAPI(t *testing.T) {
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Manager) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
-			buildStubs: func(store *mock_app.MockRepository) {
+			buildStubs: func(store *mock_wallet.MockRepository) {
 				store.EXPECT().
 					CreateAccount(gomock.Any(), gomock.Any()).
 					Times(0)
@@ -249,7 +249,7 @@ func TestCreateAccountAPI(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			store := mock_app.NewMockRepository(ctrl)
+			store := mock_wallet.NewMockRepository(ctrl)
 			tc.buildStubs(store)
 
 			server := newTestServer(t, store)
@@ -274,7 +274,7 @@ func TestListAccountsAPI(t *testing.T) {
 	user, _ := randomUser(t)
 
 	n := 5
-	accounts := make([]app.Account, n)
+	accounts := make([]wallet.Account, n)
 	for i := 0; i < n; i++ {
 		accounts[i] = *randomAccount(user.Username)
 	}
@@ -288,7 +288,7 @@ func TestListAccountsAPI(t *testing.T) {
 		name          string
 		query         Query
 		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Manager)
-		buildStubs    func(store *mock_app.MockRepository)
+		buildStubs    func(store *mock_wallet.MockRepository)
 		checkResponse func(recoder *httptest.ResponseRecorder)
 	}{
 		{
@@ -300,8 +300,8 @@ func TestListAccountsAPI(t *testing.T) {
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Manager) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
-			buildStubs: func(store *mock_app.MockRepository) {
-				arg := &app.ListAccountsParams{
+			buildStubs: func(store *mock_wallet.MockRepository) {
+				arg := &wallet.ListAccountsParams{
 					Owner:  user.Username,
 					Limit:  int32(n),
 					Offset: 0,
@@ -325,7 +325,7 @@ func TestListAccountsAPI(t *testing.T) {
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Manager) {
 			},
-			buildStubs: func(store *mock_app.MockRepository) {
+			buildStubs: func(store *mock_wallet.MockRepository) {
 				store.EXPECT().
 					ListAccounts(gomock.Any(), gomock.Any()).
 					Times(0)
@@ -343,11 +343,11 @@ func TestListAccountsAPI(t *testing.T) {
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Manager) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
-			buildStubs: func(store *mock_app.MockRepository) {
+			buildStubs: func(store *mock_wallet.MockRepository) {
 				store.EXPECT().
 					ListAccounts(gomock.Any(), gomock.Any()).
 					Times(1).
-					Return([]app.Account{}, sql.ErrConnDone)
+					Return([]wallet.Account{}, sql.ErrConnDone)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -362,7 +362,7 @@ func TestListAccountsAPI(t *testing.T) {
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Manager) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
-			buildStubs: func(store *mock_app.MockRepository) {
+			buildStubs: func(store *mock_wallet.MockRepository) {
 				store.EXPECT().
 					ListAccounts(gomock.Any(), gomock.Any()).
 					Times(0)
@@ -380,7 +380,7 @@ func TestListAccountsAPI(t *testing.T) {
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Manager) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user.Username, time.Minute)
 			},
-			buildStubs: func(store *mock_app.MockRepository) {
+			buildStubs: func(store *mock_wallet.MockRepository) {
 				store.EXPECT().
 					ListAccounts(gomock.Any(), gomock.Any()).
 					Times(0)
@@ -398,7 +398,7 @@ func TestListAccountsAPI(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			store := mock_app.NewMockRepository(ctrl)
+			store := mock_wallet.NewMockRepository(ctrl)
 			tc.buildStubs(store)
 
 			server := newTestServer(t, store)
@@ -421,30 +421,30 @@ func TestListAccountsAPI(t *testing.T) {
 	}
 }
 
-func randomAccount(owner string) *app.Account {
-	return &app.Account{
-		ID:       app.RandomInt(1, 1000),
+func randomAccount(owner string) *wallet.Account {
+	return &wallet.Account{
+		ID:       wallet.RandomInt(1, 1000),
 		Owner:    owner,
-		Balance:  app.RandomMoney(),
-		Currency: app.RandomCurrency(),
+		Balance:  wallet.RandomMoney(),
+		Currency: wallet.RandomCurrency(),
 	}
 }
 
-func requireBodyMatchAccount(t *testing.T, body *bytes.Buffer, account *app.Account) {
+func requireBodyMatchAccount(t *testing.T, body *bytes.Buffer, account *wallet.Account) {
 	data, err := io.ReadAll(body)
 	require.NoError(t, err)
 
-	var gotAccount *app.Account
+	var gotAccount *wallet.Account
 	err = json.Unmarshal(data, &gotAccount)
 	require.NoError(t, err)
 	require.Equal(t, account, gotAccount)
 }
 
-func requireBodyMatchAccounts(t *testing.T, body *bytes.Buffer, accounts []app.Account) {
+func requireBodyMatchAccounts(t *testing.T, body *bytes.Buffer, accounts []wallet.Account) {
 	data, err := io.ReadAll(body)
 	require.NoError(t, err)
 
-	var gotAccounts []app.Account
+	var gotAccounts []wallet.Account
 	err = json.Unmarshal(data, &gotAccounts)
 	require.NoError(t, err)
 	require.Equal(t, accounts, gotAccounts)

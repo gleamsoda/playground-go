@@ -9,10 +9,10 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"playground/app"
 	"playground/internal/delivery/grpc/gen"
 	"playground/internal/delivery/grpc/validator"
 	"playground/internal/pkg/apperr"
+	"playground/internal/wallet"
 )
 
 func (c *Controller) CreateUser(ctx context.Context, req *gen.CreateUserRequest) (*gen.CreateUserResponse, error) {
@@ -21,7 +21,7 @@ func (c *Controller) CreateUser(ctx context.Context, req *gen.CreateUserRequest)
 		return nil, invalidArgumentError(violations)
 	}
 
-	args := &app.CreateUserParams{
+	args := &wallet.CreateUserParams{
 		Username: req.GetUsername(),
 		FullName: req.GetFullName(),
 		Email:    req.GetEmail(),
@@ -62,7 +62,7 @@ func (c *Controller) LoginUser(ctx context.Context, req *gen.LoginUserRequest) (
 	}
 
 	meta := c.extractMetadata(ctx)
-	args := &app.LoginUserParams{
+	args := &wallet.LoginUserParams{
 		Username:  req.GetUsername(),
 		Password:  req.GetPassword(),
 		UserAgent: meta.UserAgent,
@@ -95,7 +95,7 @@ func (c *Controller) UpdateUser(ctx context.Context, req *gen.UpdateUserRequest)
 		return nil, invalidArgumentError(violations)
 	}
 
-	args := &app.UpdateUserParams{
+	args := &wallet.UpdateUserParams{
 		ReqUsername: authPayload.Username,
 		Username:    req.GetUsername(),
 		Password:    req.Password,
@@ -129,7 +129,7 @@ func (c *Controller) VerifyEmail(ctx context.Context, req *gen.VerifyEmailReques
 		return nil, invalidArgumentError(violations)
 	}
 
-	usr, err := c.u.VerifyEmail(ctx, &app.VerifyEmailParams{
+	usr, err := c.u.VerifyEmail(ctx, &wallet.VerifyEmailParams{
 		EmailID:    req.GetEmailId(),
 		SecretCode: req.GetSecretCode(),
 	})
@@ -189,7 +189,7 @@ func validateVerifyEmailRequest(req *gen.VerifyEmailRequest) (violations []*errd
 	return violations
 }
 
-func convertUser(user *app.User) *gen.User {
+func convertUser(user *wallet.User) *gen.User {
 	return &gen.User{
 		Username:  user.Username,
 		FullName:  user.FullName,

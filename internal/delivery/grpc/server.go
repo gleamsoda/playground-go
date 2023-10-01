@@ -9,12 +9,12 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
-	"playground/app/mq"
-	"playground/app/repository"
-	"playground/app/usecase"
-	"playground/config"
+	"playground/internal/config"
 	"playground/internal/delivery/grpc/gen"
 	"playground/internal/pkg/token"
+	"playground/internal/wallet/mq"
+	"playground/internal/wallet/repository"
+	"playground/internal/wallet/usecase"
 )
 
 // NewServer creates a new gRPC server.

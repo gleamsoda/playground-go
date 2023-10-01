@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"playground/app"
+	"playground/internal/wallet"
 )
 
 type transferRequest struct {
@@ -23,7 +23,7 @@ func (h handler) createTransfer(c *gin.Context) {
 	}
 
 	// TODO: Get RequestUserID from AuthPayload
-	if e, err := h.u.CreateTransfer(c, &app.CreateTransferParams{
+	if e, err := h.u.CreateTransfer(c, &wallet.CreateTransferParams{
 		RequestUsername: "example",
 		FromAccountID:   req.FromAccountID,
 		ToAccountID:     req.ToAccountID,

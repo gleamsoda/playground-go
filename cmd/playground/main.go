@@ -18,8 +18,8 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 
-	"playground/config"
-	casynq "playground/internal/delivery/asynq"
+	"playground/internal/config"
+	"playground/internal/delivery/asynq"
 	"playground/internal/delivery/gin"
 	"playground/internal/delivery/grpc"
 )
@@ -77,7 +77,7 @@ func runAsynq(cmd *cobra.Command, args []string) error {
 	}
 	runDBMigration(cfg)
 
-	srv, err := casynq.NewConsumer(cfg)
+	srv, err := asynq.NewConsumer(cfg)
 	if err != nil {
 		return err
 	}

@@ -9,18 +9,18 @@ import (
 	"google.golang.org/grpc/peer"
 	"google.golang.org/grpc/status"
 
-	"playground/app"
 	"playground/internal/delivery/grpc/gen"
 	"playground/internal/pkg/token"
+	"playground/internal/wallet"
 )
 
 type Controller struct {
 	gen.UnimplementedPlaygroundServer
-	u  app.Usecase
+	u  wallet.Usecase
 	tm token.Manager
 }
 
-func NewController(u app.Usecase, tm token.Manager) *Controller {
+func NewController(u wallet.Usecase, tm token.Manager) *Controller {
 	return &Controller{
 		u:  u,
 		tm: tm,

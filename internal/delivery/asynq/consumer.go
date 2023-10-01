@@ -6,22 +6,22 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"playground/app"
-	"playground/app/mq"
-	"playground/app/repository"
-	"playground/app/usecase"
-	"playground/config"
-	"playground/internal/pkg/mail"
-	"playground/internal/pkg/token"
-
 	"github.com/go-redis/redis/v8"
 	"github.com/hibiken/asynq"
 	"github.com/rs/zerolog/log"
+
+	"playground/internal/config"
+	"playground/internal/pkg/mail"
+	"playground/internal/pkg/token"
+	"playground/internal/wallet"
+	"playground/internal/wallet/mq"
+	"playground/internal/wallet/repository"
+	"playground/internal/wallet/usecase"
 )
 
 type Consumer struct {
 	s *asynq.Server
-	u app.Usecase
+	u wallet.Usecase
 }
 
 func NewConsumer(cfg config.Config) (*Consumer, error) {
