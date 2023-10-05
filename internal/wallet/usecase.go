@@ -2,8 +2,6 @@ package wallet
 
 import (
 	"context"
-
-	"playground/internal/wallet/mq"
 )
 
 type Usecase interface {
@@ -15,6 +13,6 @@ type Usecase interface {
 	LoginUser(ctx context.Context, args *LoginUserParams) (*LoginUserOutputParams, error)
 	UpdateUser(ctx context.Context, args *UpdateUserParams) (*User, error)
 	RenewAccessToken(ctx context.Context, refreshToken string) (*RenewAccessTokenOutputParams, error)
-	SendVerifyEmail(ctx context.Context, args *mq.SendVerifyEmailPayload) (*VerifyEmail, error)
+	SendVerifyEmail(ctx context.Context, args *SendVerifyEmailPayload) (*VerifyEmail, error)
 	VerifyEmail(ctx context.Context, args *VerifyEmailParams) (*User, error)
 }

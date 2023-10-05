@@ -1,8 +1,10 @@
 package config
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/spf13/viper"
@@ -26,11 +28,21 @@ type Config struct {
 	EmailSenderPassword  string        `mapstructure:"EMAIL_SENDER_PASSWORD"`
 }
 
-// NewConfig reads configuration from file or environment variables.
-func NewConfig() (cfg Config, err error) {
+// Get reads configuration from file or environment variables.
+var Get = sync.OnceValue(func() (cfg Config) {
 	bindEnv(cfg)
-	err = viper.Unmarshal(&cfg)
+	if err := viper.Unmarshal(&cfg); err != nil {
+		panic(err)
+	}
 	return
+})
+
+func (c Config) IsDevelopment() bool {
+	return c.Environment == "development"
+}
+
+func (c Config) DBName() string {
+	return fmt.Sprintf("%s:%s@tcp(%s:%d)/playground?parseTime=true", c.DBUser, c.DBPassword, c.DBHost, c.DBPort)
 }
 
 func bindEnv(iface interface{}, ps ...string) {

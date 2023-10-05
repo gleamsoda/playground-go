@@ -8,36 +8,34 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type Logger struct{}
+type logger struct{}
 
-func NewLogger() *Logger {
-	return &Logger{}
-}
+var lgr = &logger{}
 
-func (logger *Logger) Print(level zerolog.Level, args ...interface{}) {
+func (l *logger) Print(level zerolog.Level, args ...interface{}) {
 	log.WithLevel(level).Msg(fmt.Sprint(args...))
 }
 
-func (logger *Logger) Printf(ctx context.Context, format string, v ...interface{}) {
+func (l *logger) Printf(ctx context.Context, format string, v ...interface{}) {
 	log.WithLevel(zerolog.DebugLevel).Msgf(format, v...)
 }
 
-func (logger *Logger) Debug(args ...interface{}) {
-	logger.Print(zerolog.DebugLevel, args...)
+func (l *logger) Debug(args ...interface{}) {
+	l.Print(zerolog.DebugLevel, args...)
 }
 
-func (logger *Logger) Info(args ...interface{}) {
-	logger.Print(zerolog.InfoLevel, args...)
+func (l *logger) Info(args ...interface{}) {
+	l.Print(zerolog.InfoLevel, args...)
 }
 
-func (logger *Logger) Warn(args ...interface{}) {
-	logger.Print(zerolog.WarnLevel, args...)
+func (l *logger) Warn(args ...interface{}) {
+	l.Print(zerolog.WarnLevel, args...)
 }
 
-func (logger *Logger) Error(args ...interface{}) {
-	logger.Print(zerolog.ErrorLevel, args...)
+func (l *logger) Error(args ...interface{}) {
+	l.Print(zerolog.ErrorLevel, args...)
 }
 
-func (logger *Logger) Fatal(args ...interface{}) {
-	logger.Print(zerolog.FatalLevel, args...)
+func (l *logger) Fatal(args ...interface{}) {
+	l.Print(zerolog.FatalLevel, args...)
 }

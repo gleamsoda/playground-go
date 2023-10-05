@@ -1,4 +1,4 @@
-package mq
+package wallet
 
 import "context"
 
@@ -8,6 +8,6 @@ type SendVerifyEmailPayload struct {
 	Username string `json:"username" binding:"required,alphanum"`
 }
 
-type Producer interface {
+type Dispatcher interface {
 	SendVerifyEmail(ctx context.Context, payload *SendVerifyEmailPayload) error
 }

@@ -13,17 +13,16 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"playground/internal/config"
+	"playground/internal/delivery/gin/handler"
+	"playground/internal/delivery/gin/middleware"
 	"playground/internal/pkg/token"
 	"playground/internal/wallet"
-	"playground/internal/wallet/mq"
+	"playground/internal/wallet/dispatcher"
 	"playground/internal/wallet/usecase"
 )
 
 func newTestServer(t *testing.T, r wallet.Repository) *Server {
-	cfg, err := config.NewConfig()
-	if err != nil {
-		log.Fatal(err)
-	}
+	cfg := config.Get()
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		_ = v.RegisterValidation("currency", validCurrency)
 	}
@@ -31,13 +30,13 @@ func newTestServer(t *testing.T, r wallet.Repository) *Server {
 	if err != nil {
 		log.Fatal(err)
 	}
-	p := mq.NewAsynqProducer(asynq.RedisClientOpt{
+	p := dispatcher.NewDispatcher(asynq.RedisClientOpt{
 		Addr: cfg.RedisAddress,
 	})
 	// usecases
 	u := usecase.NewUsecase(r, p, nil, tm, cfg.AccessTokenDuration, cfg.RefreshTokenDuration)
 	// handlers
-	svr := NewHandler(u, authMiddleware(tm))
+	svr := NewRouter(handler.NewHandler(u), middleware.Auth(tm))
 	require.NoError(t, err)
 
 	return &Server{

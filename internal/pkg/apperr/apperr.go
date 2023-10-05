@@ -7,6 +7,6 @@ const (
 	InvalidArgument  failure.StringCode = "InvalidArgument"
 	NotFound         failure.StringCode = "NotFound"
 	AlreadyExists    failure.StringCode = "AlreadyExists"
-	Unauthorized     failure.StringCode = "Unauthorized"
+	Unauthenticated  failure.StringCode = "Unauthenticated"
 	PermissionDenied failure.StringCode = "PermissionDenied"
 )

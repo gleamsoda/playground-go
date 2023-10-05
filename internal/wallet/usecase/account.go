@@ -21,7 +21,7 @@ func (u *Usecase) GetAccount(ctx context.Context, args *wallet.GetAccountsParams
 	}
 	if a.Owner != args.Owner {
 		err := errors.New("account doesn't belong to the authenticated user")
-		return nil, failure.Translate(err, apperr.Unauthorized)
+		return nil, failure.Translate(err, apperr.Unauthenticated)
 	}
 	return a, nil
 }

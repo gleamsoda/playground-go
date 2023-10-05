@@ -15,17 +15,12 @@ import (
 var repository wallet.Repository
 
 func TestMain(m *testing.M) {
-	cfg, err := config.NewConfig()
+	cfg := config.Get()
+	conn, err := sql.Open("mysql", cfg.DBName())
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
-	}
-	conn, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%d)/playground?parseTime=true", cfg.DBUser, cfg.DBPassword, cfg.DBHost, cfg.DBPort))
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
-	if err := conn.Ping(); err != nil {
+	} else if err := conn.Ping(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}

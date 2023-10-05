@@ -5,10 +5,9 @@ import (
 	"fmt"
 
 	"playground/internal/wallet"
-	"playground/internal/wallet/mq"
 )
 
-func (u *Usecase) SendVerifyEmail(ctx context.Context, args *mq.SendVerifyEmailPayload) (*wallet.VerifyEmail, error) {
+func (u *Usecase) SendVerifyEmail(ctx context.Context, args *wallet.SendVerifyEmailPayload) (*wallet.VerifyEmail, error) {
 	usr, err := u.r.GetUser(ctx, args.Username)
 	if err != nil {
 		return nil, err

@@ -3,7 +3,6 @@ package asynq
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"fmt"
 
 	"github.com/go-redis/redis/v8"
@@ -14,38 +13,42 @@ import (
 	"playground/internal/pkg/mail"
 	"playground/internal/pkg/token"
 	"playground/internal/wallet"
-	"playground/internal/wallet/mq"
 	"playground/internal/wallet/repository"
 	"playground/internal/wallet/usecase"
 )
 
 type Consumer struct {
-	s *asynq.Server
-	u wallet.Usecase
+	server  *asynq.Server
+	handler *handler
+}
+
+func Run() error {
+	if c, err := NewConsumer(config.Get()); err != nil {
+		return err
+	} else {
+		return c.Run()
+	}
 }
 
 func NewConsumer(cfg config.Config) (*Consumer, error) {
-	logger := NewLogger()
-	redis.SetLogger(logger)
-
-	server := asynq.NewServer(
+	redis.SetLogger(lgr)
+	s := asynq.NewServer(
 		asynq.RedisClientOpt{
 			Addr: cfg.RedisAddress,
 		},
 		asynq.Config{
-			ErrorHandler: asynq.ErrorHandlerFunc(func(ctx context.Context, task *asynq.Task, err error) {
-				log.Error().Err(err).Str("type", task.Type()).
-					Bytes("payload", task.Payload()).Msg("process task failed")
+			ErrorHandler: asynq.ErrorHandlerFunc(func(ctx context.Context, t *asynq.Task, err error) {
+				log.Error().Err(err).Str("type", t.Type()).
+					Bytes("payload", t.Payload()).Msg("process task failed")
 			}),
-			Logger: logger,
+			Logger: lgr,
 		},
 	)
 
-	conn, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%d)/playground?parseTime=true", cfg.DBUser, cfg.DBPassword, cfg.DBHost, cfg.DBPort))
+	conn, err := sql.Open("mysql", cfg.DBName())
 	if err != nil {
 		return nil, err
-	}
-	if err := conn.Ping(); err != nil {
+	} else if err := conn.Ping(); err != nil {
 		return nil, err
 	}
 	tm, err := token.NewPasetoManager(cfg.TokenSymmetricKey)
@@ -57,35 +60,13 @@ func NewConsumer(cfg config.Config) (*Consumer, error) {
 	u := usecase.NewUsecase(r, nil, mailer, tm, cfg.AccessTokenDuration, cfg.RefreshTokenDuration)
 
 	return &Consumer{
-		s: server,
-		u: u,
+		server:  s,
+		handler: NewHandler(u),
 	}, nil
 }
 
-func (c *Consumer) Start() error {
+func (c *Consumer) Run() error {
 	mux := asynq.NewServeMux()
-	mux.HandleFunc(mq.SendVerifyEmailQueue, c.SendVerifyEmail)
-	return c.s.Run(mux)
-}
-
-func (c *Consumer) Stop() {
-	c.s.Shutdown()
-}
-
-func (c *Consumer) SendVerifyEmail(ctx context.Context, task *asynq.Task) error {
-	var payload mq.SendVerifyEmailPayload
-	if err := json.Unmarshal(task.Payload(), &payload); err != nil {
-		return fmt.Errorf("failed to unmarshal payload: %w", asynq.SkipRetry)
-	}
-
-	usr, err := c.u.SendVerifyEmail(ctx, &mq.SendVerifyEmailPayload{
-		Username: payload.Username,
-	})
-	if err != nil {
-		return err
-	}
-
-	log.Info().Str("type", task.Type()).Bytes("payload", task.Payload()).
-		Str("email", usr.Email).Msg("processed task")
-	return nil
+	mux.HandleFunc(wallet.SendVerifyEmailQueue, c.handler.SendVerifyEmail)
+	return c.server.Run(mux)
 }

@@ -12,7 +12,6 @@ import (
 	"playground/internal/pkg/apperr"
 	"playground/internal/pkg/password"
 	"playground/internal/wallet"
-	"playground/internal/wallet/mq"
 )
 
 func (u *Usecase) CreateUser(ctx context.Context, args *wallet.CreateUserParams) (*wallet.User, error) {
@@ -31,7 +30,7 @@ func (u *Usecase) CreateUser(ctx context.Context, args *wallet.CreateUserParams)
 		return nil, err
 	}
 
-	if err := u.q.SendVerifyEmail(ctx, &mq.SendVerifyEmailPayload{
+	if err := u.d.SendVerifyEmail(ctx, &wallet.SendVerifyEmailPayload{
 		Username: usr.Username,
 	}); err != nil {
 		return nil, err
@@ -46,7 +45,7 @@ func (u *Usecase) LoginUser(ctx context.Context, args *wallet.LoginUserParams) (
 		return nil, err
 	}
 	if err := password.Verify(args.Password, usr.HashedPassword); err != nil {
-		return nil, failure.Translate(err, apperr.Unauthorized)
+		return nil, failure.Translate(err, apperr.Unauthenticated)
 	}
 
 	aToken, aPayload, err := u.tm.Create(
@@ -127,7 +126,7 @@ func (u *Usecase) RenewAccessToken(ctx context.Context, refreshToken string) (*w
 
 func (u *Usecase) UpdateUser(ctx context.Context, args *wallet.UpdateUserParams) (*wallet.User, error) {
 	if args.Username != args.ReqUsername {
-		return nil, failure.Translate(fmt.Errorf("cannot update other user's info"), apperr.Unauthorized)
+		return nil, failure.Translate(fmt.Errorf("cannot update other user's info"), apperr.Unauthenticated)
 	}
 
 	usr, err := u.r.GetUser(ctx, args.Username)

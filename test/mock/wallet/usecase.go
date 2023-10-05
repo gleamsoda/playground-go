@@ -7,7 +7,6 @@ package mock_wallet
 import (
 	context "context"
 	wallet "playground/internal/wallet"
-	mq "playground/internal/wallet/mq"
 	reflect "reflect"
 
 	gomock "go.uber.org/mock/gomock"
@@ -142,7 +141,7 @@ func (mr *MockUsecaseMockRecorder) RenewAccessToken(ctx, refreshToken interface{
 }
 
 // SendVerifyEmail mocks base method.
-func (m *MockUsecase) SendVerifyEmail(ctx context.Context, args *mq.SendVerifyEmailPayload) (*wallet.VerifyEmail, error) {
+func (m *MockUsecase) SendVerifyEmail(ctx context.Context, args *wallet.SendVerifyEmailPayload) (*wallet.VerifyEmail, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendVerifyEmail", ctx, args)
 	ret0, _ := ret[0].(*wallet.VerifyEmail)

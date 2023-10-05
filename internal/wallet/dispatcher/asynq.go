@@ -1,4 +1,4 @@
-package mq
+package dispatcher
 
 import (
 	"context"
@@ -8,19 +8,21 @@ import (
 
 	"github.com/hibiken/asynq"
 	"github.com/rs/zerolog/log"
+
+	"playground/internal/wallet"
 )
 
-type AsynqProducer struct {
+type Dispatcher struct {
 	c *asynq.Client
 }
 
-func NewAsynqProducer(redisOpt asynq.RedisClientOpt) Producer {
-	return &AsynqProducer{
+func NewDispatcher(redisOpt asynq.RedisClientOpt) wallet.Dispatcher {
+	return &Dispatcher{
 		c: asynq.NewClient(redisOpt),
 	}
 }
 
-func (p *AsynqProducer) SendVerifyEmail(ctx context.Context, payload *SendVerifyEmailPayload) error {
+func (p *Dispatcher) SendVerifyEmail(ctx context.Context, payload *wallet.SendVerifyEmailPayload) error {
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return fmt.Errorf("failed to marshal task payload: %w", err)
@@ -30,7 +32,7 @@ func (p *AsynqProducer) SendVerifyEmail(ctx context.Context, payload *SendVerify
 		asynq.MaxRetry(10),
 		asynq.ProcessIn(10 * time.Second),
 	}
-	task := asynq.NewTask(SendVerifyEmailQueue, jsonPayload, opts...)
+	task := asynq.NewTask(wallet.SendVerifyEmailQueue, jsonPayload, opts...)
 	info, err := p.c.EnqueueContext(ctx, task)
 	if err != nil {
 		return fmt.Errorf("failed to enqueue task: %w", err)
