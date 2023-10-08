@@ -1,26 +1,27 @@
+APP_NAME=playground
+GRPC_BASE=internal/delivery/grpc
 COVERAGE_OUT=coverage.out
 COVERAGE_HTML=coverage.html
-DB_SOURCE=root:example@tcp(127.0.0.1:3306)
-APP_NAME=playground
-GRPC_BASE=driver/grpc
 
-.PHONY: build test cover mock sqlc proto migrate/up migrate/down
+.PHONY: build test cover mock sqlc proto evans migrate/up migrate/down migrate/create
 
 build:
 	go build -o bin/playground ./cmd/playground/main.go
 
 test:
-	go test -v -cover ./... -coverprofile=$(COVERAGE_OUT)
+	go test -v -short -cover ./... -coverprofile=$(COVERAGE_OUT)
 
 cover:
 	go tool cover -html=$(COVERAGE_OUT) -o $(COVERAGE_HTML)
 
 mock:
-	mockgen playground/app Repository > ./test/mock/app/repository.go
-	mockgen playground/app Usecase > ./test/mock/app/usecase.go
-	mockgen playground/pkg/token Manager > ./test/mock/token/manager.go
+	mockgen -source ./internal/wallet/repository.go -destination ./test/mock/wallet/repository.go
+	mockgen -source ./internal/wallet/usecase.go -destination ./test/mock/wallet/usecase.go
+	mockgen -source ./internal/wallet/dispatcher.go -destination ./test/mock/wallet/dispatcher.go
+	mockgen -source ./internal/pkg/token/manager.go -destination ./test/mock/pkg/token/manager.go
 
 sqlc:
+	rm -f ./internal/wallet/repository/sqlc/gen/*.go
 	sqlc generate -f ./sqlc.yaml
 
 proto:
@@ -28,13 +29,19 @@ proto:
 	rm -f docs/*.swagger.json
 	protoc --proto_path=$(GRPC_BASE)/proto \
 		--go_out=$(GRPC_BASE)/gen --go_opt=paths=source_relative \
-    	--go-grpc_out=$(GRPC_BASE)/gen --go-grpc_opt=paths=source_relative \
+		--go-grpc_out=$(GRPC_BASE)/gen --go-grpc_opt=paths=source_relative \
 		--grpc-gateway_out=$(GRPC_BASE)/gen --grpc-gateway_opt paths=source_relative \
 		--openapiv2_out=./docs --openapiv2_opt=allow_merge=true,merge_file_name=$(APP_NAME) \
-    	$(GRPC_BASE)/proto/*.proto
+		$(GRPC_BASE)/proto/*.proto
+
+evans:
+	evans --host localhost --port 9090 -r repl
 
 migrate/up:
-	migrate -path tools/migrations -database 'mysql://$(DB_SOURCE)/$(APP_NAME)' -verbose up
+	migrate -path db/migrations -database 'mysql://${DB_USER}:${DB_PASSWORD}@tcp(${DB_HOST}:${DB_PORT})/$(APP_NAME)' -verbose up
 
 migrate/down:
-	migrate -path tools/migrations -database 'mysql://$(DB_SOURCE)/$(APP_NAME)' -verbose down
+	migrate -path db/migrations -database 'mysql://${DB_USER}:${DB_PASSWORD}@tcp(${DB_HOST}:${DB_PORT})/$(APP_NAME)' -verbose down
+
+migrate/create:
+	migrate create -ext sql -dir db/migrations -seq $(name)

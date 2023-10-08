@@ -12,22 +12,29 @@ services:
     command:
       - --character-set-server=utf8mb4
       - --sql-mode=ONLY_FULL_GROUP_BY,NO_ENGINE_SUBSTITUTION
-  api:
-    build:
-      context: .  # root directory
-      dockerfile: Dockerfile
+  redis:
+    image: redis:7-alpine
+    container_name: playground-redis
     ports:
-      - "8080:8080"
-    environment:
-      - DB_SOURCE=root:example@tcp(mysql:3306)/playground?parseTime=true
-    depends_on:
-      - mysql
-    entrypoint:
-      [
-        "/app/wait-for",
-        "mysql:3306",
-        "--",
-        "/app/start.sh",
-        "/app/playground"
-      ]
-    command: [ "gin" ]
+      - 6379:6379
+  # api:
+  #   build:
+  #     context: .  # root directory
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "8080:8080"
+  #   env_file:
+  #     - docker.env
+  #   depends_on:
+  #     - mysql
+  #   entrypoint:
+  #     [
+  #       "/app/wait-for.sh",
+  #       "mysql:3306",
+  #       "--",
+  #       "/app/playground"
+  #     ]
+  #   command: [ "gin" ]
+networks:
+  default:
+    name: playground
