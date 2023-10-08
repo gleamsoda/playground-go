@@ -9,7 +9,7 @@ build:
 	go build -o bin/playground ./cmd/playground/main.go
 
 test:
-	go test -v -cover ./... -coverprofile=$(COVERAGE_OUT)
+	go test -v -short -cover ./... -coverprofile=$(COVERAGE_OUT)
 
 cover:
 	go tool cover -html=$(COVERAGE_OUT) -o $(COVERAGE_HTML)
