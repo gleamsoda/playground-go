@@ -214,6 +214,20 @@ func (mr *MockRepositoryMockRecorder) ListTransfers(ctx, args interface{}) *gomo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListTransfers", reflect.TypeOf((*MockRepository)(nil).ListTransfers), ctx, args)
 }
 
+// Transaction mocks base method.
+func (m *MockRepository) Transaction(ctx context.Context, fn wallet.TransactionFunc) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Transaction", ctx, fn)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Transaction indicates an expected call of Transaction.
+func (mr *MockRepositoryMockRecorder) Transaction(ctx, fn interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Transaction", reflect.TypeOf((*MockRepository)(nil).Transaction), ctx, fn)
+}
+
 // UpdateAccount mocks base method.
 func (m *MockRepository) UpdateAccount(ctx context.Context, args *wallet.Account) (*wallet.Account, error) {
 	m.ctrl.T.Helper()

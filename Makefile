@@ -21,6 +21,7 @@ mock:
 	mockgen -source ./internal/pkg/token/manager.go -destination ./test/mock/pkg/token/manager.go
 
 sqlc:
+	rm -f ./internal/wallet/repository/sqlc/gen/*.go
 	sqlc generate -f ./sqlc.yaml
 
 proto:

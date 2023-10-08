@@ -56,8 +56,8 @@ func (h *Handler) GetAccount(ctx *gin.Context) {
 }
 
 type listAccountsRequest struct {
-	Limit  int32 `form:"limit" binding:"required,min=1,max=100"`
-	Offset int32 `form:"offset"`
+	PageID   int32 `form:"page_id" binding:"required,min=1"`
+	PageSize int32 `form:"page_size" binding:"required,min=5,max=10"`
 }
 
 func (h *Handler) ListAccounts(ctx *gin.Context) {
@@ -70,8 +70,8 @@ func (h *Handler) ListAccounts(ctx *gin.Context) {
 	authPayload := ctx.MustGet(helper.AuthorizationPayloadKey).(*token.Payload)
 	if as, err := h.w.ListAccounts(ctx, &wallet.ListAccountsParams{
 		Owner:  authPayload.Username,
-		Limit:  req.Limit,
-		Offset: req.Offset,
+		Limit:  req.PageSize,
+		Offset: (req.PageID - 1) * req.PageSize,
 	}); err != nil {
 		ctx.Error(err)
 	} else {

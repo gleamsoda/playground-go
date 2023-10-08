@@ -7,6 +7,7 @@ import (
 
 	"github.com/hibiken/asynq"
 	"github.com/rs/zerolog/log"
+	"github.com/samber/do"
 
 	"playground/internal/wallet"
 )
@@ -15,8 +16,9 @@ type handler struct {
 	w wallet.Usecase
 }
 
-func NewHandler(w wallet.Usecase) *handler {
-	return &handler{w: w}
+func NewHandler(i *do.Injector) (*handler, error) {
+	w := do.MustInvoke[wallet.Usecase](i)
+	return &handler{w: w}, nil
 }
 
 func (h *handler) SendVerifyEmail(ctx context.Context, t *asynq.Task) error {

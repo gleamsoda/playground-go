@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/samber/do"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -36,11 +37,13 @@ type (
 	}
 )
 
-func NewHandler(w wallet.Usecase, tm token.Manager) *Handler {
+func NewHandler(i *do.Injector) (*Handler, error) {
+	w := do.MustInvoke[wallet.Usecase](i)
+	tm := do.MustInvoke[token.Manager](i)
 	return &Handler{
 		w:  w,
 		tm: tm,
-	}
+	}, nil
 }
 
 func (s *Handler) extractMetadata(ctx context.Context) *Metadata {

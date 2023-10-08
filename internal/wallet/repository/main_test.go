@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/samber/do"
 
 	"playground/internal/config"
 	"playground/internal/wallet"
@@ -15,8 +16,7 @@ import (
 var repository wallet.Repository
 
 func TestMain(m *testing.M) {
-	cfg := config.Get()
-	conn, err := sql.Open("mysql", cfg.DBName())
+	conn, err := sql.Open("mysql", config.Get().DBName())
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -24,6 +24,11 @@ func TestMain(m *testing.M) {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	repository = NewRepository(conn)
+
+	injector := do.New()
+	do.Provide(injector, NewRepository)
+	do.ProvideValue(injector, conn)
+	repository = do.MustInvoke[wallet.Repository](injector)
+
 	os.Exit(m.Run())
 }

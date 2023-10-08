@@ -8,6 +8,7 @@ import (
 
 	"github.com/hibiken/asynq"
 	"github.com/rs/zerolog/log"
+	"github.com/samber/do"
 
 	"playground/internal/wallet"
 )
@@ -16,10 +17,11 @@ type Dispatcher struct {
 	c *asynq.Client
 }
 
-func NewDispatcher(redisOpt asynq.RedisClientOpt) wallet.Dispatcher {
+func NewDispatcher(i *do.Injector) (wallet.Dispatcher, error) {
+	redisOpt := do.MustInvoke[asynq.RedisClientOpt](i)
 	return &Dispatcher{
 		c: asynq.NewClient(redisOpt),
-	}
+	}, nil
 }
 
 func (p *Dispatcher) SendVerifyEmail(ctx context.Context, payload *wallet.SendVerifyEmailPayload) error {

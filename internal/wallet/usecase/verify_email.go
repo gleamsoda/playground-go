@@ -13,26 +13,30 @@ func (u *Usecase) SendVerifyEmail(ctx context.Context, args *wallet.SendVerifyEm
 		return nil, err
 	}
 
-	ve, err := u.r.CreateVerifyEmail(ctx, wallet.NewVerifyEmail(
-		usr.Username,
-		usr.Email,
-		wallet.RandomString(32),
-	))
-	if err != nil {
-		return nil, err
-	}
+	var ve *wallet.VerifyEmail
+	err = u.r.Transaction(ctx, func(ctx context.Context, r wallet.Repository) error {
+		var err error
+		if ve, err = r.CreateVerifyEmail(ctx, wallet.NewVerifyEmail(
+			usr.Username,
+			usr.Email,
+			wallet.RandomString(32),
+		)); err != nil {
+			return err
+		}
 
-	subject := "Welcome to Simple Bank"
-	// TODO: replace this URL with an environment variable that points to a front-end page
-	verifyUrl := fmt.Sprintf("http://localhost:8080/v1/verify_email?email_id=%d&secret_code=%s", ve.ID, ve.SecretCode)
-	content := fmt.Sprintf(VerifyEmailContentFormat, usr.FullName, verifyUrl)
-	to := []string{usr.Email}
+		subject := "Welcome to Simple Bank"
+		// TODO: replace this URL with an environment variable that points to a front-end page
+		verifyUrl := fmt.Sprintf("http://localhost:8080/v1/verify_email?email_id=%d&secret_code=%s", ve.ID, ve.SecretCode)
+		content := fmt.Sprintf(VerifyEmailContentFormat, usr.FullName, verifyUrl)
+		to := []string{usr.Email}
 
-	err = u.mailer.Send(subject, content, to, nil, nil, nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to send verify email: %w", err)
-	}
-	return ve, nil
+		err = u.mailer.Send(subject, content, to, nil, nil, nil)
+		if err != nil {
+			return fmt.Errorf("failed to send verify email: %w", err)
+		}
+		return nil
+	})
+	return ve, err
 }
 
 var VerifyEmailContentFormat = `Hello %s,<br/>

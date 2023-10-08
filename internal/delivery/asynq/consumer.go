@@ -8,6 +8,7 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/hibiken/asynq"
 	"github.com/rs/zerolog/log"
+	"github.com/samber/do"
 
 	"playground/internal/config"
 	"playground/internal/pkg/mail"
@@ -44,7 +45,6 @@ func NewConsumer(cfg config.Config) (*Consumer, error) {
 			Logger: lgr,
 		},
 	)
-
 	conn, err := sql.Open("mysql", cfg.DBName())
 	if err != nil {
 		return nil, err
@@ -55,13 +55,24 @@ func NewConsumer(cfg config.Config) (*Consumer, error) {
 	if err != nil {
 		return nil, fmt.Errorf("cannot create token maker: %w", err)
 	}
-	r := repository.NewRepository(conn)
 	mailer := mail.NewGmailSender(cfg.EmailSenderName, cfg.EmailSenderAddress, cfg.EmailSenderPassword)
-	u := usecase.NewUsecase(r, nil, mailer, tm, cfg.AccessTokenDuration, cfg.RefreshTokenDuration)
+
+	injector := do.New()
+	do.Provide(injector, NewHandler)
+	do.Provide(injector, usecase.NewUsecase)
+	do.Provide(injector, repository.NewRepository)
+	do.ProvideValue(injector, conn)
+	do.ProvideValue[wallet.Dispatcher](injector, nil)
+	do.ProvideValue(injector, asynq.RedisClientOpt{})
+	do.ProvideValue(injector, tm)
+	do.ProvideValue(injector, mailer)
+	do.ProvideNamedValue(injector, "AccessTokenDuration", cfg.AccessTokenDuration)
+	do.ProvideNamedValue(injector, "RefreshTokenDuration", cfg.RefreshTokenDuration)
+	h := do.MustInvoke[*handler](injector)
 
 	return &Consumer{
 		server:  s,
-		handler: NewHandler(u),
+		handler: h,
 	}, nil
 }
 

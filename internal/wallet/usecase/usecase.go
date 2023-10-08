@@ -3,6 +3,8 @@ package usecase
 import (
 	"time"
 
+	"github.com/samber/do"
+
 	"playground/internal/pkg/mail"
 	"playground/internal/pkg/token"
 	"playground/internal/wallet"
@@ -17,13 +19,20 @@ type Usecase struct {
 	refreshTokenDuration time.Duration
 }
 
-func NewUsecase(r wallet.Repository, q wallet.Dispatcher, mailer mail.Sender, tm token.Manager, accessTokenDuration, refreshTokenDuration time.Duration) wallet.Usecase {
+func NewUsecase(i *do.Injector) (wallet.Usecase, error) {
+	r := do.MustInvoke[wallet.Repository](i)
+	d := do.MustInvoke[wallet.Dispatcher](i)
+	tm := do.MustInvoke[token.Manager](i)
+	mailer := do.MustInvoke[mail.Sender](i)
+	accessTokenDuration := do.MustInvokeNamed[time.Duration](i, "AccessTokenDuration")
+	refreshTokenDuration := do.MustInvokeNamed[time.Duration](i, "RefreshTokenDuration")
+
 	return &Usecase{
 		r:                    r,
-		d:                    q,
+		d:                    d,
 		mailer:               mailer,
 		tm:                   tm,
 		accessTokenDuration:  accessTokenDuration,
 		refreshTokenDuration: refreshTokenDuration,
-	}
+	}, nil
 }

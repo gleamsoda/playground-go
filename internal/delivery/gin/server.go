@@ -15,10 +15,12 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/hibiken/asynq"
 	"github.com/rs/zerolog/log"
+	"github.com/samber/do"
 
 	"playground/internal/config"
 	"playground/internal/delivery/gin/handler"
 	"playground/internal/delivery/gin/middleware"
+	"playground/internal/pkg/mail"
 	"playground/internal/pkg/token"
 	"playground/internal/wallet"
 	"playground/internal/wallet/dispatcher"
@@ -28,7 +30,6 @@ import (
 
 type Server struct {
 	server *http.Server
-	tm     token.Manager
 }
 
 func Run(ctx context.Context) error {
@@ -81,21 +82,27 @@ func NewServer(cfg config.Config) (*Server, error) {
 	} else if err := conn.Ping(); err != nil {
 		return nil, err
 	}
-	r := repository.NewRepository(conn)
-	p := dispatcher.NewDispatcher(asynq.RedisClientOpt{
-		Addr: cfg.RedisAddress,
-	})
-	// usecases
-	u := usecase.NewUsecase(r, p, nil, tm, cfg.AccessTokenDuration, cfg.RefreshTokenDuration)
+
+	injector := do.New()
+	do.Provide(injector, handler.NewHandler)
+	do.Provide(injector, usecase.NewUsecase)
+	do.Provide(injector, repository.NewRepository)
+	do.ProvideValue(injector, conn)
+	do.Provide(injector, dispatcher.NewDispatcher)
+	do.ProvideValue(injector, asynq.RedisClientOpt{Addr: cfg.RedisAddress})
+	do.ProvideValue[mail.Sender](injector, nil)
+	do.ProvideValue(injector, tm)
+	do.ProvideNamedValue(injector, "AccessTokenDuration", cfg.AccessTokenDuration)
+	do.ProvideNamedValue(injector, "RefreshTokenDuration", cfg.RefreshTokenDuration)
+	h := do.MustInvoke[*handler.Handler](injector)
 
 	// handlers
-	router := NewRouter(handler.NewHandler(u), middleware.Auth(tm))
+	router := NewRouter(h, middleware.Auth(tm))
 	return &Server{
 		server: &http.Server{
 			Addr:    cfg.HTTPServerAddress,
 			Handler: router,
 		},
-		tm: tm,
 	}, nil
 }
 

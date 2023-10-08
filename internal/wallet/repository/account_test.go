@@ -2,12 +2,13 @@ package repository
 
 import (
 	"context"
-	"database/sql"
 	"testing"
 	"time"
 
+	"github.com/morikuni/failure"
 	"github.com/stretchr/testify/require"
 
+	"playground/internal/pkg/apperr"
 	"playground/internal/wallet"
 )
 
@@ -73,7 +74,8 @@ func TestDeleteAccount(t *testing.T) {
 
 	account2, err := repository.GetAccount(context.Background(), account1.ID)
 	require.Error(t, err)
-	require.EqualError(t, err, sql.ErrNoRows.Error())
+	code, _ := failure.CodeOf(err)
+	require.Equal(t, apperr.NotFound, code)
 	require.Empty(t, account2)
 }
 

@@ -12,6 +12,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/hibiken/asynq"
 	"github.com/rs/zerolog/log"
+	"github.com/samber/do"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
@@ -19,6 +20,7 @@ import (
 	"playground/internal/delivery/grpc/gen"
 	"playground/internal/delivery/grpc/handler"
 	"playground/internal/delivery/grpc/interceptor"
+	"playground/internal/pkg/mail"
 	"playground/internal/pkg/token"
 	"playground/internal/wallet/dispatcher"
 	"playground/internal/wallet/repository"
@@ -107,21 +109,26 @@ func NewServer(cfg config.Config) (*Server, error) {
 	if err != nil {
 		return nil, fmt.Errorf("cannot create token maker: %w", err)
 	}
-	// repositories
 	conn, err := sql.Open("mysql", cfg.DBName())
 	if err != nil {
 		return nil, err
 	} else if err := conn.Ping(); err != nil {
 		return nil, err
 	}
-	r := repository.NewRepository(conn)
-	p := dispatcher.NewDispatcher(asynq.RedisClientOpt{
-		Addr: cfg.RedisAddress,
-	})
-	// usecases
-	u := usecase.NewUsecase(r, p, nil, tm, cfg.AccessTokenDuration, cfg.RefreshTokenDuration)
 
-	ctrl := handler.NewHandler(u, tm)
+	injector := do.New()
+	do.Provide(injector, handler.NewHandler)
+	do.Provide(injector, usecase.NewUsecase)
+	do.Provide(injector, repository.NewRepository)
+	do.ProvideValue(injector, conn)
+	do.Provide(injector, dispatcher.NewDispatcher)
+	do.ProvideValue(injector, asynq.RedisClientOpt{Addr: cfg.RedisAddress})
+	do.ProvideValue[mail.Sender](injector, nil)
+	do.ProvideValue(injector, tm)
+	do.ProvideNamedValue(injector, "AccessTokenDuration", cfg.AccessTokenDuration)
+	do.ProvideNamedValue(injector, "RefreshTokenDuration", cfg.RefreshTokenDuration)
+	ctrl := do.MustInvoke[*handler.Handler](injector)
+
 	server := grpc.NewServer(grpc.ChainUnaryInterceptor(
 		interceptor.Logger,
 		interceptor.ErrorHandler,

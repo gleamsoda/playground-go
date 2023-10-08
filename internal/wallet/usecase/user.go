@@ -20,23 +20,25 @@ func (u *Usecase) CreateUser(ctx context.Context, args *wallet.CreateUserParams)
 		return nil, err
 	}
 
-	usr, err := u.r.CreateUser(ctx, wallet.NewUser(
-		args.Username,
-		hashedPassword,
-		args.FullName,
-		args.Email,
-	))
-	if err != nil {
-		return nil, err
-	}
-
-	if err := u.d.SendVerifyEmail(ctx, &wallet.SendVerifyEmailPayload{
-		Username: usr.Username,
-	}); err != nil {
-		return nil, err
-	}
-
-	return usr, nil
+	var usr *wallet.User
+	err = u.r.Transaction(ctx, func(ctx context.Context, r wallet.Repository) error {
+		var err error
+		if usr, err = r.CreateUser(ctx, wallet.NewUser(
+			args.Username,
+			hashedPassword,
+			args.FullName,
+			args.Email,
+		)); err != nil {
+			return err
+		}
+		if err := u.d.SendVerifyEmail(ctx, &wallet.SendVerifyEmailPayload{
+			Username: usr.Username,
+		}); err != nil {
+			return err
+		}
+		return nil
+	})
+	return usr, err
 }
 
 func (u *Usecase) LoginUser(ctx context.Context, args *wallet.LoginUserParams) (*wallet.LoginUserOutputParams, error) {

@@ -7,6 +7,7 @@ import (
 )
 
 type Repository interface {
+	Transaction(ctx context.Context, fn TransactionFunc) error
 	CreateAccount(ctx context.Context, args *Account) (*Account, error)
 	GetAccount(ctx context.Context, id int64) (*Account, error)
 	ListAccounts(ctx context.Context, args *ListAccountsParams) ([]Account, error)
@@ -24,3 +25,5 @@ type Repository interface {
 	UpdateVerifyEmail(ctx context.Context, args *VerifyEmail) (*VerifyEmail, error)
 	UpdateUserEmailVerified(ctx context.Context, args *VerifyEmailParams) (*User, *VerifyEmail, error)
 }
+
+type TransactionFunc func(context.Context, Repository) error
