@@ -1,4 +1,4 @@
-package gin
+package gqlgen
 
 import (
 	"context"
@@ -10,19 +10,14 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/gin-gonic/gin/binding"
-	"github.com/go-playground/validator/v10"
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/hibiken/asynq"
 	"github.com/rs/zerolog/log"
 	"github.com/samber/do"
 
 	"playground/internal/config"
-	"playground/internal/delivery/gin/handler"
-	"playground/internal/delivery/gin/middleware"
+	"playground/internal/delivery/gqlgen/resolver"
 	"playground/internal/pkg/mail"
 	"playground/internal/pkg/token"
-	"playground/internal/wallet"
 	"playground/internal/wallet/dispatcher"
 	"playground/internal/wallet/repository"
 	"playground/internal/wallet/usecase"
@@ -67,9 +62,6 @@ func Run(ctx context.Context) error {
 }
 
 func NewServer(cfg config.Config) (*Server, error) {
-	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		_ = v.RegisterValidation("currency", validCurrency)
-	}
 	tm, err := token.NewPasetoManager(cfg.TokenSymmetricKey)
 	if err != nil {
 		return nil, err
@@ -82,7 +74,7 @@ func NewServer(cfg config.Config) (*Server, error) {
 	}
 
 	injector := do.New()
-	do.Provide(injector, handler.NewHandler)
+	do.Provide(injector, resolver.NewResolver)
 	do.Provide(injector, usecase.NewUsecase)
 	do.Provide(injector, repository.NewRepository)
 	do.ProvideValue(injector, conn)
@@ -92,16 +84,13 @@ func NewServer(cfg config.Config) (*Server, error) {
 	do.ProvideValue(injector, tm)
 	do.ProvideNamedValue(injector, "AccessTokenDuration", cfg.AccessTokenDuration)
 	do.ProvideNamedValue(injector, "RefreshTokenDuration", cfg.RefreshTokenDuration)
-	h := do.MustInvoke[*handler.Handler](injector)
+	r := do.MustInvoke[*resolver.Resolver](injector)
 
-	// handlers
-	router := NewRouter(h, middleware.Auth(tm))
-	return &Server{
-		server: &http.Server{
-			Addr:    cfg.HTTPServerAddress,
-			Handler: router,
-		},
-	}, nil
+	router := NewRouter(r, tm)
+	return &Server{server: &http.Server{
+		Addr:    cfg.GraphQLServerAddress,
+		Handler: router,
+	}}, nil
 }
 
 func (s *Server) Run() error {
@@ -110,11 +99,4 @@ func (s *Server) Run() error {
 
 func (s *Server) Shutdown(ctx context.Context) error {
 	return s.server.Shutdown(ctx)
-}
-
-var validCurrency validator.Func = func(fieldLevel validator.FieldLevel) bool {
-	if c, ok := fieldLevel.Field().Interface().(string); ok {
-		return wallet.IsSupportedCurrency(c)
-	}
-	return false
 }
