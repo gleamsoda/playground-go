@@ -37,6 +37,7 @@ var GetInjector = sync.OnceValue(func() *do.Injector {
 	tm, _ := token.NewPasetoManager(cfg.TokenSymmetricKey)
 
 	injector := do.New()
+	do.Provide(injector, NewRouter)
 	do.Provide(injector, handler.NewHandler)
 	do.Provide(injector, usecase.NewUsecase)
 	do.ProvideValue[wallet.Repository](injector, nil)

@@ -14,12 +14,13 @@ import (
 	"playground/internal/config"
 	"playground/internal/delivery/asynq"
 	"playground/internal/delivery/gin"
+	"playground/internal/delivery/gqlgen"
 	"playground/internal/delivery/grpc"
 )
 
 func main() {
 	cmd := NewCmdRoot()
-	cmd.AddCommand(NewCmdAsynq(), NewCmdGin(), NewCmdGRPC(), NewCmdMigrateUp())
+	cmd.AddCommand(NewCmdAsynq(), NewCmdGin(), NewCmdGRPC(), NewCmdGqlgen(), NewCmdMigrateUp())
 	if err := cmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -58,6 +59,17 @@ func NewCmdGRPC() *cobra.Command {
 		Short: "Run gRPC server",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return grpc.Run(cmd.Context())
+		},
+	}
+	return cmd
+}
+
+func NewCmdGqlgen() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "gqlgen",
+		Short: "Run graphql server",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return gqlgen.Run(cmd.Context())
 		},
 	}
 	return cmd

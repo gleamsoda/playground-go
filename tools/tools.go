@@ -11,4 +11,7 @@ import (
 
 	// imports for golang/mock
 	_ "go.uber.org/mock/mockgen/model" // https://github.com/golang/mock#debugging-errors
+
+	// imports for gqlgen
+	_ "github.com/99designs/gqlgen"
 )
