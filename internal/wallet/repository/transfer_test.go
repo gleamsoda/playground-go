@@ -21,10 +21,13 @@ func TestCreateTransfer(t *testing.T) {
 
 	errs := make(chan error)
 	results := make(chan *wallet.Transfer)
+	locker := make(chan struct{}, 1)
+	locker <- struct{}{}
 
 	// run n concurrent transfer transaction
 	for i := 0; i < n; i++ {
 		go func() {
+			<-locker
 			t := wallet.NewTransfer(account1.ID, account2.ID, amount)
 			result, err := repository.CreateTransfer(context.Background(), t)
 
@@ -64,6 +67,7 @@ func TestCreateTransfer(t *testing.T) {
 		require.NoError(t, err)
 		require.NotEmpty(t, toAccount)
 		require.Equal(t, account2.ID, toAccount.ID)
+		locker <- struct{}{}
 
 		// check balances
 		fmt.Println(">> tx:", fromAccount.Balance, toAccount.Balance)
