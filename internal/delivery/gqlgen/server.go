@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/hibiken/asynq"
 	"github.com/rs/zerolog/log"
 	"github.com/samber/do"
@@ -74,6 +75,7 @@ func NewServer(cfg config.Config) (*Server, error) {
 	}
 
 	injector := do.New()
+	do.Provide(injector, NewRouter)
 	do.Provide(injector, resolver.NewResolver)
 	do.Provide(injector, usecase.NewUsecase)
 	do.Provide(injector, repository.NewRepository)
@@ -84,9 +86,7 @@ func NewServer(cfg config.Config) (*Server, error) {
 	do.ProvideValue(injector, tm)
 	do.ProvideNamedValue(injector, "AccessTokenDuration", cfg.AccessTokenDuration)
 	do.ProvideNamedValue(injector, "RefreshTokenDuration", cfg.RefreshTokenDuration)
-	r := do.MustInvoke[*resolver.Resolver](injector)
-
-	router := NewRouter(r, tm)
+	router := do.MustInvoke[*chi.Mux](injector)
 	return &Server{server: &http.Server{
 		Addr:    cfg.GraphQLServerAddress,
 		Handler: router,

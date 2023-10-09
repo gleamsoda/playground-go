@@ -17,9 +17,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 
-	"playground/internal/delivery/gin/handler"
 	"playground/internal/delivery/gin/helper"
-	"playground/internal/delivery/gin/middleware"
 	"playground/internal/pkg/apperr"
 	"playground/internal/pkg/token"
 	"playground/internal/wallet"
@@ -130,9 +128,8 @@ func TestGetAccountAPI(t *testing.T) {
 			tc.buildStubs(mr)
 
 			do.OverrideValue[wallet.Repository](i, mr)
-			h := do.MustInvoke[*handler.Handler](i)
 			tm := do.MustInvoke[token.Manager](i)
-			router := NewRouter(h, middleware.Auth(tm))
+			router := do.MustInvoke[*gin.Engine](i)
 			recorder := httptest.NewRecorder()
 
 			url := fmt.Sprintf("/accounts/%d", tc.accountID)
@@ -245,17 +242,15 @@ func TestCreateAccountAPI(t *testing.T) {
 			tc.buildStubs(mr)
 
 			do.OverrideValue[wallet.Repository](i, mr)
-			h := do.MustInvoke[*handler.Handler](i)
 			tm := do.MustInvoke[token.Manager](i)
-			router := NewRouter(h, middleware.Auth(tm))
+			router := do.MustInvoke[*gin.Engine](i)
 			recorder := httptest.NewRecorder()
 
 			// Marshal body data to JSON
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := "/accounts"
-			request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
+			request, err := http.NewRequest(http.MethodPost, "/accounts", bytes.NewReader(data))
 			require.NoError(t, err)
 
 			tc.setupAuth(t, request, tm)
@@ -396,13 +391,11 @@ func TestListAccountsAPI(t *testing.T) {
 			tc.buildStubs(mr)
 
 			do.OverrideValue[wallet.Repository](i, mr)
-			h := do.MustInvoke[*handler.Handler](i)
 			tm := do.MustInvoke[token.Manager](i)
-			router := NewRouter(h, middleware.Auth(tm))
+			router := do.MustInvoke[*gin.Engine](i)
 			recorder := httptest.NewRecorder()
 
-			url := "/accounts"
-			request, err := http.NewRequest(http.MethodGet, url, nil)
+			request, err := http.NewRequest(http.MethodGet, "/accounts", nil)
 			require.NoError(t, err)
 
 			// Add query parameters to request URL

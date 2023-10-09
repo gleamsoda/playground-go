@@ -18,11 +18,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 
-	"playground/internal/delivery/gin/handler"
-	"playground/internal/delivery/gin/middleware"
 	"playground/internal/pkg/apperr"
 	"playground/internal/pkg/password"
-	"playground/internal/pkg/token"
 	"playground/internal/wallet"
 	mock_wallet "playground/test/mock/wallet"
 )
@@ -163,9 +160,7 @@ func TestCreateUserAPI(t *testing.T) {
 
 			do.OverrideValue[wallet.Repository](i, mr)
 			do.OverrideValue[wallet.Dispatcher](i, md)
-			h := do.MustInvoke[*handler.Handler](i)
-			tm := do.MustInvoke[token.Manager](i)
-			router := NewRouter(h, middleware.Auth(tm))
+			router := do.MustInvoke[*gin.Engine](i)
 			recorder := httptest.NewRecorder()
 
 			// Marshal body data to JSON
@@ -285,9 +280,7 @@ func TestLoginUserAPI(t *testing.T) {
 			tc.buildStubs(mrepo)
 
 			do.OverrideValue[wallet.Repository](i, mrepo)
-			h := do.MustInvoke[*handler.Handler](i)
-			tm := do.MustInvoke[token.Manager](i)
-			router := NewRouter(h, middleware.Auth(tm))
+			router := do.MustInvoke[*gin.Engine](i)
 			recorder := httptest.NewRecorder()
 
 			// Marshal body data to JSON

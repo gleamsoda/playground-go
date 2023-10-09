@@ -3,7 +3,6 @@ package helper
 const (
 	AuthorizationHeaderKey  = "authorization"
 	AuthorizationTypeBearer = "bearer"
-	AuthorizationPayloadKey = "authorization_payload"
 )
 
 var AuthCtxkey = &ctxkey{"auth"}

@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 	_ "github.com/go-sql-driver/mysql"
@@ -19,7 +20,6 @@ import (
 
 	"playground/internal/config"
 	"playground/internal/delivery/gin/handler"
-	"playground/internal/delivery/gin/middleware"
 	"playground/internal/pkg/mail"
 	"playground/internal/pkg/token"
 	"playground/internal/wallet"
@@ -82,6 +82,7 @@ func NewServer(cfg config.Config) (*Server, error) {
 	}
 
 	injector := do.New()
+	do.Provide(injector, NewRouter)
 	do.Provide(injector, handler.NewHandler)
 	do.Provide(injector, usecase.NewUsecase)
 	do.Provide(injector, repository.NewRepository)
@@ -92,10 +93,9 @@ func NewServer(cfg config.Config) (*Server, error) {
 	do.ProvideValue(injector, tm)
 	do.ProvideNamedValue(injector, "AccessTokenDuration", cfg.AccessTokenDuration)
 	do.ProvideNamedValue(injector, "RefreshTokenDuration", cfg.RefreshTokenDuration)
-	h := do.MustInvoke[*handler.Handler](injector)
 
 	// handlers
-	router := NewRouter(h, middleware.Auth(tm))
+	router := do.MustInvoke[*gin.Engine](injector)
 	return &Server{
 		server: &http.Server{
 			Addr:    cfg.HTTPServerAddress,
