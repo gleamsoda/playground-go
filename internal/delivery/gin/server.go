@@ -18,14 +18,14 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/samber/do"
 
+	"playground/internal/app"
+	"playground/internal/app/dispatcher"
+	"playground/internal/app/repository"
+	"playground/internal/app/usecase"
 	"playground/internal/config"
 	"playground/internal/delivery/gin/handler"
 	"playground/internal/pkg/mail"
 	"playground/internal/pkg/token"
-	"playground/internal/wallet"
-	"playground/internal/wallet/dispatcher"
-	"playground/internal/wallet/repository"
-	"playground/internal/wallet/usecase"
 )
 
 type Server struct {
@@ -114,7 +114,7 @@ func (s *Server) Shutdown(ctx context.Context) error {
 
 var validCurrency validator.Func = func(fieldLevel validator.FieldLevel) bool {
 	if c, ok := fieldLevel.Field().Interface().(string); ok {
-		return wallet.IsSupportedCurrency(c)
+		return app.IsSupportedCurrency(c)
 	}
 	return false
 }

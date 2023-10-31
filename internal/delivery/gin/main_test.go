@@ -14,13 +14,13 @@ import (
 	"github.com/samber/do"
 	"github.com/stretchr/testify/require"
 
+	"playground/internal/app"
+	"playground/internal/app/usecase"
 	"playground/internal/config"
 	"playground/internal/delivery/gin/handler"
 	"playground/internal/delivery/gin/helper"
 	"playground/internal/pkg/mail"
 	"playground/internal/pkg/token"
-	"playground/internal/wallet"
-	"playground/internal/wallet/usecase"
 )
 
 func TestMain(m *testing.M) {
@@ -40,8 +40,8 @@ var GetInjector = sync.OnceValue(func() *do.Injector {
 	do.Provide(injector, NewRouter)
 	do.Provide(injector, handler.NewHandler)
 	do.Provide(injector, usecase.NewUsecase)
-	do.ProvideValue[wallet.Repository](injector, nil)
-	do.ProvideValue[wallet.Dispatcher](injector, nil)
+	do.ProvideValue[app.Repository](injector, nil)
+	do.ProvideValue[app.Dispatcher](injector, nil)
 	do.ProvideValue[mail.Sender](injector, nil)
 	do.ProvideValue[token.Manager](injector, tm)
 	do.ProvideNamedValue(injector, "AccessTokenDuration", cfg.AccessTokenDuration)

@@ -12,9 +12,9 @@ import (
 	"google.golang.org/grpc/peer"
 	"google.golang.org/grpc/status"
 
+	"playground/internal/app"
 	"playground/internal/delivery/grpc/gen"
 	"playground/internal/pkg/token"
-	"playground/internal/wallet"
 )
 
 const (
@@ -28,7 +28,7 @@ const (
 type (
 	Handler struct {
 		gen.UnimplementedPlaygroundServer
-		w  wallet.Usecase
+		w  app.Usecase
 		tm token.Manager
 	}
 	Metadata struct {
@@ -38,7 +38,7 @@ type (
 )
 
 func NewHandler(i *do.Injector) (*Handler, error) {
-	w := do.MustInvoke[wallet.Usecase](i)
+	w := do.MustInvoke[app.Usecase](i)
 	tm := do.MustInvoke[token.Manager](i)
 	return &Handler{
 		w:  w,

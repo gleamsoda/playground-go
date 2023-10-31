@@ -10,12 +10,12 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/samber/do"
 
+	"playground/internal/app"
+	"playground/internal/app/repository"
+	"playground/internal/app/usecase"
 	"playground/internal/config"
 	"playground/internal/pkg/mail"
 	"playground/internal/pkg/token"
-	"playground/internal/wallet"
-	"playground/internal/wallet/repository"
-	"playground/internal/wallet/usecase"
 )
 
 type Consumer struct {
@@ -62,7 +62,7 @@ func NewConsumer(cfg config.Config) (*Consumer, error) {
 	do.Provide(injector, usecase.NewUsecase)
 	do.Provide(injector, repository.NewRepository)
 	do.ProvideValue(injector, conn)
-	do.ProvideValue[wallet.Dispatcher](injector, nil)
+	do.ProvideValue[app.Dispatcher](injector, nil)
 	do.ProvideValue(injector, asynq.RedisClientOpt{})
 	do.ProvideValue(injector, tm)
 	do.ProvideValue(injector, mailer)
@@ -78,6 +78,6 @@ func NewConsumer(cfg config.Config) (*Consumer, error) {
 
 func (c *Consumer) Run() error {
 	mux := asynq.NewServeMux()
-	mux.HandleFunc(wallet.SendVerifyEmailQueue, c.handler.SendVerifyEmail)
+	mux.HandleFunc(app.SendVerifyEmailQueue, c.handler.SendVerifyEmail)
 	return c.server.Run(mux)
 }

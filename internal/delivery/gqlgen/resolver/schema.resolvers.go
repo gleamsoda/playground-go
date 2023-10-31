@@ -7,15 +7,16 @@ package resolver
 import (
 	"context"
 	"errors"
+
+	"playground/internal/app"
 	"playground/internal/delivery/gqlgen/gen"
 	"playground/internal/delivery/gqlgen/helper"
 	"playground/internal/pkg/token"
-	"playground/internal/wallet"
 )
 
 // CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, input gen.NewUser) (*gen.User, error) {
-	if usr, err := r.w.CreateUser(ctx, &wallet.CreateUserParams{
+	if usr, err := r.w.CreateUser(ctx, &app.CreateUserParams{
 		Username: input.Username,
 		Password: input.Password,
 		FullName: input.Fullname,
@@ -30,7 +31,7 @@ func (r *mutationResolver) CreateUser(ctx context.Context, input gen.NewUser) (*
 // LoginUser is the resolver for the loginUser field.
 func (r *mutationResolver) LoginUser(ctx context.Context, input gen.LoginUser) (*gen.LoginUserResponse, error) {
 	md := ctx.Value(helper.MetadataCtxkey).(*helper.Metadata)
-	args := &wallet.LoginUserParams{
+	args := &app.LoginUserParams{
 		Username:  input.Username,
 		Password:  input.Password,
 		UserAgent: md.UserAgent,
@@ -60,7 +61,7 @@ func (r *mutationResolver) CreateAccount(ctx context.Context, input gen.NewAccou
 		return nil, err
 	}
 
-	if a, err := r.w.CreateAccount(ctx, &wallet.CreateAccountParams{
+	if a, err := r.w.CreateAccount(ctx, &app.CreateAccountParams{
 		Owner:    authPayload.Username,
 		Balance:  0,
 		Currency: input.Currency,
@@ -80,7 +81,7 @@ func (r *queryResolver) Accounts(ctx context.Context, limit int, offset int) ([]
 		return nil, err
 	}
 
-	if as, err := r.w.ListAccounts(ctx, &wallet.ListAccountsParams{
+	if as, err := r.w.ListAccounts(ctx, &app.ListAccountsParams{
 		Owner:  authPayload.Username,
 		Limit:  int32(limit),
 		Offset: int32(offset),
@@ -111,7 +112,7 @@ type queryResolver struct{ *Resolver }
 //   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
 //     it when you're done.
 //   - You have helper methods in this file. Move them out to keep these resolver files clean.
-func convertUser(u *wallet.User) *gen.User {
+func convertUser(u *app.User) *gen.User {
 	return &gen.User{
 		Username:        u.Username,
 		Fullname:        u.FullName,
@@ -120,7 +121,7 @@ func convertUser(u *wallet.User) *gen.User {
 		IsEmailVerified: u.IsEmailVerified,
 	}
 }
-func convertAccount(a *wallet.Account) *gen.Account {
+func convertAccount(a *app.Account) *gen.Account {
 	return &gen.Account{
 		ID:        int(a.ID),
 		Owner:     a.Owner,

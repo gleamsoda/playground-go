@@ -18,10 +18,10 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 
+	"playground/internal/app"
 	"playground/internal/pkg/apperr"
 	"playground/internal/pkg/password"
-	"playground/internal/wallet"
-	mock_wallet "playground/test/mock/wallet"
+	mock_app "playground/test/mock/app"
 )
 
 func TestCreateUserAPI(t *testing.T) {
@@ -30,7 +30,7 @@ func TestCreateUserAPI(t *testing.T) {
 	testCases := []struct {
 		name          string
 		body          gin.H
-		buildStubs    func(mr *mock_wallet.MockRepository, md *mock_wallet.MockDispatcher)
+		buildStubs    func(mr *mock_app.MockRepository, md *mock_app.MockDispatcher)
 		checkResponse func(recoder *httptest.ResponseRecorder)
 	}{
 		{
@@ -41,13 +41,13 @@ func TestCreateUserAPI(t *testing.T) {
 				"full_name": user.FullName,
 				"email":     user.Email,
 			},
-			buildStubs: func(mr *mock_wallet.MockRepository, md *mock_wallet.MockDispatcher) {
-				arg := &wallet.User{
+			buildStubs: func(mr *mock_app.MockRepository, md *mock_app.MockDispatcher) {
+				arg := &app.User{
 					Username: user.Username,
 					FullName: user.FullName,
 					Email:    user.Email,
 				}
-				mr.EXPECT().Transaction(gomock.Any(), gomock.Any()).DoAndReturn(func(ctx context.Context, fn wallet.TransactionFunc) error {
+				mr.EXPECT().Transaction(gomock.Any(), gomock.Any()).DoAndReturn(func(ctx context.Context, fn app.TransactionFunc) error {
 					return fn(ctx, mr)
 				})
 				mr.EXPECT().CreateUser(gomock.Any(), EqCreateUserParams(arg, password)).Times(1).Return(user, nil)
@@ -66,11 +66,11 @@ func TestCreateUserAPI(t *testing.T) {
 				"full_name": user.FullName,
 				"email":     user.Email,
 			},
-			buildStubs: func(mr *mock_wallet.MockRepository, md *mock_wallet.MockDispatcher) {
-				mr.EXPECT().Transaction(gomock.Any(), gomock.Any()).DoAndReturn(func(ctx context.Context, fn wallet.TransactionFunc) error {
+			buildStubs: func(mr *mock_app.MockRepository, md *mock_app.MockDispatcher) {
+				mr.EXPECT().Transaction(gomock.Any(), gomock.Any()).DoAndReturn(func(ctx context.Context, fn app.TransactionFunc) error {
 					return fn(ctx, mr)
 				})
-				mr.EXPECT().CreateUser(gomock.Any(), gomock.Any()).Times(1).Return(&wallet.User{}, sql.ErrConnDone)
+				mr.EXPECT().CreateUser(gomock.Any(), gomock.Any()).Times(1).Return(&app.User{}, sql.ErrConnDone)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -84,11 +84,11 @@ func TestCreateUserAPI(t *testing.T) {
 		// 		"full_name": user.FullName,
 		// 		"email":     user.Email,
 		// 	},
-		// 	buildStubs: func(store *mock_wallet.MockRepository) {
+		// 	buildStubs: func(store *mock_app.MockRepository) {
 		// 		store.EXPECT().
 		// 			CreateUser(gomock.Any(), gomock.Any()).
 		// 			Times(1).
-		// 			Return(&wallet.User{}, db.ErrUniqueViolation)
+		// 			Return(&app.User{}, db.ErrUniqueViolation)
 		// 	},
 		// 	checkResponse: func(recorder *httptest.ResponseRecorder) {
 		// 		require.Equal(t, http.StatusForbidden, recorder.Code)
@@ -102,7 +102,7 @@ func TestCreateUserAPI(t *testing.T) {
 				"full_name": user.FullName,
 				"email":     user.Email,
 			},
-			buildStubs: func(mr *mock_wallet.MockRepository, md *mock_wallet.MockDispatcher) {
+			buildStubs: func(mr *mock_app.MockRepository, md *mock_app.MockDispatcher) {
 				mr.EXPECT().
 					CreateUser(gomock.Any(), gomock.Any()).
 					Times(0)
@@ -119,7 +119,7 @@ func TestCreateUserAPI(t *testing.T) {
 				"full_name": user.FullName,
 				"email":     "invalid-email",
 			},
-			buildStubs: func(mr *mock_wallet.MockRepository, md *mock_wallet.MockDispatcher) {
+			buildStubs: func(mr *mock_app.MockRepository, md *mock_app.MockDispatcher) {
 				mr.EXPECT().
 					CreateUser(gomock.Any(), gomock.Any()).
 					Times(0)
@@ -136,7 +136,7 @@ func TestCreateUserAPI(t *testing.T) {
 				"full_name": user.FullName,
 				"email":     user.Email,
 			},
-			buildStubs: func(mr *mock_wallet.MockRepository, md *mock_wallet.MockDispatcher) {
+			buildStubs: func(mr *mock_app.MockRepository, md *mock_app.MockDispatcher) {
 				mr.EXPECT().
 					CreateUser(gomock.Any(), gomock.Any()).
 					Times(0)
@@ -154,12 +154,12 @@ func TestCreateUserAPI(t *testing.T) {
 			i := GetInjector().Clone()
 			defer i.Shutdown()
 			ctrl := gomock.NewController(t)
-			mr := mock_wallet.NewMockRepository(ctrl)
-			md := mock_wallet.NewMockDispatcher(ctrl)
+			mr := mock_app.NewMockRepository(ctrl)
+			md := mock_app.NewMockDispatcher(ctrl)
 			tc.buildStubs(mr, md)
 
-			do.OverrideValue[wallet.Repository](i, mr)
-			do.OverrideValue[wallet.Dispatcher](i, md)
+			do.OverrideValue[app.Repository](i, mr)
+			do.OverrideValue[app.Dispatcher](i, md)
 			router := do.MustInvoke[*gin.Engine](i)
 			recorder := httptest.NewRecorder()
 
@@ -182,7 +182,7 @@ func TestLoginUserAPI(t *testing.T) {
 	testCases := []struct {
 		name          string
 		body          gin.H
-		buildStubs    func(store *mock_wallet.MockRepository)
+		buildStubs    func(store *mock_app.MockRepository)
 		checkResponse func(recoder *httptest.ResponseRecorder)
 	}{
 		{
@@ -191,7 +191,7 @@ func TestLoginUserAPI(t *testing.T) {
 				"username": user.Username,
 				"password": password,
 			},
-			buildStubs: func(store *mock_wallet.MockRepository) {
+			buildStubs: func(store *mock_app.MockRepository) {
 				store.EXPECT().
 					GetUser(gomock.Any(), gomock.Eq(user.Username)).
 					Times(1).
@@ -210,7 +210,7 @@ func TestLoginUserAPI(t *testing.T) {
 				"username": "NotFound",
 				"password": password,
 			},
-			buildStubs: func(store *mock_wallet.MockRepository) {
+			buildStubs: func(store *mock_app.MockRepository) {
 				store.EXPECT().
 					GetUser(gomock.Any(), gomock.Any()).
 					Times(1).
@@ -226,7 +226,7 @@ func TestLoginUserAPI(t *testing.T) {
 				"username": user.Username,
 				"password": "incorrect",
 			},
-			buildStubs: func(store *mock_wallet.MockRepository) {
+			buildStubs: func(store *mock_app.MockRepository) {
 				store.EXPECT().
 					GetUser(gomock.Any(), gomock.Eq(user.Username)).
 					Times(1).
@@ -242,11 +242,11 @@ func TestLoginUserAPI(t *testing.T) {
 				"username": user.Username,
 				"password": password,
 			},
-			buildStubs: func(store *mock_wallet.MockRepository) {
+			buildStubs: func(store *mock_app.MockRepository) {
 				store.EXPECT().
 					GetUser(gomock.Any(), gomock.Any()).
 					Times(1).
-					Return(&wallet.User{}, sql.ErrConnDone)
+					Return(&app.User{}, sql.ErrConnDone)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -258,7 +258,7 @@ func TestLoginUserAPI(t *testing.T) {
 				"username": "invalid-user#1",
 				"password": password,
 			},
-			buildStubs: func(store *mock_wallet.MockRepository) {
+			buildStubs: func(store *mock_app.MockRepository) {
 				store.EXPECT().
 					GetUser(gomock.Any(), gomock.Any()).
 					Times(0)
@@ -276,10 +276,10 @@ func TestLoginUserAPI(t *testing.T) {
 			i := GetInjector().Clone()
 			defer i.Shutdown()
 			ctrl := gomock.NewController(t)
-			mrepo := mock_wallet.NewMockRepository(ctrl)
+			mrepo := mock_app.NewMockRepository(ctrl)
 			tc.buildStubs(mrepo)
 
-			do.OverrideValue[wallet.Repository](i, mrepo)
+			do.OverrideValue[app.Repository](i, mrepo)
 			router := do.MustInvoke[*gin.Engine](i)
 			recorder := httptest.NewRecorder()
 
@@ -296,20 +296,20 @@ func TestLoginUserAPI(t *testing.T) {
 	}
 }
 
-func randomUser(t *testing.T) (*wallet.User, string) {
-	pwd := wallet.RandomString(6)
+func randomUser(t *testing.T) (*app.User, string) {
+	pwd := app.RandomString(6)
 	hashedPassword, err := password.Hash(pwd)
 	require.NoError(t, err)
 
-	u := wallet.NewUser(wallet.RandomOwner(), hashedPassword, wallet.RandomOwner(), wallet.RandomEmail())
+	u := app.NewUser(app.RandomOwner(), hashedPassword, app.RandomOwner(), app.RandomEmail())
 	return u, pwd
 }
 
-func requireBodyMatchUser(t *testing.T, body *bytes.Buffer, user *wallet.User) {
+func requireBodyMatchUser(t *testing.T, body *bytes.Buffer, user *app.User) {
 	data, err := io.ReadAll(body)
 	require.NoError(t, err)
 
-	var gotUser *wallet.User
+	var gotUser *app.User
 	err = json.Unmarshal(data, &gotUser)
 
 	require.NoError(t, err)
@@ -319,17 +319,17 @@ func requireBodyMatchUser(t *testing.T, body *bytes.Buffer, user *wallet.User) {
 	require.Empty(t, gotUser.HashedPassword)
 }
 
-func EqCreateUserParams(arg *wallet.User, password string) gomock.Matcher {
+func EqCreateUserParams(arg *app.User, password string) gomock.Matcher {
 	return eqCreateUserParamsMatcher{arg, password}
 }
 
 type eqCreateUserParamsMatcher struct {
-	arg      *wallet.User
+	arg      *app.User
 	password string
 }
 
 func (e eqCreateUserParamsMatcher) Matches(x interface{}) bool {
-	arg, ok := x.(*wallet.User)
+	arg, ok := x.(*app.User)
 	if !ok {
 		return false
 	}

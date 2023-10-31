@@ -16,15 +16,15 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
+	"playground/internal/app/dispatcher"
+	"playground/internal/app/repository"
+	"playground/internal/app/usecase"
 	"playground/internal/config"
 	"playground/internal/delivery/grpc/gen"
 	"playground/internal/delivery/grpc/handler"
 	"playground/internal/delivery/grpc/interceptor"
 	"playground/internal/pkg/mail"
 	"playground/internal/pkg/token"
-	"playground/internal/wallet/dispatcher"
-	"playground/internal/wallet/repository"
-	"playground/internal/wallet/usecase"
 )
 
 type Server struct {

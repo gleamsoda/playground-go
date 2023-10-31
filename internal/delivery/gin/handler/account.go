@@ -5,9 +5,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"playground/internal/app"
 	"playground/internal/delivery/gin/helper"
 	"playground/internal/pkg/token"
-	"playground/internal/wallet"
 )
 
 type createAccountRequest struct {
@@ -22,7 +22,7 @@ func (h *Handler) CreateAccount(ctx *gin.Context) {
 	}
 
 	authPayload := ctx.MustGet(helper.AuthorizationPayloadKey).(*token.Payload)
-	if a, err := h.w.CreateAccount(ctx, &wallet.CreateAccountParams{
+	if a, err := h.w.CreateAccount(ctx, &app.CreateAccountParams{
 		Owner:    authPayload.Username,
 		Balance:  0,
 		Currency: req.Currency,
@@ -45,7 +45,7 @@ func (h *Handler) GetAccount(ctx *gin.Context) {
 	}
 
 	authPayload := ctx.MustGet(helper.AuthorizationPayloadKey).(*token.Payload)
-	if a, err := h.w.GetAccount(ctx, &wallet.GetAccountsParams{
+	if a, err := h.w.GetAccount(ctx, &app.GetAccountsParams{
 		ID:    req.ID,
 		Owner: authPayload.Username,
 	}); err != nil {
@@ -68,7 +68,7 @@ func (h *Handler) ListAccounts(ctx *gin.Context) {
 	}
 
 	authPayload := ctx.MustGet(helper.AuthorizationPayloadKey).(*token.Payload)
-	if as, err := h.w.ListAccounts(ctx, &wallet.ListAccountsParams{
+	if as, err := h.w.ListAccounts(ctx, &app.ListAccountsParams{
 		Owner:  authPayload.Username,
 		Limit:  req.PageSize,
 		Offset: (req.PageID - 1) * req.PageSize,

@@ -15,13 +15,13 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/samber/do"
 
+	"playground/internal/app/dispatcher"
+	"playground/internal/app/repository"
+	"playground/internal/app/usecase"
 	"playground/internal/config"
 	"playground/internal/delivery/gqlgen/resolver"
 	"playground/internal/pkg/mail"
 	"playground/internal/pkg/token"
-	"playground/internal/wallet/dispatcher"
-	"playground/internal/wallet/repository"
-	"playground/internal/wallet/usecase"
 )
 
 type Server struct {
