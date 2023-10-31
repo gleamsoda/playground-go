@@ -3,19 +3,16 @@ package asynq
 import (
 	"context"
 	"database/sql"
-	"fmt"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/hibiken/asynq"
 	"github.com/rs/zerolog/log"
 	"github.com/samber/do"
 
+	"playground/internal/app"
+	"playground/internal/app/repository"
 	"playground/internal/config"
 	"playground/internal/pkg/mail"
-	"playground/internal/pkg/token"
-	"playground/internal/wallet"
-	"playground/internal/wallet/repository"
-	"playground/internal/wallet/usecase"
 )
 
 type Consumer struct {
@@ -51,23 +48,13 @@ func NewConsumer(cfg config.Config) (*Consumer, error) {
 	} else if err := conn.Ping(); err != nil {
 		return nil, err
 	}
-	tm, err := token.NewPasetoManager(cfg.TokenSymmetricKey)
-	if err != nil {
-		return nil, fmt.Errorf("cannot create token maker: %w", err)
-	}
 	mailer := mail.NewGmailSender(cfg.EmailSenderName, cfg.EmailSenderAddress, cfg.EmailSenderPassword)
 
 	injector := do.New()
 	do.Provide(injector, NewHandler)
-	do.Provide(injector, usecase.NewUsecase)
 	do.Provide(injector, repository.NewRepository)
 	do.ProvideValue(injector, conn)
-	do.ProvideValue[wallet.Dispatcher](injector, nil)
-	do.ProvideValue(injector, asynq.RedisClientOpt{})
-	do.ProvideValue(injector, tm)
 	do.ProvideValue(injector, mailer)
-	do.ProvideNamedValue(injector, "AccessTokenDuration", cfg.AccessTokenDuration)
-	do.ProvideNamedValue(injector, "RefreshTokenDuration", cfg.RefreshTokenDuration)
 	h := do.MustInvoke[*handler](injector)
 
 	return &Consumer{
@@ -78,6 +65,6 @@ func NewConsumer(cfg config.Config) (*Consumer, error) {
 
 func (c *Consumer) Run() error {
 	mux := asynq.NewServeMux()
-	mux.HandleFunc(wallet.SendVerifyEmailQueue, c.handler.SendVerifyEmail)
+	mux.HandleFunc(app.SendVerifyEmailQueue, c.handler.SendVerifyEmail)
 	return c.server.Run(mux)
 }

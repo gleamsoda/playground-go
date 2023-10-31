@@ -9,25 +9,30 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/samber/do"
 
-	"playground/internal/wallet"
+	"playground/internal/app"
+	"playground/internal/app/usecase"
+	"playground/internal/pkg/mail"
 )
 
 type handler struct {
-	w wallet.Usecase
+	sendVerifyEmailUsecase app.SendVerifyEmailUsecase
 }
 
 func NewHandler(i *do.Injector) (*handler, error) {
-	w := do.MustInvoke[wallet.Usecase](i)
-	return &handler{w: w}, nil
+	r := do.MustInvoke[app.Repository](i)
+	m := do.MustInvoke[mail.Sender](i)
+	return &handler{
+		sendVerifyEmailUsecase: usecase.NewSendVerifyEmailUsecase(r, m),
+	}, nil
 }
 
 func (h *handler) SendVerifyEmail(ctx context.Context, t *asynq.Task) error {
-	var payload wallet.SendVerifyEmailPayload
+	var payload app.SendVerifyEmailPayload
 	if err := json.Unmarshal(t.Payload(), &payload); err != nil {
 		return fmt.Errorf("failed to unmarshal payload: %w", asynq.SkipRetry)
 	}
 
-	usr, err := h.w.SendVerifyEmail(ctx, &wallet.SendVerifyEmailPayload{
+	usr, err := h.sendVerifyEmailUsecase.Execute(ctx, &app.SendVerifyEmailPayload{
 		Username: payload.Username,
 	})
 	if err != nil {

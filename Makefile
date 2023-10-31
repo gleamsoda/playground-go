@@ -15,13 +15,13 @@ cover:
 	go tool cover -html=$(COVERAGE_OUT) -o $(COVERAGE_HTML)
 
 mock:
-	mockgen -source ./internal/wallet/repository.go -destination ./test/mock/wallet/repository.go
-	mockgen -source ./internal/wallet/usecase.go -destination ./test/mock/wallet/usecase.go
-	mockgen -source ./internal/wallet/dispatcher.go -destination ./test/mock/wallet/dispatcher.go
+	mockgen -source ./internal/app/repository.go -destination ./test/mock/app/repository.go
+	mockgen -source ./internal/app/usecase.go -destination ./test/mock/app/usecase.go
+	mockgen -source ./internal/app/dispatcher.go -destination ./test/mock/app/dispatcher.go
 	mockgen -source ./internal/pkg/token/manager.go -destination ./test/mock/pkg/token/manager.go
 
 sqlc:
-	rm -f ./internal/wallet/repository/sqlc/gen/*.go
+	rm -f ./internal/app/repository/sqlc/gen/*.go
 	sqlc generate -f ./sqlc.yaml
 
 proto:

@@ -2,7 +2,7 @@
 version: "2"
 sql:
   - schema: "db/migrations" # マイグレーションのディレクトリ OR 単一のSQLファイルへのパス OR パスのリスト
-    queries: "internal/wallet/repository/sqlc/query" # SQLクエリのディレクトリ OR 単一のSQLファイルへのパス OR パスのリスト
+    queries: "internal/app/repository/sqlc/query" # SQLクエリのディレクトリ OR 単一のSQLファイルへのパス OR パスのリスト
     engine: "mysql" # or postgresql
     gen:
       go:
@@ -10,7 +10,7 @@ sql:
           - column: "sessions.id"
             go_type: "github.com/google/uuid.UUID"
         package: "gen"
-        out: "internal/wallet/repository/sqlc/gen"
+        out: "internal/app/repository/sqlc/gen"
         emit_interface: true # interfaceを生成する
         emit_exact_table_names: false # users table -> User struct
         emit_empty_slices: true # 空のsliceをnilではなく空にする

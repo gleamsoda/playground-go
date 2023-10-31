@@ -18,14 +18,12 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/samber/do"
 
+	"playground/internal/app"
+	"playground/internal/app/dispatcher"
+	"playground/internal/app/repository"
 	"playground/internal/config"
 	"playground/internal/delivery/gin/handler"
-	"playground/internal/pkg/mail"
 	"playground/internal/pkg/token"
-	"playground/internal/wallet"
-	"playground/internal/wallet/dispatcher"
-	"playground/internal/wallet/repository"
-	"playground/internal/wallet/usecase"
 )
 
 type Server struct {
@@ -84,12 +82,10 @@ func NewServer(cfg config.Config) (*Server, error) {
 	injector := do.New()
 	do.Provide(injector, NewRouter)
 	do.Provide(injector, handler.NewHandler)
-	do.Provide(injector, usecase.NewUsecase)
 	do.Provide(injector, repository.NewRepository)
 	do.ProvideValue(injector, conn)
 	do.Provide(injector, dispatcher.NewDispatcher)
 	do.ProvideValue(injector, asynq.RedisClientOpt{Addr: cfg.RedisAddress})
-	do.ProvideValue[mail.Sender](injector, nil)
 	do.ProvideValue(injector, tm)
 	do.ProvideNamedValue(injector, "AccessTokenDuration", cfg.AccessTokenDuration)
 	do.ProvideNamedValue(injector, "RefreshTokenDuration", cfg.RefreshTokenDuration)
@@ -114,7 +110,7 @@ func (s *Server) Shutdown(ctx context.Context) error {
 
 var validCurrency validator.Func = func(fieldLevel validator.FieldLevel) bool {
 	if c, ok := fieldLevel.Field().Interface().(string); ok {
-		return wallet.IsSupportedCurrency(c)
+		return app.IsSupportedCurrency(c)
 	}
 	return false
 }
