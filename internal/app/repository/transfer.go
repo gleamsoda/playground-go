@@ -130,26 +130,3 @@ func (r *Repository) GetEntry(ctx context.Context, id int64) (*app.Entry, error)
 		CreatedAt: e.CreatedAt,
 	}, nil
 }
-
-func (r *Repository) ListEntries(ctx context.Context, args app.ListEntriesParams) ([]app.Entry, error) {
-	es, err := r.q.ListEntries(ctx, &gen.ListEntriesParams{
-		AccountID: args.AccountID,
-		Limit:     args.Limit,
-		Offset:    args.Offset,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	var result []app.Entry
-	for _, e := range es {
-		result = append(result, app.Entry{
-			ID:        e.ID,
-			AccountID: e.AccountID,
-			Amount:    e.Amount,
-			CreatedAt: e.CreatedAt,
-		})
-	}
-
-	return result, nil
-}

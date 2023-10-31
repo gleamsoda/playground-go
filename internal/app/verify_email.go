@@ -30,9 +30,8 @@ type (
 	VerifyEmailUsecase interface {
 		Execute(ctx context.Context, args *VerifyEmailParams) (*User, error)
 	}
+	VerifyEmailParams struct {
+		EmailID    int64
+		SecretCode string
+	}
 )
-
-type VerifyEmailParams struct {
-	EmailID    int64
-	SecretCode string
-}

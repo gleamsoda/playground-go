@@ -22,21 +22,15 @@ func NewTransfer(fromAccountID, toAccountID, amount int64) *Transfer {
 	}
 }
 
-type CreateTransferUsecase interface {
-	Execute(ctx context.Context, args *CreateTransferParams) (*Transfer, error)
-}
-
-type CreateTransferParams struct {
-	RequestUsername string `json:"-"`
-	FromAccountID   int64  `json:"from_account_id"`
-	ToAccountID     int64  `json:"to_account_id"`
-	Amount          int64  `json:"amount"`
-	Currency        string `json:"currency"`
-}
-
-type ListTransfersParams struct {
-	FromAccountID int64 `json:"from_account_id"`
-	ToAccountID   int64 `json:"to_account_id"`
-	Limit         int32 `json:"limit"`
-	Offset        int32 `json:"offset"`
-}
+type (
+	CreateTransferUsecase interface {
+		Execute(ctx context.Context, args *CreateTransferParams) (*Transfer, error)
+	}
+	CreateTransferParams struct {
+		RequestUsername string `json:"-"`
+		FromAccountID   int64  `json:"from_account_id"`
+		ToAccountID     int64  `json:"to_account_id"`
+		Amount          int64  `json:"amount"`
+		Currency        string `json:"currency"`
+	}
+)

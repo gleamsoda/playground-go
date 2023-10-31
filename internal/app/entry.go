@@ -18,10 +18,3 @@ func NewEntry(accountID, amount int64) *Entry {
 		Amount:    amount,
 	}
 }
-
-type ListEntriesParams struct {
-	RequestUserID int64 `json:"-"`
-	AccountID     int64 `json:"account_id"`
-	Limit         int32 `json:"limit" form:"limit"`
-	Offset        int32 `json:"offset" form:"offset"`
-}

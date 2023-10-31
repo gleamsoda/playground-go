@@ -25,27 +25,24 @@ type (
 	CreateAccountUsecase interface {
 		Execute(ctx context.Context, args *CreateAccountParams) (*Account, error)
 	}
+	CreateAccountParams struct {
+		Owner    string `json:"owner"`
+		Balance  int64  `json:"balance"`
+		Currency string `json:"currency"`
+	}
 	GetAccountUsecase interface {
 		Execute(ctx context.Context, args *GetAccountsParams) (*Account, error)
+	}
+	GetAccountsParams struct {
+		ID    int64  `json:"id"`
+		Owner string `json:"owner"`
 	}
 	ListAccountsUsecase interface {
 		Execute(ctx context.Context, args *ListAccountsParams) ([]Account, error)
 	}
+	ListAccountsParams struct {
+		Owner  string `json:"owner"`
+		Limit  int32  `json:"limit"`
+		Offset int32  `json:"offset"`
+	}
 )
-
-type CreateAccountParams struct {
-	Owner    string `json:"owner"`
-	Balance  int64  `json:"balance"`
-	Currency string `json:"currency"`
-}
-
-type GetAccountsParams struct {
-	ID    int64  `json:"id"`
-	Owner string `json:"owner"`
-}
-
-type ListAccountsParams struct {
-	Owner  string `json:"owner"`
-	Limit  int32  `json:"limit"`
-	Offset int32  `json:"offset"`
-}
