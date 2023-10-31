@@ -16,7 +16,7 @@ import (
 
 // CreateUser is the resolver for the createUser field.
 func (r *mutationResolver) CreateUser(ctx context.Context, input gen.NewUser) (*gen.User, error) {
-	if usr, err := r.w.CreateUser(ctx, &app.CreateUserParams{
+	if usr, err := r.createUserUsecase.Execute(ctx, &app.CreateUserParams{
 		Username: input.Username,
 		Password: input.Password,
 		FullName: input.Fullname,
@@ -37,7 +37,7 @@ func (r *mutationResolver) LoginUser(ctx context.Context, input gen.LoginUser) (
 		UserAgent: md.UserAgent,
 		ClientIP:  md.ClientIP,
 	}
-	resp, err := r.w.LoginUser(ctx, args)
+	resp, err := r.loginUserUsecase.Execute(ctx, args)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +61,7 @@ func (r *mutationResolver) CreateAccount(ctx context.Context, input gen.NewAccou
 		return nil, err
 	}
 
-	if a, err := r.w.CreateAccount(ctx, &app.CreateAccountParams{
+	if a, err := r.createAccountUsecase.Execute(ctx, &app.CreateAccountParams{
 		Owner:    authPayload.Username,
 		Balance:  0,
 		Currency: input.Currency,
@@ -81,7 +81,7 @@ func (r *queryResolver) Accounts(ctx context.Context, limit int, offset int) ([]
 		return nil, err
 	}
 
-	if as, err := r.w.ListAccounts(ctx, &app.ListAccountsParams{
+	if as, err := r.listAccountsUsecase.Execute(ctx, &app.ListAccountsParams{
 		Owner:  authPayload.Username,
 		Limit:  int32(limit),
 		Offset: int32(offset),

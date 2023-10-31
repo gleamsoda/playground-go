@@ -1,6 +1,9 @@
 package app
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 type VerifyEmail struct {
 	ID         int64
@@ -19,6 +22,15 @@ func NewVerifyEmail(username, email, secretCode string) *VerifyEmail {
 		SecretCode: secretCode,
 	}
 }
+
+type (
+	SendVerifyEmailUsecase interface {
+		Execute(ctx context.Context, args *SendVerifyEmailPayload) (*VerifyEmail, error)
+	}
+	VerifyEmailUsecase interface {
+		Execute(ctx context.Context, args *VerifyEmailParams) (*User, error)
+	}
+)
 
 type VerifyEmailParams struct {
 	EmailID    int64

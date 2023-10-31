@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"time"
 )
 
@@ -11,6 +12,26 @@ type Account struct {
 	Currency  string    `json:"currency"`
 	CreatedAt time.Time `json:"created_at"`
 }
+
+func NewAccount(owner string, balance int64, currency string) *Account {
+	return &Account{
+		Owner:    owner,
+		Balance:  balance,
+		Currency: currency,
+	}
+}
+
+type (
+	CreateAccountUsecase interface {
+		Execute(ctx context.Context, args *CreateAccountParams) (*Account, error)
+	}
+	GetAccountUsecase interface {
+		Execute(ctx context.Context, args *GetAccountsParams) (*Account, error)
+	}
+	ListAccountsUsecase interface {
+		Execute(ctx context.Context, args *ListAccountsParams) ([]Account, error)
+	}
+)
 
 type CreateAccountParams struct {
 	Owner    string `json:"owner"`
@@ -27,12 +48,4 @@ type ListAccountsParams struct {
 	Owner  string `json:"owner"`
 	Limit  int32  `json:"limit"`
 	Offset int32  `json:"offset"`
-}
-
-func NewAccount(owner string, balance int64, currency string) *Account {
-	return &Account{
-		Owner:    owner,
-		Balance:  balance,
-		Currency: currency,
-	}
 }

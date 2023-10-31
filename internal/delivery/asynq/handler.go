@@ -10,15 +10,20 @@ import (
 	"github.com/samber/do"
 
 	"playground/internal/app"
+	"playground/internal/app/usecase"
+	"playground/internal/pkg/mail"
 )
 
 type handler struct {
-	w app.Usecase
+	sendVerifyEmailUsecase app.SendVerifyEmailUsecase
 }
 
 func NewHandler(i *do.Injector) (*handler, error) {
-	w := do.MustInvoke[app.Usecase](i)
-	return &handler{w: w}, nil
+	r := do.MustInvoke[app.Repository](i)
+	m := do.MustInvoke[mail.Sender](i)
+	return &handler{
+		sendVerifyEmailUsecase: usecase.NewSendVerifyEmailUsecase(r, m),
+	}, nil
 }
 
 func (h *handler) SendVerifyEmail(ctx context.Context, t *asynq.Task) error {
@@ -27,7 +32,7 @@ func (h *handler) SendVerifyEmail(ctx context.Context, t *asynq.Task) error {
 		return fmt.Errorf("failed to unmarshal payload: %w", asynq.SkipRetry)
 	}
 
-	usr, err := h.w.SendVerifyEmail(ctx, &app.SendVerifyEmailPayload{
+	usr, err := h.sendVerifyEmailUsecase.Execute(ctx, &app.SendVerifyEmailPayload{
 		Username: payload.Username,
 	})
 	if err != nil {

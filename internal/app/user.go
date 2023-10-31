@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"time"
 
 	"github.com/google/uuid"
@@ -24,6 +25,21 @@ func NewUser(username, hashedPassword, fullName, email string) *User {
 		HashedPassword: hashedPassword,
 	}
 }
+
+type (
+	CreateUserUsecase interface {
+		Execute(ctx context.Context, args *CreateUserParams) (*User, error)
+	}
+	LoginUserUsecase interface {
+		Execute(ctx context.Context, args *LoginUserParams) (*LoginUserOutputParams, error)
+	}
+	RenewAccessTokenUsecase interface {
+		Execute(ctx context.Context, refreshToken string) (*RenewAccessTokenOutputParams, error)
+	}
+	UpdateUserUsecase interface {
+		Execute(ctx context.Context, args *UpdateUserParams) (*User, error)
+	}
+)
 
 type CreateUserParams struct {
 	Username string `json:"username" binding:"required,alphanum"`

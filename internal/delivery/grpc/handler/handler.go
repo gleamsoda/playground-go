@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/samber/do"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
@@ -13,6 +14,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	"playground/internal/app"
+	"playground/internal/app/usecase"
 	"playground/internal/delivery/grpc/gen"
 	"playground/internal/pkg/token"
 )
@@ -28,8 +30,11 @@ const (
 type (
 	Handler struct {
 		gen.UnimplementedPlaygroundServer
-		w  app.Usecase
-		tm token.Manager
+		tm                 token.Manager
+		createUserUsecase  app.CreateUserUsecase
+		loginUserUsecase   app.LoginUserUsecase
+		updateUserUsecase  app.UpdateUserUsecase
+		verifyEmailUsecase app.VerifyEmailUsecase
 	}
 	Metadata struct {
 		UserAgent string
@@ -38,11 +43,18 @@ type (
 )
 
 func NewHandler(i *do.Injector) (*Handler, error) {
-	w := do.MustInvoke[app.Usecase](i)
+	r := do.MustInvoke[app.Repository](i)
+	d := do.MustInvoke[app.Dispatcher](i)
 	tm := do.MustInvoke[token.Manager](i)
+	accessTokenDuration := do.MustInvokeNamed[time.Duration](i, "AccessTokenDuration")
+	refreshTokenDuration := do.MustInvokeNamed[time.Duration](i, "RefreshTokenDuration")
+
 	return &Handler{
-		w:  w,
-		tm: tm,
+		tm:                 tm,
+		createUserUsecase:  usecase.NewCreateUserUsecase(r, d),
+		loginUserUsecase:   usecase.NewLoginUserUsecase(r, tm, accessTokenDuration, refreshTokenDuration),
+		updateUserUsecase:  usecase.NewUpdateUserUsecase(r),
+		verifyEmailUsecase: usecase.NewVerifyEmailUsecase(r),
 	}, nil
 }
 

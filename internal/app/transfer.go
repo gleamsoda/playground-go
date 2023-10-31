@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"time"
 )
 
@@ -19,6 +20,10 @@ func NewTransfer(fromAccountID, toAccountID, amount int64) *Transfer {
 		ToAccountID:   toAccountID,
 		Amount:        amount,
 	}
+}
+
+type CreateTransferUsecase interface {
+	Execute(ctx context.Context, args *CreateTransferParams) (*Transfer, error)
 }
 
 type CreateTransferParams struct {

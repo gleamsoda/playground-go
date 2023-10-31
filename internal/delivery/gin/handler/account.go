@@ -22,7 +22,7 @@ func (h *Handler) CreateAccount(ctx *gin.Context) {
 	}
 
 	authPayload := ctx.MustGet(helper.AuthorizationPayloadKey).(*token.Payload)
-	if a, err := h.w.CreateAccount(ctx, &app.CreateAccountParams{
+	if a, err := h.createAccountUsecase.Execute(ctx, &app.CreateAccountParams{
 		Owner:    authPayload.Username,
 		Balance:  0,
 		Currency: req.Currency,
@@ -45,7 +45,7 @@ func (h *Handler) GetAccount(ctx *gin.Context) {
 	}
 
 	authPayload := ctx.MustGet(helper.AuthorizationPayloadKey).(*token.Payload)
-	if a, err := h.w.GetAccount(ctx, &app.GetAccountsParams{
+	if a, err := h.getAccountUsecase.Execute(ctx, &app.GetAccountsParams{
 		ID:    req.ID,
 		Owner: authPayload.Username,
 	}); err != nil {
@@ -68,7 +68,7 @@ func (h *Handler) ListAccounts(ctx *gin.Context) {
 	}
 
 	authPayload := ctx.MustGet(helper.AuthorizationPayloadKey).(*token.Payload)
-	if as, err := h.w.ListAccounts(ctx, &app.ListAccountsParams{
+	if as, err := h.listAccountsUsecase.Execute(ctx, &app.ListAccountsParams{
 		Owner:  authPayload.Username,
 		Limit:  req.PageSize,
 		Offset: (req.PageID - 1) * req.PageSize,

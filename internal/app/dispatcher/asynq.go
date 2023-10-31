@@ -24,7 +24,7 @@ func NewDispatcher(i *do.Injector) (app.Dispatcher, error) {
 	}, nil
 }
 
-func (p *Dispatcher) SendVerifyEmail(ctx context.Context, payload *app.SendVerifyEmailPayload) error {
+func (d *Dispatcher) SendVerifyEmail(ctx context.Context, payload *app.SendVerifyEmailPayload) error {
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return fmt.Errorf("failed to marshal task payload: %w", err)
@@ -35,7 +35,7 @@ func (p *Dispatcher) SendVerifyEmail(ctx context.Context, payload *app.SendVerif
 		asynq.ProcessIn(10 * time.Second),
 	}
 	task := asynq.NewTask(app.SendVerifyEmailQueue, jsonPayload, opts...)
-	info, err := p.c.EnqueueContext(ctx, task)
+	info, err := d.c.EnqueueContext(ctx, task)
 	if err != nil {
 		return fmt.Errorf("failed to enqueue task: %w", err)
 	}

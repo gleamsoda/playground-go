@@ -5,9 +5,27 @@ import (
 	"fmt"
 
 	"playground/internal/app"
+	"playground/internal/pkg/mail"
 )
 
-func (u *Usecase) SendVerifyEmail(ctx context.Context, args *app.SendVerifyEmailPayload) (*app.VerifyEmail, error) {
+type (
+	SendVerifyEmailUsecase struct {
+		r      app.Repository
+		mailer mail.Sender
+	}
+	VerifyEmailUsecase struct {
+		r app.Repository
+	}
+)
+
+func NewSendVerifyEmailUsecase(r app.Repository, mailer mail.Sender) *SendVerifyEmailUsecase {
+	return &SendVerifyEmailUsecase{
+		r:      r,
+		mailer: mailer,
+	}
+}
+
+func (u *SendVerifyEmailUsecase) Execute(ctx context.Context, args *app.SendVerifyEmailPayload) (*app.VerifyEmail, error) {
 	usr, err := u.r.GetUser(ctx, args.Username)
 	if err != nil {
 		return nil, err
@@ -44,7 +62,13 @@ Thank you for registering with us!<br/>
 Please <a href="%s">click here</a> to verify your email address.<br/>
 `
 
-func (u *Usecase) VerifyEmail(ctx context.Context, args *app.VerifyEmailParams) (*app.User, error) {
+func NewVerifyEmailUsecase(r app.Repository) *VerifyEmailUsecase {
+	return &VerifyEmailUsecase{
+		r: r,
+	}
+}
+
+func (u *VerifyEmailUsecase) Execute(ctx context.Context, args *app.VerifyEmailParams) (*app.User, error) {
 	usr, _, err := u.r.UpdateUserEmailVerified(ctx, args)
 	return usr, err
 }

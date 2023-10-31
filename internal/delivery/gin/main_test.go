@@ -15,11 +15,9 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"playground/internal/app"
-	"playground/internal/app/usecase"
 	"playground/internal/config"
 	"playground/internal/delivery/gin/handler"
 	"playground/internal/delivery/gin/helper"
-	"playground/internal/pkg/mail"
 	"playground/internal/pkg/token"
 )
 
@@ -39,10 +37,8 @@ var GetInjector = sync.OnceValue(func() *do.Injector {
 	injector := do.New()
 	do.Provide(injector, NewRouter)
 	do.Provide(injector, handler.NewHandler)
-	do.Provide(injector, usecase.NewUsecase)
 	do.ProvideValue[app.Repository](injector, nil)
 	do.ProvideValue[app.Dispatcher](injector, nil)
-	do.ProvideValue[mail.Sender](injector, nil)
 	do.ProvideValue[token.Manager](injector, tm)
 	do.ProvideNamedValue(injector, "AccessTokenDuration", cfg.AccessTokenDuration)
 	do.ProvideNamedValue(injector, "RefreshTokenDuration", cfg.RefreshTokenDuration)

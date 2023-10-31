@@ -12,9 +12,38 @@ import (
 	"playground/internal/app"
 	"playground/internal/pkg/apperr"
 	"playground/internal/pkg/password"
+	"playground/internal/pkg/token"
 )
 
-func (u *Usecase) CreateUser(ctx context.Context, args *app.CreateUserParams) (*app.User, error) {
+type (
+	CreateUserUsecase struct {
+		r app.Repository
+		d app.Dispatcher
+	}
+	LoginUserUsecase struct {
+		r                    app.Repository
+		tm                   token.Manager
+		accessTokenDuration  time.Duration
+		refreshTokenDuration time.Duration
+	}
+	RenewAccessTokenUsecase struct {
+		r                   app.Repository
+		tm                  token.Manager
+		accessTokenDuration time.Duration
+	}
+	UpdateUserUsecase struct {
+		r app.Repository
+	}
+)
+
+func NewCreateUserUsecase(r app.Repository, d app.Dispatcher) *CreateUserUsecase {
+	return &CreateUserUsecase{
+		r: r,
+		d: d,
+	}
+}
+
+func (u *CreateUserUsecase) Execute(ctx context.Context, args *app.CreateUserParams) (*app.User, error) {
 	hashedPassword, err := password.Hash(args.Password)
 	if err != nil {
 		return nil, err
@@ -41,7 +70,16 @@ func (u *Usecase) CreateUser(ctx context.Context, args *app.CreateUserParams) (*
 	return usr, err
 }
 
-func (u *Usecase) LoginUser(ctx context.Context, args *app.LoginUserParams) (*app.LoginUserOutputParams, error) {
+func NewLoginUserUsecase(r app.Repository, tm token.Manager, accessTokenDuration time.Duration, refreshTokenDuration time.Duration) *LoginUserUsecase {
+	return &LoginUserUsecase{
+		r:                    r,
+		tm:                   tm,
+		accessTokenDuration:  accessTokenDuration,
+		refreshTokenDuration: refreshTokenDuration,
+	}
+}
+
+func (u *LoginUserUsecase) Execute(ctx context.Context, args *app.LoginUserParams) (*app.LoginUserOutputParams, error) {
 	usr, err := u.r.GetUser(ctx, args.Username)
 	if err != nil {
 		return nil, err
@@ -88,7 +126,15 @@ func (u *Usecase) LoginUser(ctx context.Context, args *app.LoginUserParams) (*ap
 	}, nil
 }
 
-func (u *Usecase) RenewAccessToken(ctx context.Context, refreshToken string) (*app.RenewAccessTokenOutputParams, error) {
+func NewRenewAccessTokenUsecase(r app.Repository, tm token.Manager, accessTokenDuration time.Duration) *RenewAccessTokenUsecase {
+	return &RenewAccessTokenUsecase{
+		r:                   r,
+		tm:                  tm,
+		accessTokenDuration: accessTokenDuration,
+	}
+}
+
+func (u *RenewAccessTokenUsecase) Execute(ctx context.Context, refreshToken string) (*app.RenewAccessTokenOutputParams, error) {
 	rPayload, err := u.tm.Verify(refreshToken)
 	if err != nil {
 		return nil, err
@@ -126,7 +172,13 @@ func (u *Usecase) RenewAccessToken(ctx context.Context, refreshToken string) (*a
 	return resp, nil
 }
 
-func (u *Usecase) UpdateUser(ctx context.Context, args *app.UpdateUserParams) (*app.User, error) {
+func NewUpdateUserUsecase(r app.Repository) *UpdateUserUsecase {
+	return &UpdateUserUsecase{
+		r: r,
+	}
+}
+
+func (u *UpdateUserUsecase) Execute(ctx context.Context, args *app.UpdateUserParams) (*app.User, error) {
 	if args.Username != args.ReqUsername {
 		return nil, failure.Translate(fmt.Errorf("cannot update other user's info"), apperr.Unauthenticated)
 	}

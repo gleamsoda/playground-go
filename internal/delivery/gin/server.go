@@ -21,10 +21,8 @@ import (
 	"playground/internal/app"
 	"playground/internal/app/dispatcher"
 	"playground/internal/app/repository"
-	"playground/internal/app/usecase"
 	"playground/internal/config"
 	"playground/internal/delivery/gin/handler"
-	"playground/internal/pkg/mail"
 	"playground/internal/pkg/token"
 )
 
@@ -84,12 +82,10 @@ func NewServer(cfg config.Config) (*Server, error) {
 	injector := do.New()
 	do.Provide(injector, NewRouter)
 	do.Provide(injector, handler.NewHandler)
-	do.Provide(injector, usecase.NewUsecase)
 	do.Provide(injector, repository.NewRepository)
 	do.ProvideValue(injector, conn)
 	do.Provide(injector, dispatcher.NewDispatcher)
 	do.ProvideValue(injector, asynq.RedisClientOpt{Addr: cfg.RedisAddress})
-	do.ProvideValue[mail.Sender](injector, nil)
 	do.ProvideValue(injector, tm)
 	do.ProvideNamedValue(injector, "AccessTokenDuration", cfg.AccessTokenDuration)
 	do.ProvideNamedValue(injector, "RefreshTokenDuration", cfg.RefreshTokenDuration)
