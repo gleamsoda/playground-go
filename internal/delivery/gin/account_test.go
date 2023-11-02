@@ -19,9 +19,9 @@ import (
 
 	"playground/internal/app"
 	"playground/internal/delivery/gin/helper"
+	mock_app "playground/internal/mock/app"
 	"playground/internal/pkg/apperr"
 	"playground/internal/pkg/token"
-	mock_app "playground/test/mock/app"
 )
 
 func TestGetAccountAPI(t *testing.T) {

@@ -19,9 +19,9 @@ import (
 	"go.uber.org/mock/gomock"
 
 	"playground/internal/app"
+	mock_app "playground/internal/mock/app"
 	"playground/internal/pkg/apperr"
 	"playground/internal/pkg/password"
-	mock_app "playground/test/mock/app"
 )
 
 func TestCreateUserAPI(t *testing.T) {
