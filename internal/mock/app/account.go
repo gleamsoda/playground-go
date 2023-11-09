@@ -125,3 +125,100 @@ func (mr *MockListAccountsUsecaseMockRecorder) Execute(ctx, args interface{}) *g
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockListAccountsUsecase)(nil).Execute), ctx, args)
 }
+
+// MockAccountRepository is a mock of AccountRepository interface.
+type MockAccountRepository struct {
+	ctrl     *gomock.Controller
+	recorder *MockAccountRepositoryMockRecorder
+}
+
+// MockAccountRepositoryMockRecorder is the mock recorder for MockAccountRepository.
+type MockAccountRepositoryMockRecorder struct {
+	mock *MockAccountRepository
+}
+
+// NewMockAccountRepository creates a new mock instance.
+func NewMockAccountRepository(ctrl *gomock.Controller) *MockAccountRepository {
+	mock := &MockAccountRepository{ctrl: ctrl}
+	mock.recorder = &MockAccountRepositoryMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockAccountRepository) EXPECT() *MockAccountRepositoryMockRecorder {
+	return m.recorder
+}
+
+// Create mocks base method.
+func (m *MockAccountRepository) Create(ctx context.Context, args *app.Account) (*app.Account, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Create", ctx, args)
+	ret0, _ := ret[0].(*app.Account)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Create indicates an expected call of Create.
+func (mr *MockAccountRepositoryMockRecorder) Create(ctx, args interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockAccountRepository)(nil).Create), ctx, args)
+}
+
+// Delete mocks base method.
+func (m *MockAccountRepository) Delete(ctx context.Context, id int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Delete", ctx, id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Delete indicates an expected call of Delete.
+func (mr *MockAccountRepositoryMockRecorder) Delete(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockAccountRepository)(nil).Delete), ctx, id)
+}
+
+// Get mocks base method.
+func (m *MockAccountRepository) Get(ctx context.Context, id int64) (*app.Account, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Get", ctx, id)
+	ret0, _ := ret[0].(*app.Account)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Get indicates an expected call of Get.
+func (mr *MockAccountRepositoryMockRecorder) Get(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockAccountRepository)(nil).Get), ctx, id)
+}
+
+// List mocks base method.
+func (m *MockAccountRepository) List(ctx context.Context, args *app.ListAccountsParams) ([]app.Account, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "List", ctx, args)
+	ret0, _ := ret[0].([]app.Account)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// List indicates an expected call of List.
+func (mr *MockAccountRepositoryMockRecorder) List(ctx, args interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockAccountRepository)(nil).List), ctx, args)
+}
+
+// Update mocks base method.
+func (m *MockAccountRepository) Update(ctx context.Context, args *app.Account) (*app.Account, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Update", ctx, args)
+	ret0, _ := ret[0].(*app.Account)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Update indicates an expected call of Update.
+func (mr *MockAccountRepositoryMockRecorder) Update(ctx, args interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockAccountRepository)(nil).Update), ctx, args)
+}

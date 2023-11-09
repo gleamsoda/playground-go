@@ -2,16 +2,32 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 
 	"playground/internal/app"
 	"playground/internal/app/repository/sqlc/gen"
 )
 
-func (r *Repository) CreateTransfer(ctx context.Context, args *app.Transfer) (*app.Transfer, error) {
+type Transfer struct {
+	e Executor
+	q gen.Querier
+}
+
+func NewTransfer(e Executor) *Transfer {
+	return &Transfer{
+		e: e,
+		q: gen.New(e),
+	}
+}
+
+var _ app.TransferRepository = (*Transfer)(nil)
+
+func (r *Transfer) Create(ctx context.Context, args *app.Transfer) (*app.Transfer, error) {
 	var t *gen.Transfer
 
-	if err := r.tx(ctx, func(cctx context.Context, q *gen.Queries) error {
-		id, err := q.CreateTransfer(cctx, &gen.CreateTransferParams{
+	if err := runTx(ctx, r.e, func(cctx context.Context, tx *sql.Tx) error {
+		txr := NewTransfer(tx)
+		id, err := txr.q.CreateTransfer(cctx, &gen.CreateTransferParams{
 			FromAccountID: args.FromAccountID,
 			ToAccountID:   args.ToAccountID,
 			Amount:        args.Amount,
@@ -20,7 +36,7 @@ func (r *Repository) CreateTransfer(ctx context.Context, args *app.Transfer) (*a
 			return err
 		}
 
-		_, err = q.CreateEntry(cctx, &gen.CreateEntryParams{
+		_, err = txr.q.CreateEntry(cctx, &gen.CreateEntryParams{
 			AccountID: args.FromAccountID,
 			Amount:    -args.Amount,
 		})
@@ -28,7 +44,7 @@ func (r *Repository) CreateTransfer(ctx context.Context, args *app.Transfer) (*a
 			return err
 		}
 
-		_, err = q.CreateEntry(cctx, &gen.CreateEntryParams{
+		_, err = txr.q.CreateEntry(cctx, &gen.CreateEntryParams{
 			AccountID: args.ToAccountID,
 			Amount:    args.Amount,
 		})
@@ -43,12 +59,12 @@ func (r *Repository) CreateTransfer(ctx context.Context, args *app.Transfer) (*a
 			bs = append(bs, &gen.AddAccountBalanceParams{ID: args.ToAccountID, Amount: args.Amount}, &gen.AddAccountBalanceParams{ID: args.FromAccountID, Amount: -args.Amount})
 		}
 		for _, b := range bs {
-			if err := q.AddAccountBalance(cctx, b); err != nil {
+			if err := txr.q.AddAccountBalance(cctx, b); err != nil {
 				return err
 			}
 		}
 
-		if t, err = q.GetTransfer(cctx, id); err != nil {
+		if t, err = txr.q.GetTransfer(cctx, id); err != nil {
 			return err
 		}
 		return nil
@@ -65,7 +81,7 @@ func (r *Repository) CreateTransfer(ctx context.Context, args *app.Transfer) (*a
 	}, nil
 }
 
-func (r *Repository) GetTransfer(ctx context.Context, id int64) (*app.Transfer, error) {
+func (r *Transfer) Get(ctx context.Context, id int64) (*app.Transfer, error) {
 	t, err := r.q.GetTransfer(ctx, id)
 	if err != nil {
 		return nil, err
@@ -80,7 +96,7 @@ func (r *Repository) GetTransfer(ctx context.Context, id int64) (*app.Transfer, 
 	}, nil
 }
 
-func (r *Repository) ListTransfers(ctx context.Context, args *app.ListTransfersParams) ([]app.Transfer, error) {
+func (r *Transfer) List(ctx context.Context, args *app.ListTransfersParams) ([]app.Transfer, error) {
 	ts, err := r.q.ListTransfers(ctx, &gen.ListTransfersParams{
 		FromAccountID: args.FromAccountID,
 		ToAccountID:   args.ToAccountID,
@@ -105,28 +121,28 @@ func (r *Repository) ListTransfers(ctx context.Context, args *app.ListTransfersP
 	return result, nil
 }
 
-func (r *Repository) CreateEntry(ctx context.Context, args *app.Entry) (*app.Entry, error) {
-	id, err := r.q.CreateEntry(ctx, &gen.CreateEntryParams{
-		AccountID: args.AccountID,
-		Amount:    args.Amount,
-	})
-	if err != nil {
-		return nil, err
-	}
+// func (r *Transfer) CreateEntry(ctx context.Context, args *app.Entry) (*app.Entry, error) {
+// 	id, err := r.q.CreateEntry(ctx, &gen.CreateEntryParams{
+// 		AccountID: args.AccountID,
+// 		Amount:    args.Amount,
+// 	})
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	return r.GetEntry(ctx, id)
-}
+// 	return r.GetEntry(ctx, id)
+// }
 
-func (r *Repository) GetEntry(ctx context.Context, id int64) (*app.Entry, error) {
-	e, err := r.q.GetEntry(ctx, id)
-	if err != nil {
-		return nil, err
-	}
+// func (r *Transfer) GetEntry(ctx context.Context, id int64) (*app.Entry, error) {
+// 	e, err := r.q.GetEntry(ctx, id)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	return &app.Entry{
-		ID:        e.ID,
-		AccountID: e.AccountID,
-		Amount:    e.Amount,
-		CreatedAt: e.CreatedAt,
-	}, nil
-}
+// 	return &app.Entry{
+// 		ID:        e.ID,
+// 		AccountID: e.AccountID,
+// 		Amount:    e.Amount,
+// 		CreatedAt: e.CreatedAt,
+// 	}, nil
+// }

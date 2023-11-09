@@ -75,7 +75,7 @@ func NewServer(cfg config.Config) (*Server, error) {
 	injector := do.New()
 	do.Provide(injector, NewRouter)
 	do.Provide(injector, resolver.NewResolver)
-	do.Provide(injector, repository.NewRepository)
+	do.Provide(injector, repository.NewManager)
 	do.ProvideValue(injector, conn)
 	do.Provide(injector, dispatcher.NewDispatcher)
 	do.ProvideValue(injector, asynq.RedisClientOpt{Addr: cfg.RedisAddress})

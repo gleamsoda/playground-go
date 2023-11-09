@@ -11,35 +11,35 @@ import (
 )
 
 type (
-	CreateAccountUsecase struct {
-		r app.Repository
+	CreateAccount struct {
+		r app.RepositoryManager
 	}
-	GetAccountUsecase struct {
-		r app.Repository
+	GetAccount struct {
+		r app.RepositoryManager
 	}
-	ListAccountsUsecase struct {
-		r app.Repository
+	ListAccounts struct {
+		r app.RepositoryManager
 	}
 )
 
-func NewCreateAccountUsecase(r app.Repository) *CreateAccountUsecase {
-	return &CreateAccountUsecase{
+func NewCreateAccount(r app.RepositoryManager) *CreateAccount {
+	return &CreateAccount{
 		r: r,
 	}
 }
 
-func (u *CreateAccountUsecase) Execute(ctx context.Context, args *app.CreateAccountParams) (*app.Account, error) {
-	return u.r.CreateAccount(ctx, app.NewAccount(args.Owner, args.Balance, args.Currency))
+func (u *CreateAccount) Execute(ctx context.Context, args *app.CreateAccountParams) (*app.Account, error) {
+	return u.r.Account().Create(ctx, app.NewAccount(args.Owner, args.Balance, args.Currency))
 }
 
-func NewGetAccountUsecase(r app.Repository) *GetAccountUsecase {
-	return &GetAccountUsecase{
+func NewGetAccount(r app.RepositoryManager) *GetAccount {
+	return &GetAccount{
 		r: r,
 	}
 }
 
-func (u *GetAccountUsecase) Execute(ctx context.Context, args *app.GetAccountsParams) (*app.Account, error) {
-	a, err := u.r.GetAccount(ctx, args.ID)
+func (u *GetAccount) Execute(ctx context.Context, args *app.GetAccountsParams) (*app.Account, error) {
+	a, err := u.r.Account().Get(ctx, args.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -50,12 +50,12 @@ func (u *GetAccountUsecase) Execute(ctx context.Context, args *app.GetAccountsPa
 	return a, nil
 }
 
-func NewListAccountsUsecase(r app.Repository) *ListAccountsUsecase {
-	return &ListAccountsUsecase{
+func NewListAccounts(r app.RepositoryManager) *ListAccounts {
+	return &ListAccounts{
 		r: r,
 	}
 }
 
-func (u *ListAccountsUsecase) Execute(ctx context.Context, args *app.ListAccountsParams) ([]app.Account, error) {
-	return u.r.ListAccounts(ctx, args)
+func (u *ListAccounts) Execute(ctx context.Context, args *app.ListAccountsParams) ([]app.Account, error) {
+	return u.r.Account().List(ctx, args)
 }

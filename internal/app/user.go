@@ -71,4 +71,13 @@ type (
 		FullName    *string `json:"full_name" binding:""`
 		Email       *string `json:"email" binding:"email"`
 	}
+	UserRepository interface {
+		Create(ctx context.Context, args *User) (*User, error)
+		Get(ctx context.Context, username string) (*User, error)
+		Update(ctx context.Context, args *User) (*User, error)
+		UpdateEmailVerified(ctx context.Context, args *VerifyEmailParams) (*User, *VerifyEmail, error)
+		CreateSession(ctx context.Context, args *Session) error
+		GetSession(ctx context.Context, id uuid.UUID) (*Session, error)
+		CreateVerifyEmail(ctx context.Context, args *VerifyEmail) (*VerifyEmail, error)
+	}
 )

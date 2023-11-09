@@ -34,4 +34,9 @@ type (
 		Amount          int64  `json:"amount"`
 		Currency        string `json:"currency"`
 	}
+	TransferRepository interface {
+		Create(ctx context.Context, args *Transfer) (*Transfer, error)
+		Get(ctx context.Context, id int64) (*Transfer, error)
+		List(ctx context.Context, args *ListTransfersParams) ([]Transfer, error)
+	}
 )

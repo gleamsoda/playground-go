@@ -11,29 +11,29 @@ import (
 )
 
 type Handler struct {
-	createAccountUsecase    app.CreateAccountUsecase
-	getAccountUsecase       app.GetAccountUsecase
-	listAccountsUsecase     app.ListAccountsUsecase
-	createTransferUsecase   app.CreateTransferUsecase
-	createUserUsecase       app.CreateUserUsecase
-	loginUserUsecase        app.LoginUserUsecase
-	renewAccessTokenUsecase app.RenewAccessTokenUsecase
+	createAccount    app.CreateAccountUsecase
+	getAccount       app.GetAccountUsecase
+	listAccounts     app.ListAccountsUsecase
+	createTransfer   app.CreateTransferUsecase
+	createUser       app.CreateUserUsecase
+	loginUser        app.LoginUserUsecase
+	renewAccessToken app.RenewAccessTokenUsecase
 }
 
 func NewHandler(i *do.Injector) (*Handler, error) {
-	r := do.MustInvoke[app.Repository](i)
+	r := do.MustInvoke[app.RepositoryManager](i)
 	d := do.MustInvoke[app.Dispatcher](i)
 	tm := do.MustInvoke[token.Manager](i)
 	accessTokenDuration := do.MustInvokeNamed[time.Duration](i, "AccessTokenDuration")
 	refreshTokenDuration := do.MustInvokeNamed[time.Duration](i, "RefreshTokenDuration")
 
 	return &Handler{
-		createAccountUsecase:    usecase.NewCreateAccountUsecase(r),
-		getAccountUsecase:       usecase.NewGetAccountUsecase(r),
-		listAccountsUsecase:     usecase.NewListAccountsUsecase(r),
-		createTransferUsecase:   usecase.NewCreateTransferUsecase(r),
-		createUserUsecase:       usecase.NewCreateUserUsecase(r, d),
-		loginUserUsecase:        usecase.NewLoginUserUsecase(r, tm, accessTokenDuration, refreshTokenDuration),
-		renewAccessTokenUsecase: usecase.NewRenewAccessTokenUsecase(r, tm, accessTokenDuration),
+		createAccount:    usecase.NewCreateAccount(r),
+		getAccount:       usecase.NewGetAccount(r),
+		listAccounts:     usecase.NewListAccounts(r),
+		createTransfer:   usecase.NewCreateTransfer(r),
+		createUser:       usecase.NewCreateUser(r, d),
+		loginUser:        usecase.NewLoginUser(r, tm, accessTokenDuration, refreshTokenDuration),
+		renewAccessToken: usecase.NewRenewAccessToken(r, tm, accessTokenDuration),
 	}, nil
 }

@@ -46,4 +46,11 @@ type (
 		Limit  int32  `json:"limit"`
 		Offset int32  `json:"offset"`
 	}
+	AccountRepository interface {
+		Create(ctx context.Context, args *Account) (*Account, error)
+		Get(ctx context.Context, id int64) (*Account, error)
+		List(ctx context.Context, args *ListAccountsParams) ([]Account, error)
+		Update(ctx context.Context, args *Account) (*Account, error)
+		Delete(ctx context.Context, id int64) error
+	}
 )

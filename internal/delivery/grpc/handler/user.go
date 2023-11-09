@@ -22,7 +22,7 @@ func (c *Handler) CreateUser(ctx context.Context, req *gen.CreateUserRequest) (*
 		Email:    req.GetEmail(),
 		Password: req.GetPassword(),
 	}
-	u, err := c.createUserUsecase.Execute(ctx, args)
+	u, err := c.createUser.Execute(ctx, args)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +61,7 @@ func (c *Handler) LoginUser(ctx context.Context, req *gen.LoginUserRequest) (*ge
 		UserAgent: meta.UserAgent,
 		ClientIP:  meta.ClientIP,
 	}
-	r, err := c.loginUserUsecase.Execute(ctx, args)
+	r, err := c.loginUser.Execute(ctx, args)
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +103,7 @@ func (c *Handler) UpdateUser(ctx context.Context, req *gen.UpdateUserRequest) (*
 		FullName:    req.FullName,
 		Email:       req.Email,
 	}
-	u, err := c.updateUserUsecase.Execute(ctx, args)
+	u, err := c.updateUser.Execute(ctx, args)
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +141,7 @@ func (c *Handler) VerifyEmail(ctx context.Context, req *gen.VerifyEmailRequest) 
 		return nil, invalidArgumentError(violations)
 	}
 
-	usr, err := c.verifyEmailUsecase.Execute(ctx, &app.VerifyEmailParams{
+	usr, err := c.verifyEmail.Execute(ctx, &app.VerifyEmailParams{
 		EmailID:    req.GetEmailId(),
 		SecretCode: req.GetSecretCode(),
 	})

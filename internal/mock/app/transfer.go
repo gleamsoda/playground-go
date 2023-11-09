@@ -49,3 +49,71 @@ func (mr *MockCreateTransferUsecaseMockRecorder) Execute(ctx, args interface{}) 
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockCreateTransferUsecase)(nil).Execute), ctx, args)
 }
+
+// MockTransferRepository is a mock of TransferRepository interface.
+type MockTransferRepository struct {
+	ctrl     *gomock.Controller
+	recorder *MockTransferRepositoryMockRecorder
+}
+
+// MockTransferRepositoryMockRecorder is the mock recorder for MockTransferRepository.
+type MockTransferRepositoryMockRecorder struct {
+	mock *MockTransferRepository
+}
+
+// NewMockTransferRepository creates a new mock instance.
+func NewMockTransferRepository(ctrl *gomock.Controller) *MockTransferRepository {
+	mock := &MockTransferRepository{ctrl: ctrl}
+	mock.recorder = &MockTransferRepositoryMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockTransferRepository) EXPECT() *MockTransferRepositoryMockRecorder {
+	return m.recorder
+}
+
+// Create mocks base method.
+func (m *MockTransferRepository) Create(ctx context.Context, args *app.Transfer) (*app.Transfer, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Create", ctx, args)
+	ret0, _ := ret[0].(*app.Transfer)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Create indicates an expected call of Create.
+func (mr *MockTransferRepositoryMockRecorder) Create(ctx, args interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockTransferRepository)(nil).Create), ctx, args)
+}
+
+// Get mocks base method.
+func (m *MockTransferRepository) Get(ctx context.Context, id int64) (*app.Transfer, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Get", ctx, id)
+	ret0, _ := ret[0].(*app.Transfer)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Get indicates an expected call of Get.
+func (mr *MockTransferRepositoryMockRecorder) Get(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockTransferRepository)(nil).Get), ctx, id)
+}
+
+// List mocks base method.
+func (m *MockTransferRepository) List(ctx context.Context, args *app.ListTransfersParams) ([]app.Transfer, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "List", ctx, args)
+	ret0, _ := ret[0].([]app.Transfer)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// List indicates an expected call of List.
+func (mr *MockTransferRepositoryMockRecorder) List(ctx, args interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockTransferRepository)(nil).List), ctx, args)
+}

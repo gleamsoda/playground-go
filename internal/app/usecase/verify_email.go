@@ -9,32 +9,32 @@ import (
 )
 
 type (
-	SendVerifyEmailUsecase struct {
-		r      app.Repository
+	SendVerifyEmail struct {
+		r      app.RepositoryManager
 		mailer mail.Sender
 	}
-	VerifyEmailUsecase struct {
-		r app.Repository
+	VerifyEmail struct {
+		r app.RepositoryManager
 	}
 )
 
-func NewSendVerifyEmailUsecase(r app.Repository, mailer mail.Sender) *SendVerifyEmailUsecase {
-	return &SendVerifyEmailUsecase{
+func NewSendVerifyEmail(r app.RepositoryManager, mailer mail.Sender) *SendVerifyEmail {
+	return &SendVerifyEmail{
 		r:      r,
 		mailer: mailer,
 	}
 }
 
-func (u *SendVerifyEmailUsecase) Execute(ctx context.Context, args *app.SendVerifyEmailPayload) (*app.VerifyEmail, error) {
-	usr, err := u.r.GetUser(ctx, args.Username)
+func (u *SendVerifyEmail) Execute(ctx context.Context, args *app.SendVerifyEmailPayload) (*app.VerifyEmail, error) {
+	usr, err := u.r.User().Get(ctx, args.Username)
 	if err != nil {
 		return nil, err
 	}
 
 	var ve *app.VerifyEmail
-	err = u.r.Transaction(ctx, func(ctx context.Context, r app.Repository) error {
+	err = u.r.Transaction(ctx, func(ctx context.Context, r app.RepositoryManager) error {
 		var err error
-		if ve, err = r.CreateVerifyEmail(ctx, app.NewVerifyEmail(
+		if ve, err = r.User().CreateVerifyEmail(ctx, app.NewVerifyEmail(
 			usr.Username,
 			usr.Email,
 			app.RandomString(32),
@@ -62,13 +62,13 @@ Thank you for registering with us!<br/>
 Please <a href="%s">click here</a> to verify your email address.<br/>
 `
 
-func NewVerifyEmailUsecase(r app.Repository) *VerifyEmailUsecase {
-	return &VerifyEmailUsecase{
+func NewVerifyEmail(r app.RepositoryManager) *VerifyEmail {
+	return &VerifyEmail{
 		r: r,
 	}
 }
 
-func (u *VerifyEmailUsecase) Execute(ctx context.Context, args *app.VerifyEmailParams) (*app.User, error) {
-	usr, _, err := u.r.UpdateUserEmailVerified(ctx, args)
+func (u *VerifyEmail) Execute(ctx context.Context, args *app.VerifyEmailParams) (*app.User, error) {
+	usr, _, err := u.r.User().UpdateEmailVerified(ctx, args)
 	return usr, err
 }

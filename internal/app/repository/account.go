@@ -12,7 +12,19 @@ import (
 	"playground/internal/pkg/apperr"
 )
 
-func (r *Repository) CreateAccount(ctx context.Context, args *app.Account) (*app.Account, error) {
+type Account struct {
+	q gen.Querier
+}
+
+func NewAccount(e Executor) *Account {
+	return &Account{
+		q: gen.New(e),
+	}
+}
+
+var _ app.AccountRepository = (*Account)(nil)
+
+func (r *Account) Create(ctx context.Context, args *app.Account) (*app.Account, error) {
 	id, err := r.q.CreateAccount(ctx, &gen.CreateAccountParams{
 		Owner:    args.Owner,
 		Balance:  args.Balance,
@@ -22,10 +34,10 @@ func (r *Repository) CreateAccount(ctx context.Context, args *app.Account) (*app
 		return nil, err
 	}
 
-	return r.GetAccount(ctx, id)
+	return r.Get(ctx, id)
 }
 
-func (r *Repository) GetAccount(ctx context.Context, id int64) (*app.Account, error) {
+func (r *Account) Get(ctx context.Context, id int64) (*app.Account, error) {
 	a, err := r.q.GetAccount(ctx, id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -43,7 +55,7 @@ func (r *Repository) GetAccount(ctx context.Context, id int64) (*app.Account, er
 	}, nil
 }
 
-func (r *Repository) ListAccounts(ctx context.Context, args *app.ListAccountsParams) ([]app.Account, error) {
+func (r *Account) List(ctx context.Context, args *app.ListAccountsParams) ([]app.Account, error) {
 	as, err := r.q.ListAccounts(ctx, &gen.ListAccountsParams{
 		Owner:  args.Owner,
 		Limit:  args.Limit,
@@ -67,7 +79,7 @@ func (r *Repository) ListAccounts(ctx context.Context, args *app.ListAccountsPar
 	return result, nil
 }
 
-func (r *Repository) UpdateAccount(ctx context.Context, args *app.Account) (*app.Account, error) {
+func (r *Account) Update(ctx context.Context, args *app.Account) (*app.Account, error) {
 	err := r.q.UpdateAccount(ctx, &gen.UpdateAccountParams{
 		ID:      args.ID,
 		Balance: args.Balance,
@@ -75,9 +87,9 @@ func (r *Repository) UpdateAccount(ctx context.Context, args *app.Account) (*app
 	if err != nil {
 		return nil, err
 	}
-	return r.GetAccount(ctx, args.ID)
+	return r.Get(ctx, args.ID)
 }
 
-func (r *Repository) DeleteAccount(ctx context.Context, id int64) error {
+func (r *Account) Delete(ctx context.Context, id int64) error {
 	return r.q.DeleteAccount(ctx, id)
 }

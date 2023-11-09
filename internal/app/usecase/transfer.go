@@ -8,17 +8,17 @@ import (
 	"playground/internal/app"
 )
 
-type CreateTransferUsecase struct {
-	r app.Repository
+type CreateTransfer struct {
+	r app.RepositoryManager
 }
 
-func NewCreateTransferUsecase(r app.Repository) *CreateTransferUsecase {
-	return &CreateTransferUsecase{
+func NewCreateTransfer(r app.RepositoryManager) *CreateTransfer {
+	return &CreateTransfer{
 		r: r,
 	}
 }
 
-func (u *CreateTransferUsecase) Execute(ctx context.Context, args *app.CreateTransferParams) (*app.Transfer, error) {
+func (u *CreateTransfer) Execute(ctx context.Context, args *app.CreateTransferParams) (*app.Transfer, error) {
 	fromAccount, err := u.validAccount(ctx, args.FromAccountID, args.Currency)
 	if err != nil {
 		return nil, err
@@ -31,11 +31,11 @@ func (u *CreateTransferUsecase) Execute(ctx context.Context, args *app.CreateTra
 		return nil, err
 	}
 
-	return u.r.CreateTransfer(ctx, app.NewTransfer(args.FromAccountID, args.ToAccountID, args.Amount))
+	return u.r.Transfer().Create(ctx, app.NewTransfer(args.FromAccountID, args.ToAccountID, args.Amount))
 }
 
-func (u *CreateTransferUsecase) validAccount(ctx context.Context, accountID int64, currency string) (*app.Account, error) {
-	a, err := u.r.GetAccount(ctx, accountID)
+func (u *CreateTransfer) validAccount(ctx context.Context, accountID int64, currency string) (*app.Account, error) {
+	a, err := u.r.Account().Get(ctx, accountID)
 	if err != nil {
 		return nil, err
 	}
