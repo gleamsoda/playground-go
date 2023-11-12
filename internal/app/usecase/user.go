@@ -16,43 +16,43 @@ import (
 )
 
 type (
-	CreateUserUsecase struct {
-		r app.Repository
+	CreateUser struct {
+		r app.RepositoryManager
 		d app.Dispatcher
 	}
-	LoginUserUsecase struct {
-		r                    app.Repository
+	LoginUser struct {
+		r                    app.RepositoryManager
 		tm                   token.Manager
 		accessTokenDuration  time.Duration
 		refreshTokenDuration time.Duration
 	}
-	RenewAccessTokenUsecase struct {
-		r                   app.Repository
+	RenewAccessToken struct {
+		r                   app.RepositoryManager
 		tm                  token.Manager
 		accessTokenDuration time.Duration
 	}
-	UpdateUserUsecase struct {
-		r app.Repository
+	UpdateUser struct {
+		r app.RepositoryManager
 	}
 )
 
-func NewCreateUserUsecase(r app.Repository, d app.Dispatcher) *CreateUserUsecase {
-	return &CreateUserUsecase{
+func NewCreateUser(r app.RepositoryManager, d app.Dispatcher) *CreateUser {
+	return &CreateUser{
 		r: r,
 		d: d,
 	}
 }
 
-func (u *CreateUserUsecase) Execute(ctx context.Context, args *app.CreateUserParams) (*app.User, error) {
+func (u *CreateUser) Execute(ctx context.Context, args *app.CreateUserParams) (*app.User, error) {
 	hashedPassword, err := password.Hash(args.Password)
 	if err != nil {
 		return nil, err
 	}
 
 	var usr *app.User
-	err = u.r.Transaction(ctx, func(ctx context.Context, r app.Repository) error {
+	err = u.r.Transaction(ctx, func(ctx context.Context, r app.RepositoryManager) error {
 		var err error
-		if usr, err = r.CreateUser(ctx, app.NewUser(
+		if usr, err = r.User().Create(ctx, app.NewUser(
 			args.Username,
 			hashedPassword,
 			args.FullName,
@@ -70,8 +70,8 @@ func (u *CreateUserUsecase) Execute(ctx context.Context, args *app.CreateUserPar
 	return usr, err
 }
 
-func NewLoginUserUsecase(r app.Repository, tm token.Manager, accessTokenDuration time.Duration, refreshTokenDuration time.Duration) *LoginUserUsecase {
-	return &LoginUserUsecase{
+func NewLoginUser(r app.RepositoryManager, tm token.Manager, accessTokenDuration time.Duration, refreshTokenDuration time.Duration) *LoginUser {
+	return &LoginUser{
 		r:                    r,
 		tm:                   tm,
 		accessTokenDuration:  accessTokenDuration,
@@ -79,8 +79,8 @@ func NewLoginUserUsecase(r app.Repository, tm token.Manager, accessTokenDuration
 	}
 }
 
-func (u *LoginUserUsecase) Execute(ctx context.Context, args *app.LoginUserParams) (*app.LoginUserOutputParams, error) {
-	usr, err := u.r.GetUser(ctx, args.Username)
+func (u *LoginUser) Execute(ctx context.Context, args *app.LoginUserParams) (*app.LoginUserOutputParams, error) {
+	usr, err := u.r.User().Get(ctx, args.Username)
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +104,7 @@ func (u *LoginUserUsecase) Execute(ctx context.Context, args *app.LoginUserParam
 		return nil, err
 	}
 
-	if err := u.r.CreateSession(ctx, app.NewSession(
+	if err := u.r.User().CreateSession(ctx, app.NewSession(
 		rPayload.ID,
 		usr.Username,
 		rToken,
@@ -126,21 +126,21 @@ func (u *LoginUserUsecase) Execute(ctx context.Context, args *app.LoginUserParam
 	}, nil
 }
 
-func NewRenewAccessTokenUsecase(r app.Repository, tm token.Manager, accessTokenDuration time.Duration) *RenewAccessTokenUsecase {
-	return &RenewAccessTokenUsecase{
+func NewRenewAccessToken(r app.RepositoryManager, tm token.Manager, accessTokenDuration time.Duration) *RenewAccessToken {
+	return &RenewAccessToken{
 		r:                   r,
 		tm:                  tm,
 		accessTokenDuration: accessTokenDuration,
 	}
 }
 
-func (u *RenewAccessTokenUsecase) Execute(ctx context.Context, refreshToken string) (*app.RenewAccessTokenOutputParams, error) {
+func (u *RenewAccessToken) Execute(ctx context.Context, refreshToken string) (*app.RenewAccessTokenOutputParams, error) {
 	rPayload, err := u.tm.Verify(refreshToken)
 	if err != nil {
 		return nil, err
 	}
 
-	sess, err := u.r.GetSession(ctx, rPayload.ID)
+	sess, err := u.r.User().GetSession(ctx, rPayload.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -172,18 +172,18 @@ func (u *RenewAccessTokenUsecase) Execute(ctx context.Context, refreshToken stri
 	return resp, nil
 }
 
-func NewUpdateUserUsecase(r app.Repository) *UpdateUserUsecase {
-	return &UpdateUserUsecase{
+func NewUpdateUser(r app.RepositoryManager) *UpdateUser {
+	return &UpdateUser{
 		r: r,
 	}
 }
 
-func (u *UpdateUserUsecase) Execute(ctx context.Context, args *app.UpdateUserParams) (*app.User, error) {
+func (u *UpdateUser) Execute(ctx context.Context, args *app.UpdateUserParams) (*app.User, error) {
 	if args.Username != args.ReqUsername {
 		return nil, failure.Translate(fmt.Errorf("cannot update other user's info"), apperr.Unauthenticated)
 	}
 
-	usr, err := u.r.GetUser(ctx, args.Username)
+	usr, err := u.r.User().Get(ctx, args.Username)
 	if err != nil {
 		return nil, err
 	}
@@ -203,5 +203,5 @@ func (u *UpdateUserUsecase) Execute(ctx context.Context, args *app.UpdateUserPar
 		usr.PasswordChangedAt = time.Now()
 	}
 
-	return u.r.UpdateUser(ctx, usr)
+	return u.r.User().Update(ctx, usr)
 }

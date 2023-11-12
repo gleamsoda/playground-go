@@ -30,11 +30,11 @@ const (
 type (
 	Handler struct {
 		gen.UnimplementedPlaygroundServer
-		tm                 token.Manager
-		createUserUsecase  app.CreateUserUsecase
-		loginUserUsecase   app.LoginUserUsecase
-		updateUserUsecase  app.UpdateUserUsecase
-		verifyEmailUsecase app.VerifyEmailUsecase
+		tm          token.Manager
+		createUser  app.CreateUserUsecase
+		loginUser   app.LoginUserUsecase
+		updateUser  app.UpdateUserUsecase
+		verifyEmail app.VerifyEmailUsecase
 	}
 	Metadata struct {
 		UserAgent string
@@ -43,18 +43,18 @@ type (
 )
 
 func NewHandler(i *do.Injector) (*Handler, error) {
-	r := do.MustInvoke[app.Repository](i)
+	r := do.MustInvoke[app.RepositoryManager](i)
 	d := do.MustInvoke[app.Dispatcher](i)
 	tm := do.MustInvoke[token.Manager](i)
 	accessTokenDuration := do.MustInvokeNamed[time.Duration](i, "AccessTokenDuration")
 	refreshTokenDuration := do.MustInvokeNamed[time.Duration](i, "RefreshTokenDuration")
 
 	return &Handler{
-		tm:                 tm,
-		createUserUsecase:  usecase.NewCreateUserUsecase(r, d),
-		loginUserUsecase:   usecase.NewLoginUserUsecase(r, tm, accessTokenDuration, refreshTokenDuration),
-		updateUserUsecase:  usecase.NewUpdateUserUsecase(r),
-		verifyEmailUsecase: usecase.NewVerifyEmailUsecase(r),
+		tm:          tm,
+		createUser:  usecase.NewCreateUser(r, d),
+		loginUser:   usecase.NewLoginUser(r, tm, accessTokenDuration, refreshTokenDuration),
+		updateUser:  usecase.NewUpdateUser(r),
+		verifyEmail: usecase.NewVerifyEmail(r),
 	}, nil
 }
 

@@ -15,14 +15,14 @@ import (
 )
 
 type handler struct {
-	sendVerifyEmailUsecase app.SendVerifyEmailUsecase
+	sendVerifyEmail app.SendVerifyEmailUsecase
 }
 
 func NewHandler(i *do.Injector) (*handler, error) {
-	r := do.MustInvoke[app.Repository](i)
+	r := do.MustInvoke[app.RepositoryManager](i)
 	m := do.MustInvoke[mail.Sender](i)
 	return &handler{
-		sendVerifyEmailUsecase: usecase.NewSendVerifyEmailUsecase(r, m),
+		sendVerifyEmail: usecase.NewSendVerifyEmail(r, m),
 	}, nil
 }
 
@@ -32,7 +32,7 @@ func (h *handler) SendVerifyEmail(ctx context.Context, t *asynq.Task) error {
 		return fmt.Errorf("failed to unmarshal payload: %w", asynq.SkipRetry)
 	}
 
-	usr, err := h.sendVerifyEmailUsecase.Execute(ctx, &app.SendVerifyEmailPayload{
+	usr, err := h.sendVerifyEmail.Execute(ctx, &app.SendVerifyEmailPayload{
 		Username: payload.Username,
 	})
 	if err != nil {

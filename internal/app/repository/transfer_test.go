@@ -29,7 +29,7 @@ func TestCreateTransfer(t *testing.T) {
 		go func() {
 			<-locker
 			t := app.NewTransfer(account1.ID, account2.ID, amount)
-			result, err := repository.CreateTransfer(context.Background(), t)
+			result, err := rm.Transfer().Create(context.Background(), t)
 
 			errs <- err
 			results <- result
@@ -54,16 +54,16 @@ func TestCreateTransfer(t *testing.T) {
 		require.NotZero(t, result.ID)
 		require.NotZero(t, result.CreatedAt)
 
-		_, err = repository.GetTransfer(context.Background(), result.ID)
+		_, err = rm.Transfer().Get(context.Background(), result.ID)
 		require.NoError(t, err)
 
 		// check accounts
-		fromAccount, err := repository.GetAccount(context.Background(), result.FromAccountID)
+		fromAccount, err := rm.Account().Get(context.Background(), result.FromAccountID)
 		require.NoError(t, err)
 		require.NotEmpty(t, fromAccount)
 		require.Equal(t, account1.ID, fromAccount.ID)
 
-		toAccount, err := repository.GetAccount(context.Background(), result.ToAccountID)
+		toAccount, err := rm.Account().Get(context.Background(), result.ToAccountID)
 		require.NoError(t, err)
 		require.NotEmpty(t, toAccount)
 		require.Equal(t, account2.ID, toAccount.ID)
@@ -85,10 +85,10 @@ func TestCreateTransfer(t *testing.T) {
 	}
 
 	// check the final updated balance
-	updatedAccount1, err := repository.GetAccount(context.Background(), account1.ID)
+	updatedAccount1, err := rm.Account().Get(context.Background(), account1.ID)
 	require.NoError(t, err)
 
-	updatedAccount2, err := repository.GetAccount(context.Background(), account2.ID)
+	updatedAccount2, err := rm.Account().Get(context.Background(), account2.ID)
 	require.NoError(t, err)
 
 	fmt.Println(">> after:", updatedAccount1.Balance, updatedAccount2.Balance)
@@ -117,7 +117,7 @@ func TestCreateTransferDeadlock(t *testing.T) {
 
 		go func() {
 			t := app.NewTransfer(fromAccountID, toAccountID, amount)
-			_, err := repository.CreateTransfer(context.Background(), t)
+			_, err := rm.Transfer().Create(context.Background(), t)
 
 			errs <- err
 		}()
@@ -129,10 +129,10 @@ func TestCreateTransferDeadlock(t *testing.T) {
 	}
 
 	// check the final updated balance
-	updatedAccount1, err := repository.GetAccount(context.Background(), account1.ID)
+	updatedAccount1, err := rm.Account().Get(context.Background(), account1.ID)
 	require.NoError(t, err)
 
-	updatedAccount2, err := repository.GetAccount(context.Background(), account2.ID)
+	updatedAccount2, err := rm.Account().Get(context.Background(), account2.ID)
 	require.NoError(t, err)
 
 	fmt.Println(">> after:", updatedAccount1.Balance, updatedAccount2.Balance)
@@ -143,7 +143,7 @@ func TestCreateTransferDeadlock(t *testing.T) {
 func createRandomTransfer(t *testing.T, account1, account2 *app.Account) *app.Transfer {
 	args := app.NewTransfer(account1.ID, account2.ID, app.RandomMoney())
 
-	transfer, err := repository.CreateTransfer(context.Background(), args)
+	transfer, err := rm.Transfer().Create(context.Background(), args)
 	require.NoError(t, err)
 	require.NotEmpty(t, transfer)
 
@@ -162,7 +162,7 @@ func TestGetTransfer(t *testing.T) {
 	account2 := createRandomAccount(t)
 	transfer1 := createRandomTransfer(t, account1, account2)
 
-	transfer2, err := repository.GetTransfer(context.Background(), transfer1.ID)
+	transfer2, err := rm.Transfer().Get(context.Background(), transfer1.ID)
 	require.NoError(t, err)
 	require.NotEmpty(t, transfer2)
 
@@ -189,7 +189,7 @@ func TestListTransfer(t *testing.T) {
 		Offset:        5,
 	}
 
-	transfers, err := repository.ListTransfers(context.Background(), arg)
+	transfers, err := rm.Transfer().List(context.Background(), arg)
 	require.NoError(t, err)
 	require.Len(t, transfers, 5)
 

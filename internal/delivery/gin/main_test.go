@@ -37,7 +37,7 @@ var GetInjector = sync.OnceValue(func() *do.Injector {
 	injector := do.New()
 	do.Provide(injector, NewRouter)
 	do.Provide(injector, handler.NewHandler)
-	do.ProvideValue[app.Repository](injector, nil)
+	do.ProvideValue[app.RepositoryManager](injector, nil)
 	do.ProvideValue[app.Dispatcher](injector, nil)
 	do.ProvideValue[token.Manager](injector, tm)
 	do.ProvideNamedValue(injector, "AccessTokenDuration", cfg.AccessTokenDuration)

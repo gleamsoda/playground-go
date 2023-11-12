@@ -25,7 +25,7 @@ func (h *Handler) CreateTransfer(ctx *gin.Context) {
 	}
 
 	authPayload := ctx.MustGet(helper.AuthorizationPayloadKey).(*token.Payload)
-	if e, err := h.createTransferUsecase.Execute(ctx, &app.CreateTransferParams{
+	if e, err := h.createTransfer.Execute(ctx, &app.CreateTransferParams{
 		RequestUsername: authPayload.Username,
 		FromAccountID:   req.FromAccountID,
 		ToAccountID:     req.ToAccountID,

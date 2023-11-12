@@ -21,7 +21,7 @@ func createRandomAccount(t *testing.T) *app.Account {
 		Currency: app.RandomCurrency(),
 	}
 
-	account, err := repository.CreateAccount(context.Background(), arg)
+	account, err := rm.Account().Create(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, account)
 
@@ -41,7 +41,7 @@ func TestCreateAccount(t *testing.T) {
 
 func TestGetAccount(t *testing.T) {
 	account1 := createRandomAccount(t)
-	account2, err := repository.GetAccount(context.Background(), account1.ID)
+	account2, err := rm.Account().Get(context.Background(), account1.ID)
 	require.NoError(t, err)
 	require.NotEmpty(t, account2)
 
@@ -56,7 +56,7 @@ func TestUpdateAccount(t *testing.T) {
 	account1 := createRandomAccount(t)
 	newBalance := app.RandomMoney()
 	account1.Balance = newBalance
-	account2, err := repository.UpdateAccount(context.Background(), account1)
+	account2, err := rm.Account().Update(context.Background(), account1)
 	require.NoError(t, err)
 	require.NotEmpty(t, account2)
 
@@ -69,10 +69,10 @@ func TestUpdateAccount(t *testing.T) {
 
 func TestDeleteAccount(t *testing.T) {
 	account1 := createRandomAccount(t)
-	err := repository.DeleteAccount(context.Background(), account1.ID)
+	err := rm.Account().Delete(context.Background(), account1.ID)
 	require.NoError(t, err)
 
-	account2, err := repository.GetAccount(context.Background(), account1.ID)
+	account2, err := rm.Account().Get(context.Background(), account1.ID)
 	require.Error(t, err)
 	code, _ := failure.CodeOf(err)
 	require.Equal(t, apperr.NotFound, code)
@@ -91,7 +91,7 @@ func TestListAccounts(t *testing.T) {
 		Offset: 0,
 	}
 
-	accounts, err := repository.ListAccounts(context.Background(), arg)
+	accounts, err := rm.Account().List(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, accounts)
 

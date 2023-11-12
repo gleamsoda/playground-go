@@ -52,7 +52,7 @@ func NewConsumer(cfg config.Config) (*Consumer, error) {
 
 	injector := do.New()
 	do.Provide(injector, NewHandler)
-	do.Provide(injector, repository.NewRepository)
+	do.Provide(injector, repository.NewManager)
 	do.ProvideValue(injector, conn)
 	do.ProvideValue(injector, mailer)
 	h := do.MustInvoke[*handler](injector)

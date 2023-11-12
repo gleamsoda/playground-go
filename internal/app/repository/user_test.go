@@ -22,7 +22,7 @@ func createRandomUser(t *testing.T) *app.User {
 		Email:          app.RandomEmail(),
 	}
 
-	user, err := repository.CreateUser(context.Background(), arg)
+	user, err := rm.User().Create(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, user)
 
@@ -42,7 +42,7 @@ func TestCreateUser(t *testing.T) {
 
 func TestGetUser(t *testing.T) {
 	user1 := createRandomUser(t)
-	user2, err := repository.GetUser(context.Background(), user1.Username)
+	user2, err := rm.User().Get(context.Background(), user1.Username)
 	require.NoError(t, err)
 	require.NotEmpty(t, user2)
 
@@ -60,7 +60,7 @@ func TestUpdateUserOnlyFullName(t *testing.T) {
 
 	newFullName := app.RandomOwner()
 	oldUser.FullName = newFullName
-	updatedUser, err := repository.UpdateUser(context.Background(), oldUser)
+	updatedUser, err := rm.User().Update(context.Background(), oldUser)
 
 	require.NoError(t, err)
 	require.NotEqual(t, oldName, updatedUser.FullName)
@@ -75,7 +75,7 @@ func TestUpdateUserOnlyEmail(t *testing.T) {
 
 	newEmail := app.RandomEmail()
 	oldUser.Email = newEmail
-	updatedUser, err := repository.UpdateUser(context.Background(), oldUser)
+	updatedUser, err := rm.User().Update(context.Background(), oldUser)
 
 	require.NoError(t, err)
 	require.NotEqual(t, oldEmail, updatedUser.Email)
@@ -92,7 +92,7 @@ func TestUpdateUserOnlyPassword(t *testing.T) {
 	require.NoError(t, err)
 	oldUser.HashedPassword = newHashedPassword
 
-	updatedUser, err := repository.UpdateUser(context.Background(), oldUser)
+	updatedUser, err := rm.User().Update(context.Background(), oldUser)
 
 	require.NoError(t, err)
 	require.NotEqual(t, oldHashedPassword, updatedUser.HashedPassword)
@@ -117,7 +117,7 @@ func TestUpdateUserAllFields(t *testing.T) {
 	oldUser.Email = newEmail
 	oldUser.HashedPassword = newHashedPassword
 
-	updatedUser, err := repository.UpdateUser(context.Background(), oldUser)
+	updatedUser, err := rm.User().Update(context.Background(), oldUser)
 
 	require.NoError(t, err)
 	require.NotEqual(t, oldHashedPassword, updatedUser.HashedPassword)

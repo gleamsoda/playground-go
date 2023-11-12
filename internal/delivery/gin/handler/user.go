@@ -23,7 +23,7 @@ func (h *Handler) CreateUser(ctx *gin.Context) {
 		return
 	}
 
-	if e, err := h.createUserUsecase.Execute(ctx, &app.CreateUserParams{
+	if e, err := h.createUser.Execute(ctx, &app.CreateUserParams{
 		Username: req.Username,
 		Password: req.Password,
 		FullName: req.FullName,
@@ -47,7 +47,7 @@ func (h *Handler) LoginUser(ctx *gin.Context) {
 		return
 	}
 
-	if param, err := h.loginUserUsecase.Execute(ctx, &app.LoginUserParams{
+	if param, err := h.loginUser.Execute(ctx, &app.LoginUserParams{
 		Username:  req.Username,
 		Password:  req.Password,
 		UserAgent: ctx.Request.UserAgent(),
@@ -70,7 +70,7 @@ func (h *Handler) RenewAccessToken(ctx *gin.Context) {
 		return
 	}
 
-	if resp, err := h.renewAccessTokenUsecase.Execute(ctx, req.RefreshToken); err != nil {
+	if resp, err := h.renewAccessToken.Execute(ctx, req.RefreshToken); err != nil {
 		ctx.Error(err)
 	} else {
 		ctx.JSON(http.StatusOK, resp)
