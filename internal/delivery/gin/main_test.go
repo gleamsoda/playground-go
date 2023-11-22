@@ -13,11 +13,13 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/samber/do"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/mock/gomock"
 
 	"playground/internal/app"
 	"playground/internal/config"
 	"playground/internal/delivery/gin/handler"
 	"playground/internal/delivery/gin/helper"
+	mock_app "playground/internal/mock/app"
 	"playground/internal/pkg/token"
 )
 
@@ -44,6 +46,15 @@ var GetInjector = sync.OnceValue(func() *do.Injector {
 	do.ProvideNamedValue(injector, "RefreshTokenDuration", cfg.RefreshTokenDuration)
 	return injector
 })
+
+func NewMockRepository(t *testing.T, ctrl *gomock.Controller) *mock_app.MockRepositoryManager {
+	mrm := mock_app.NewMockRepositoryManager(ctrl)
+	mrm.EXPECT().Account().AnyTimes().Return(mock_app.NewMockAccountRepository(ctrl))
+	mrm.EXPECT().Transfer().AnyTimes().Return(mock_app.NewMockTransferRepository(ctrl))
+	mrm.EXPECT().User().AnyTimes().Return(mock_app.NewMockUserRepository(ctrl))
+	mrm.EXPECT().Transaction().AnyTimes().Return(mock_app.NewMockTransaction(ctrl))
+	return mrm
+}
 
 func addAuthorization(
 	t *testing.T,

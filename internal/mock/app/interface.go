@@ -50,17 +50,17 @@ func (mr *MockRepositoryManagerMockRecorder) Account() *gomock.Call {
 }
 
 // Transaction mocks base method.
-func (m *MockRepositoryManager) Transaction(ctx context.Context, fn app.TransactionFunc) error {
+func (m *MockRepositoryManager) Transaction() app.Transaction {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Transaction", ctx, fn)
-	ret0, _ := ret[0].(error)
+	ret := m.ctrl.Call(m, "Transaction")
+	ret0, _ := ret[0].(app.Transaction)
 	return ret0
 }
 
 // Transaction indicates an expected call of Transaction.
-func (mr *MockRepositoryManagerMockRecorder) Transaction(ctx, fn interface{}) *gomock.Call {
+func (mr *MockRepositoryManagerMockRecorder) Transaction() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Transaction", reflect.TypeOf((*MockRepositoryManager)(nil).Transaction), ctx, fn)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Transaction", reflect.TypeOf((*MockRepositoryManager)(nil).Transaction))
 }
 
 // Transfer mocks base method.
@@ -89,6 +89,43 @@ func (m *MockRepositoryManager) User() app.UserRepository {
 func (mr *MockRepositoryManagerMockRecorder) User() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "User", reflect.TypeOf((*MockRepositoryManager)(nil).User))
+}
+
+// MockTransaction is a mock of Transaction interface.
+type MockTransaction struct {
+	ctrl     *gomock.Controller
+	recorder *MockTransactionMockRecorder
+}
+
+// MockTransactionMockRecorder is the mock recorder for MockTransaction.
+type MockTransactionMockRecorder struct {
+	mock *MockTransaction
+}
+
+// NewMockTransaction creates a new mock instance.
+func NewMockTransaction(ctrl *gomock.Controller) *MockTransaction {
+	mock := &MockTransaction{ctrl: ctrl}
+	mock.recorder = &MockTransactionMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockTransaction) EXPECT() *MockTransactionMockRecorder {
+	return m.recorder
+}
+
+// Run mocks base method.
+func (m *MockTransaction) Run(ctx context.Context, fn app.TransactionFunc) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Run", ctx, fn)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Run indicates an expected call of Run.
+func (mr *MockTransactionMockRecorder) Run(ctx, fn interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Run", reflect.TypeOf((*MockTransaction)(nil).Run), ctx, fn)
 }
 
 // MockDispatcher is a mock of Dispatcher interface.

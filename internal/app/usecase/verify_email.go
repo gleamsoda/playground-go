@@ -32,7 +32,7 @@ func (u *SendVerifyEmail) Execute(ctx context.Context, args *app.SendVerifyEmail
 	}
 
 	var ve *app.VerifyEmail
-	err = u.r.Transaction(ctx, func(ctx context.Context, r app.RepositoryManager) error {
+	err = u.r.Transaction().Run(ctx, func(ctx context.Context, r app.RepositoryManager) error {
 		var err error
 		if ve, err = r.User().CreateVerifyEmail(ctx, app.NewVerifyEmail(
 			usr.Username,

@@ -50,7 +50,7 @@ func (u *CreateUser) Execute(ctx context.Context, args *app.CreateUserParams) (*
 	}
 
 	var usr *app.User
-	err = u.r.Transaction(ctx, func(ctx context.Context, r app.RepositoryManager) error {
+	err = u.r.Transaction().Run(ctx, func(ctx context.Context, r app.RepositoryManager) error {
 		var err error
 		if usr, err = r.User().Create(ctx, app.NewUser(
 			args.Username,
