@@ -2,7 +2,6 @@ package gin
 
 import (
 	"bytes"
-	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -47,11 +46,6 @@ func TestCreateUserAPI(t *testing.T) {
 					FullName: user.FullName,
 					Email:    user.Email,
 				}
-				mrm.Transaction().(*mock_app.MockTransaction).EXPECT().
-					Run(gomock.Any(), gomock.Any()).
-					DoAndReturn(func(ctx context.Context, fn app.TransactionFunc) error {
-						return fn(ctx, mrm)
-					})
 				mrm.User().(*mock_app.MockUserRepository).EXPECT().
 					Create(gomock.Any(), EqCreateUserParams(arg, password)).Times(1).Return(user, nil)
 				md.EXPECT().SendVerifyEmail(gomock.Any(), gomock.Any()).Times(1).Return(nil)
@@ -70,11 +64,6 @@ func TestCreateUserAPI(t *testing.T) {
 				"email":     user.Email,
 			},
 			buildStubs: func(mrm *mock_app.MockRepository, md *mock_app.MockDispatcher) {
-				mrm.Transaction().(*mock_app.MockTransaction).EXPECT().
-					Run(gomock.Any(), gomock.Any()).
-					DoAndReturn(func(ctx context.Context, fn app.TransactionFunc) error {
-						return fn(ctx, mrm)
-					})
 				mrm.User().(*mock_app.MockUserRepository).EXPECT().
 					Create(gomock.Any(), gomock.Any()).Times(1).Return(&app.User{}, sql.ErrConnDone)
 			},

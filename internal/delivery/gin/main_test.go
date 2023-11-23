@@ -1,6 +1,7 @@
 package gin
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -49,10 +50,15 @@ var GetInjector = sync.OnceValue(func() *do.Injector {
 
 func NewMockRepository(t *testing.T, ctrl *gomock.Controller) *mock_app.MockRepository {
 	mrm := mock_app.NewMockRepository(ctrl)
+	tx := mock_app.NewMockTransaction(ctrl)
+	tx.EXPECT().Run(gomock.Any(), gomock.Any()).AnyTimes().
+		DoAndReturn(func(ctx context.Context, fn app.TransactionFunc) error {
+			return fn(ctx, mrm)
+		})
+	mrm.EXPECT().Transaction().AnyTimes().Return(tx)
 	mrm.EXPECT().Account().AnyTimes().Return(mock_app.NewMockAccountRepository(ctrl))
 	mrm.EXPECT().Transfer().AnyTimes().Return(mock_app.NewMockTransferRepository(ctrl))
 	mrm.EXPECT().User().AnyTimes().Return(mock_app.NewMockUserRepository(ctrl))
-	mrm.EXPECT().Transaction().AnyTimes().Return(mock_app.NewMockTransaction(ctrl))
 	return mrm
 }
 
