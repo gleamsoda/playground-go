@@ -6,13 +6,16 @@ import (
 )
 
 type ( // Repository is an interface for database access.
-	RepositoryManager interface {
-		Transaction(ctx context.Context, fn TransactionFunc) error
+	Repository interface {
+		Transaction() Transaction
 		Account() AccountRepository
 		Transfer() TransferRepository
 		User() UserRepository
 	}
-	TransactionFunc     func(context.Context, RepositoryManager) error
+	Transaction interface {
+		Run(ctx context.Context, fn TransactionFunc) error
+	}
+	TransactionFunc     func(context.Context, Repository) error
 	ListTransfersParams struct {
 		FromAccountID int64 `json:"from_account_id"`
 		ToAccountID   int64 `json:"to_account_id"`

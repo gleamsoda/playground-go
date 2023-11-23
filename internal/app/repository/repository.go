@@ -11,12 +11,13 @@ import (
 )
 
 type (
-	Manager struct {
-		r TxRunner
-		e Executor
+	Repository struct {
+		exec Executor
+		txn  app.Transaction
 	}
-	TxRunner interface {
+	DB interface {
 		BeginTx(context.Context, *sql.TxOptions) (*sql.Tx, error)
+		Executor
 	}
 	Executor interface {
 		ExecContext(context.Context, string, ...interface{}) (sql.Result, error)
@@ -26,40 +27,28 @@ type (
 	}
 )
 
-func NewManager(i *do.Injector) (app.RepositoryManager, error) {
+func NewRepository(i *do.Injector) (app.Repository, error) {
 	db := do.MustInvoke[*sql.DB](i)
-	return &Manager{
-		r: db,
-		e: db,
+	return &Repository{
+		exec: db,
+		txn:  NewTransaction(db),
 	}, nil
 }
 
-func (m *Manager) Account() app.AccountRepository {
-	return NewAccount(m.e)
+func (r *Repository) Account() app.AccountRepository {
+	return NewAccount(r.exec)
 }
 
-func (m *Manager) Transfer() app.TransferRepository {
-	return NewTransfer(m.e)
+func (r *Repository) Transfer() app.TransferRepository {
+	return NewTransfer(r.exec)
 }
 
-func (m *Manager) User() app.UserRepository {
-	return NewUser(m.e)
+func (r *Repository) User() app.UserRepository {
+	return NewUser(r.exec)
 }
 
-func (m *Manager) Transaction(ctx context.Context, fn app.TransactionFunc) error {
-	tx, err := m.r.BeginTx(ctx, nil)
-	if err != nil {
-		return err
-	}
-	txm := &Manager{r: m.r, e: tx}
-	if err := fn(ctx, txm); err != nil {
-		if rbErr := tx.Rollback(); rbErr != nil {
-			return fmt.Errorf("tx err: %v, rb err: %v", err, rbErr)
-		}
-		return err
-	}
-
-	return tx.Commit()
+func (r *Repository) Transaction() app.Transaction {
+	return r.txn
 }
 
 func runTx(ctx context.Context, e Executor, fn func(context.Context, *sql.Tx) error) error {

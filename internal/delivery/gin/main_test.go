@@ -1,6 +1,7 @@
 package gin
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -13,11 +14,13 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/samber/do"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/mock/gomock"
 
 	"playground/internal/app"
 	"playground/internal/config"
 	"playground/internal/delivery/gin/handler"
 	"playground/internal/delivery/gin/helper"
+	mock_app "playground/internal/mock/app"
 	"playground/internal/pkg/token"
 )
 
@@ -37,13 +40,27 @@ var GetInjector = sync.OnceValue(func() *do.Injector {
 	injector := do.New()
 	do.Provide(injector, NewRouter)
 	do.Provide(injector, handler.NewHandler)
-	do.ProvideValue[app.RepositoryManager](injector, nil)
+	do.ProvideValue[app.Repository](injector, nil)
 	do.ProvideValue[app.Dispatcher](injector, nil)
 	do.ProvideValue[token.Manager](injector, tm)
 	do.ProvideNamedValue(injector, "AccessTokenDuration", cfg.AccessTokenDuration)
 	do.ProvideNamedValue(injector, "RefreshTokenDuration", cfg.RefreshTokenDuration)
 	return injector
 })
+
+func NewMockRepository(t *testing.T, ctrl *gomock.Controller) *mock_app.MockRepository {
+	mrm := mock_app.NewMockRepository(ctrl)
+	tx := mock_app.NewMockTransaction(ctrl)
+	tx.EXPECT().Run(gomock.Any(), gomock.Any()).AnyTimes().
+		DoAndReturn(func(ctx context.Context, fn app.TransactionFunc) error {
+			return fn(ctx, mrm)
+		})
+	mrm.EXPECT().Transaction().AnyTimes().Return(tx)
+	mrm.EXPECT().Account().AnyTimes().Return(mock_app.NewMockAccountRepository(ctrl))
+	mrm.EXPECT().Transfer().AnyTimes().Return(mock_app.NewMockTransferRepository(ctrl))
+	mrm.EXPECT().User().AnyTimes().Return(mock_app.NewMockUserRepository(ctrl))
+	return mrm
+}
 
 func addAuthorization(
 	t *testing.T,

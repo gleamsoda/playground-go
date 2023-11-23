@@ -22,7 +22,7 @@ type Resolver struct {
 }
 
 func NewResolver(i *do.Injector) (*Resolver, error) {
-	r := do.MustInvoke[app.RepositoryManager](i)
+	r := do.MustInvoke[app.Repository](i)
 	d := do.MustInvoke[app.Dispatcher](i)
 	tm := do.MustInvoke[token.Manager](i)
 	accessTokenDuration := do.MustInvokeNamed[time.Duration](i, "AccessTokenDuration")

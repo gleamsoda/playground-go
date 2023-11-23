@@ -12,31 +12,31 @@ import (
 	gomock "go.uber.org/mock/gomock"
 )
 
-// MockRepositoryManager is a mock of RepositoryManager interface.
-type MockRepositoryManager struct {
+// MockRepository is a mock of Repository interface.
+type MockRepository struct {
 	ctrl     *gomock.Controller
-	recorder *MockRepositoryManagerMockRecorder
+	recorder *MockRepositoryMockRecorder
 }
 
-// MockRepositoryManagerMockRecorder is the mock recorder for MockRepositoryManager.
-type MockRepositoryManagerMockRecorder struct {
-	mock *MockRepositoryManager
+// MockRepositoryMockRecorder is the mock recorder for MockRepository.
+type MockRepositoryMockRecorder struct {
+	mock *MockRepository
 }
 
-// NewMockRepositoryManager creates a new mock instance.
-func NewMockRepositoryManager(ctrl *gomock.Controller) *MockRepositoryManager {
-	mock := &MockRepositoryManager{ctrl: ctrl}
-	mock.recorder = &MockRepositoryManagerMockRecorder{mock}
+// NewMockRepository creates a new mock instance.
+func NewMockRepository(ctrl *gomock.Controller) *MockRepository {
+	mock := &MockRepository{ctrl: ctrl}
+	mock.recorder = &MockRepositoryMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockRepositoryManager) EXPECT() *MockRepositoryManagerMockRecorder {
+func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
 	return m.recorder
 }
 
 // Account mocks base method.
-func (m *MockRepositoryManager) Account() app.AccountRepository {
+func (m *MockRepository) Account() app.AccountRepository {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Account")
 	ret0, _ := ret[0].(app.AccountRepository)
@@ -44,27 +44,27 @@ func (m *MockRepositoryManager) Account() app.AccountRepository {
 }
 
 // Account indicates an expected call of Account.
-func (mr *MockRepositoryManagerMockRecorder) Account() *gomock.Call {
+func (mr *MockRepositoryMockRecorder) Account() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Account", reflect.TypeOf((*MockRepositoryManager)(nil).Account))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Account", reflect.TypeOf((*MockRepository)(nil).Account))
 }
 
 // Transaction mocks base method.
-func (m *MockRepositoryManager) Transaction(ctx context.Context, fn app.TransactionFunc) error {
+func (m *MockRepository) Transaction() app.Transaction {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Transaction", ctx, fn)
-	ret0, _ := ret[0].(error)
+	ret := m.ctrl.Call(m, "Transaction")
+	ret0, _ := ret[0].(app.Transaction)
 	return ret0
 }
 
 // Transaction indicates an expected call of Transaction.
-func (mr *MockRepositoryManagerMockRecorder) Transaction(ctx, fn interface{}) *gomock.Call {
+func (mr *MockRepositoryMockRecorder) Transaction() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Transaction", reflect.TypeOf((*MockRepositoryManager)(nil).Transaction), ctx, fn)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Transaction", reflect.TypeOf((*MockRepository)(nil).Transaction))
 }
 
 // Transfer mocks base method.
-func (m *MockRepositoryManager) Transfer() app.TransferRepository {
+func (m *MockRepository) Transfer() app.TransferRepository {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Transfer")
 	ret0, _ := ret[0].(app.TransferRepository)
@@ -72,13 +72,13 @@ func (m *MockRepositoryManager) Transfer() app.TransferRepository {
 }
 
 // Transfer indicates an expected call of Transfer.
-func (mr *MockRepositoryManagerMockRecorder) Transfer() *gomock.Call {
+func (mr *MockRepositoryMockRecorder) Transfer() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Transfer", reflect.TypeOf((*MockRepositoryManager)(nil).Transfer))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Transfer", reflect.TypeOf((*MockRepository)(nil).Transfer))
 }
 
 // User mocks base method.
-func (m *MockRepositoryManager) User() app.UserRepository {
+func (m *MockRepository) User() app.UserRepository {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "User")
 	ret0, _ := ret[0].(app.UserRepository)
@@ -86,9 +86,46 @@ func (m *MockRepositoryManager) User() app.UserRepository {
 }
 
 // User indicates an expected call of User.
-func (mr *MockRepositoryManagerMockRecorder) User() *gomock.Call {
+func (mr *MockRepositoryMockRecorder) User() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "User", reflect.TypeOf((*MockRepositoryManager)(nil).User))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "User", reflect.TypeOf((*MockRepository)(nil).User))
+}
+
+// MockTransaction is a mock of Transaction interface.
+type MockTransaction struct {
+	ctrl     *gomock.Controller
+	recorder *MockTransactionMockRecorder
+}
+
+// MockTransactionMockRecorder is the mock recorder for MockTransaction.
+type MockTransactionMockRecorder struct {
+	mock *MockTransaction
+}
+
+// NewMockTransaction creates a new mock instance.
+func NewMockTransaction(ctrl *gomock.Controller) *MockTransaction {
+	mock := &MockTransaction{ctrl: ctrl}
+	mock.recorder = &MockTransactionMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockTransaction) EXPECT() *MockTransactionMockRecorder {
+	return m.recorder
+}
+
+// Run mocks base method.
+func (m *MockTransaction) Run(ctx context.Context, fn app.TransactionFunc) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Run", ctx, fn)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Run indicates an expected call of Run.
+func (mr *MockTransactionMockRecorder) Run(ctx, fn interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Run", reflect.TypeOf((*MockTransaction)(nil).Run), ctx, fn)
 }
 
 // MockDispatcher is a mock of Dispatcher interface.

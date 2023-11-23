@@ -13,7 +13,7 @@ import (
 	"playground/internal/config"
 )
 
-var rm app.RepositoryManager
+var rm app.Repository
 
 func TestMain(m *testing.M) {
 	conn, err := sql.Open("mysql", config.Get().DBName())
@@ -26,9 +26,9 @@ func TestMain(m *testing.M) {
 	}
 
 	injector := do.New()
-	do.Provide(injector, NewManager)
+	do.Provide(injector, NewRepository)
 	do.ProvideValue(injector, conn)
-	rm = do.MustInvoke[app.RepositoryManager](injector)
+	rm = do.MustInvoke[app.Repository](injector)
 
 	os.Exit(m.Run())
 }

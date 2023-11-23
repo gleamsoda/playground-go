@@ -2,7 +2,6 @@ package gin
 
 import (
 	"bytes"
-	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -30,7 +29,7 @@ func TestCreateUserAPI(t *testing.T) {
 	testCases := []struct {
 		name          string
 		body          gin.H
-		buildStubs    func(mrm *mock_app.MockRepositoryManager, ur *mock_app.MockUserRepository, md *mock_app.MockDispatcher)
+		buildStubs    func(mrm *mock_app.MockRepository, md *mock_app.MockDispatcher)
 		checkResponse func(recoder *httptest.ResponseRecorder)
 	}{
 		{
@@ -41,16 +40,14 @@ func TestCreateUserAPI(t *testing.T) {
 				"full_name": user.FullName,
 				"email":     user.Email,
 			},
-			buildStubs: func(mrm *mock_app.MockRepositoryManager, ur *mock_app.MockUserRepository, md *mock_app.MockDispatcher) {
+			buildStubs: func(mrm *mock_app.MockRepository, md *mock_app.MockDispatcher) {
 				arg := &app.User{
 					Username: user.Username,
 					FullName: user.FullName,
 					Email:    user.Email,
 				}
-				mrm.EXPECT().Transaction(gomock.Any(), gomock.Any()).DoAndReturn(func(ctx context.Context, fn app.TransactionFunc) error {
-					return fn(ctx, mrm)
-				})
-				ur.EXPECT().Create(gomock.Any(), EqCreateUserParams(arg, password)).Times(1).Return(user, nil)
+				mrm.User().(*mock_app.MockUserRepository).EXPECT().
+					Create(gomock.Any(), EqCreateUserParams(arg, password)).Times(1).Return(user, nil)
 				md.EXPECT().SendVerifyEmail(gomock.Any(), gomock.Any()).Times(1).Return(nil)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
@@ -66,11 +63,9 @@ func TestCreateUserAPI(t *testing.T) {
 				"full_name": user.FullName,
 				"email":     user.Email,
 			},
-			buildStubs: func(mrm *mock_app.MockRepositoryManager, ur *mock_app.MockUserRepository, md *mock_app.MockDispatcher) {
-				mrm.EXPECT().Transaction(gomock.Any(), gomock.Any()).DoAndReturn(func(ctx context.Context, fn app.TransactionFunc) error {
-					return fn(ctx, mrm)
-				})
-				ur.EXPECT().Create(gomock.Any(), gomock.Any()).Times(1).Return(&app.User{}, sql.ErrConnDone)
+			buildStubs: func(mrm *mock_app.MockRepository, md *mock_app.MockDispatcher) {
+				mrm.User().(*mock_app.MockUserRepository).EXPECT().
+					Create(gomock.Any(), gomock.Any()).Times(1).Return(&app.User{}, sql.ErrConnDone)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -84,8 +79,9 @@ func TestCreateUserAPI(t *testing.T) {
 		// 		"full_name": user.FullName,
 		// 		"email":     user.Email,
 		// 	},
-		// 	buildStubs: func(mrm *mock_app.MockRepositoryManager, ur *mock_app.MockUserRepository, md *mock_app.MockDispatcher) {
-		// 		ur.EXPECT().Create(gomock.Any(), gomock.Any()).Times(1).Return(&app.User{}, db.ErrUniqueViolation)
+		// 	buildStubs: func(mrm *mock_app.MockRepository, md *mock_app.MockDispatcher) {
+		// 		mrm.User().(*mock_app.MockUserRepository).EXPECT().
+		// 			Create(gomock.Any(), gomock.Any()).Times(1).Return(&app.User{}, db.ErrUniqueViolation)
 		// 	},
 		// 	checkResponse: func(recorder *httptest.ResponseRecorder) {
 		// 		require.Equal(t, http.StatusForbidden, recorder.Code)
@@ -99,8 +95,9 @@ func TestCreateUserAPI(t *testing.T) {
 				"full_name": user.FullName,
 				"email":     user.Email,
 			},
-			buildStubs: func(mrm *mock_app.MockRepositoryManager, ur *mock_app.MockUserRepository, md *mock_app.MockDispatcher) {
-				ur.EXPECT().Create(gomock.Any(), gomock.Any()).Times(0)
+			buildStubs: func(mrm *mock_app.MockRepository, md *mock_app.MockDispatcher) {
+				mrm.User().(*mock_app.MockUserRepository).EXPECT().
+					Create(gomock.Any(), gomock.Any()).Times(0)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -114,8 +111,9 @@ func TestCreateUserAPI(t *testing.T) {
 				"full_name": user.FullName,
 				"email":     "invalid-email",
 			},
-			buildStubs: func(mrm *mock_app.MockRepositoryManager, ur *mock_app.MockUserRepository, md *mock_app.MockDispatcher) {
-				ur.EXPECT().Create(gomock.Any(), gomock.Any()).Times(0)
+			buildStubs: func(mrm *mock_app.MockRepository, md *mock_app.MockDispatcher) {
+				mrm.User().(*mock_app.MockUserRepository).EXPECT().
+					Create(gomock.Any(), gomock.Any()).Times(0)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -129,8 +127,9 @@ func TestCreateUserAPI(t *testing.T) {
 				"full_name": user.FullName,
 				"email":     user.Email,
 			},
-			buildStubs: func(mrm *mock_app.MockRepositoryManager, ur *mock_app.MockUserRepository, md *mock_app.MockDispatcher) {
-				ur.EXPECT().Create(gomock.Any(), gomock.Any()).Times(0)
+			buildStubs: func(mrm *mock_app.MockRepository, md *mock_app.MockDispatcher) {
+				mrm.User().(*mock_app.MockUserRepository).EXPECT().
+					Create(gomock.Any(), gomock.Any()).Times(0)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -145,13 +144,11 @@ func TestCreateUserAPI(t *testing.T) {
 			i := GetInjector().Clone()
 			defer i.Shutdown()
 			ctrl := gomock.NewController(t)
-			mrm := mock_app.NewMockRepositoryManager(ctrl)
-			ur := mock_app.NewMockUserRepository(ctrl)
-			mrm.EXPECT().User().AnyTimes().Return(ur)
+			mrm := NewMockRepository(t, ctrl)
 			md := mock_app.NewMockDispatcher(ctrl)
-			tc.buildStubs(mrm, ur, md)
+			tc.buildStubs(mrm, md)
 
-			do.OverrideValue[app.RepositoryManager](i, mrm)
+			do.OverrideValue[app.Repository](i, mrm)
 			do.OverrideValue[app.Dispatcher](i, md)
 			router := do.MustInvoke[*gin.Engine](i)
 			recorder := httptest.NewRecorder()
@@ -253,12 +250,11 @@ func TestLoginUserAPI(t *testing.T) {
 			i := GetInjector().Clone()
 			defer i.Shutdown()
 			ctrl := gomock.NewController(t)
-			mrm := mock_app.NewMockRepositoryManager(ctrl)
-			ur := mock_app.NewMockUserRepository(ctrl)
-			mrm.EXPECT().User().AnyTimes().Return(ur)
+			mrm := NewMockRepository(t, ctrl)
+			ur := mrm.User().(*mock_app.MockUserRepository)
 			tc.buildStubs(ur)
 
-			do.OverrideValue[app.RepositoryManager](i, mrm)
+			do.OverrideValue[app.Repository](i, mrm)
 			router := do.MustInvoke[*gin.Engine](i)
 			recorder := httptest.NewRecorder()
 
