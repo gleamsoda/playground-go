@@ -12,8 +12,8 @@ import (
 
 type (
 	Repository struct {
-		db   DB
 		exec Executor
+		txn  app.Transaction
 	}
 	DB interface {
 		BeginTx(context.Context, *sql.TxOptions) (*sql.Tx, error)
@@ -30,8 +30,8 @@ type (
 func NewRepository(i *do.Injector) (app.Repository, error) {
 	db := do.MustInvoke[*sql.DB](i)
 	return &Repository{
-		db:   db,
 		exec: db,
+		txn:  NewTransaction(db),
 	}, nil
 }
 
@@ -48,7 +48,7 @@ func (r *Repository) User() app.UserRepository {
 }
 
 func (r *Repository) Transaction() app.Transaction {
-	return NewTransaction(r.db)
+	return r.txn
 }
 
 func runTx(ctx context.Context, e Executor, fn func(context.Context, *sql.Tx) error) error {
