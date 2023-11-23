@@ -11,12 +11,13 @@ import (
 )
 
 type (
-	Manager struct {
-		r TxRunner
-		e Executor
+	Repository struct {
+		db   DB
+		exec Executor
 	}
-	TxRunner interface {
+	DB interface {
 		BeginTx(context.Context, *sql.TxOptions) (*sql.Tx, error)
+		Executor
 	}
 	Executor interface {
 		ExecContext(context.Context, string, ...interface{}) (sql.Result, error)
@@ -26,28 +27,28 @@ type (
 	}
 )
 
-func NewManager(i *do.Injector) (app.RepositoryManager, error) {
+func NewRepository(i *do.Injector) (app.Repository, error) {
 	db := do.MustInvoke[*sql.DB](i)
-	return &Manager{
-		r: db,
-		e: db,
+	return &Repository{
+		db:   db,
+		exec: db,
 	}, nil
 }
 
-func (m *Manager) Account() app.AccountRepository {
-	return NewAccount(m.e)
+func (r *Repository) Account() app.AccountRepository {
+	return NewAccount(r.exec)
 }
 
-func (m *Manager) Transfer() app.TransferRepository {
-	return NewTransfer(m.e)
+func (r *Repository) Transfer() app.TransferRepository {
+	return NewTransfer(r.exec)
 }
 
-func (m *Manager) User() app.UserRepository {
-	return NewUser(m.e)
+func (r *Repository) User() app.UserRepository {
+	return NewUser(r.exec)
 }
 
-func (m *Manager) Transaction() app.Transaction {
-	return NewTransaction(m.r)
+func (r *Repository) Transaction() app.Transaction {
+	return NewTransaction(r.db)
 }
 
 func runTx(ctx context.Context, e Executor, fn func(context.Context, *sql.Tx) error) error {

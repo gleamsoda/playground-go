@@ -9,10 +9,10 @@ import (
 )
 
 type CreateTransfer struct {
-	r app.RepositoryManager
+	r app.Repository
 }
 
-func NewCreateTransfer(r app.RepositoryManager) *CreateTransfer {
+func NewCreateTransfer(r app.Repository) *CreateTransfer {
 	return &CreateTransfer{
 		r: r,
 	}

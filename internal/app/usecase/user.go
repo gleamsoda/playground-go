@@ -17,26 +17,26 @@ import (
 
 type (
 	CreateUser struct {
-		r app.RepositoryManager
+		r app.Repository
 		d app.Dispatcher
 	}
 	LoginUser struct {
-		r                    app.RepositoryManager
+		r                    app.Repository
 		tm                   token.Manager
 		accessTokenDuration  time.Duration
 		refreshTokenDuration time.Duration
 	}
 	RenewAccessToken struct {
-		r                   app.RepositoryManager
+		r                   app.Repository
 		tm                  token.Manager
 		accessTokenDuration time.Duration
 	}
 	UpdateUser struct {
-		r app.RepositoryManager
+		r app.Repository
 	}
 )
 
-func NewCreateUser(r app.RepositoryManager, d app.Dispatcher) *CreateUser {
+func NewCreateUser(r app.Repository, d app.Dispatcher) *CreateUser {
 	return &CreateUser{
 		r: r,
 		d: d,
@@ -50,7 +50,7 @@ func (u *CreateUser) Execute(ctx context.Context, args *app.CreateUserParams) (*
 	}
 
 	var usr *app.User
-	err = u.r.Transaction().Run(ctx, func(ctx context.Context, r app.RepositoryManager) error {
+	err = u.r.Transaction().Run(ctx, func(ctx context.Context, r app.Repository) error {
 		var err error
 		if usr, err = r.User().Create(ctx, app.NewUser(
 			args.Username,
@@ -70,7 +70,7 @@ func (u *CreateUser) Execute(ctx context.Context, args *app.CreateUserParams) (*
 	return usr, err
 }
 
-func NewLoginUser(r app.RepositoryManager, tm token.Manager, accessTokenDuration time.Duration, refreshTokenDuration time.Duration) *LoginUser {
+func NewLoginUser(r app.Repository, tm token.Manager, accessTokenDuration time.Duration, refreshTokenDuration time.Duration) *LoginUser {
 	return &LoginUser{
 		r:                    r,
 		tm:                   tm,
@@ -126,7 +126,7 @@ func (u *LoginUser) Execute(ctx context.Context, args *app.LoginUserParams) (*ap
 	}, nil
 }
 
-func NewRenewAccessToken(r app.RepositoryManager, tm token.Manager, accessTokenDuration time.Duration) *RenewAccessToken {
+func NewRenewAccessToken(r app.Repository, tm token.Manager, accessTokenDuration time.Duration) *RenewAccessToken {
 	return &RenewAccessToken{
 		r:                   r,
 		tm:                  tm,
@@ -172,7 +172,7 @@ func (u *RenewAccessToken) Execute(ctx context.Context, refreshToken string) (*a
 	return resp, nil
 }
 
-func NewUpdateUser(r app.RepositoryManager) *UpdateUser {
+func NewUpdateUser(r app.Repository) *UpdateUser {
 	return &UpdateUser{
 		r: r,
 	}

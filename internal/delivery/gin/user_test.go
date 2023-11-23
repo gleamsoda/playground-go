@@ -30,7 +30,7 @@ func TestCreateUserAPI(t *testing.T) {
 	testCases := []struct {
 		name          string
 		body          gin.H
-		buildStubs    func(mrm *mock_app.MockRepositoryManager, md *mock_app.MockDispatcher)
+		buildStubs    func(mrm *mock_app.MockRepository, md *mock_app.MockDispatcher)
 		checkResponse func(recoder *httptest.ResponseRecorder)
 	}{
 		{
@@ -41,7 +41,7 @@ func TestCreateUserAPI(t *testing.T) {
 				"full_name": user.FullName,
 				"email":     user.Email,
 			},
-			buildStubs: func(mrm *mock_app.MockRepositoryManager, md *mock_app.MockDispatcher) {
+			buildStubs: func(mrm *mock_app.MockRepository, md *mock_app.MockDispatcher) {
 				arg := &app.User{
 					Username: user.Username,
 					FullName: user.FullName,
@@ -69,7 +69,7 @@ func TestCreateUserAPI(t *testing.T) {
 				"full_name": user.FullName,
 				"email":     user.Email,
 			},
-			buildStubs: func(mrm *mock_app.MockRepositoryManager, md *mock_app.MockDispatcher) {
+			buildStubs: func(mrm *mock_app.MockRepository, md *mock_app.MockDispatcher) {
 				mrm.Transaction().(*mock_app.MockTransaction).EXPECT().
 					Run(gomock.Any(), gomock.Any()).
 					DoAndReturn(func(ctx context.Context, fn app.TransactionFunc) error {
@@ -90,7 +90,7 @@ func TestCreateUserAPI(t *testing.T) {
 		// 		"full_name": user.FullName,
 		// 		"email":     user.Email,
 		// 	},
-		// 	buildStubs: func(mrm *mock_app.MockRepositoryManager, md *mock_app.MockDispatcher) {
+		// 	buildStubs: func(mrm *mock_app.MockRepository, md *mock_app.MockDispatcher) {
 		// 		mrm.User().(*mock_app.MockUserRepository).EXPECT().
 		// 			Create(gomock.Any(), gomock.Any()).Times(1).Return(&app.User{}, db.ErrUniqueViolation)
 		// 	},
@@ -106,7 +106,7 @@ func TestCreateUserAPI(t *testing.T) {
 				"full_name": user.FullName,
 				"email":     user.Email,
 			},
-			buildStubs: func(mrm *mock_app.MockRepositoryManager, md *mock_app.MockDispatcher) {
+			buildStubs: func(mrm *mock_app.MockRepository, md *mock_app.MockDispatcher) {
 				mrm.User().(*mock_app.MockUserRepository).EXPECT().
 					Create(gomock.Any(), gomock.Any()).Times(0)
 			},
@@ -122,7 +122,7 @@ func TestCreateUserAPI(t *testing.T) {
 				"full_name": user.FullName,
 				"email":     "invalid-email",
 			},
-			buildStubs: func(mrm *mock_app.MockRepositoryManager, md *mock_app.MockDispatcher) {
+			buildStubs: func(mrm *mock_app.MockRepository, md *mock_app.MockDispatcher) {
 				mrm.User().(*mock_app.MockUserRepository).EXPECT().
 					Create(gomock.Any(), gomock.Any()).Times(0)
 			},
@@ -138,7 +138,7 @@ func TestCreateUserAPI(t *testing.T) {
 				"full_name": user.FullName,
 				"email":     user.Email,
 			},
-			buildStubs: func(mrm *mock_app.MockRepositoryManager, md *mock_app.MockDispatcher) {
+			buildStubs: func(mrm *mock_app.MockRepository, md *mock_app.MockDispatcher) {
 				mrm.User().(*mock_app.MockUserRepository).EXPECT().
 					Create(gomock.Any(), gomock.Any()).Times(0)
 			},
@@ -159,7 +159,7 @@ func TestCreateUserAPI(t *testing.T) {
 			md := mock_app.NewMockDispatcher(ctrl)
 			tc.buildStubs(mrm, md)
 
-			do.OverrideValue[app.RepositoryManager](i, mrm)
+			do.OverrideValue[app.Repository](i, mrm)
 			do.OverrideValue[app.Dispatcher](i, md)
 			router := do.MustInvoke[*gin.Engine](i)
 			recorder := httptest.NewRecorder()
@@ -265,7 +265,7 @@ func TestLoginUserAPI(t *testing.T) {
 			ur := mrm.User().(*mock_app.MockUserRepository)
 			tc.buildStubs(ur)
 
-			do.OverrideValue[app.RepositoryManager](i, mrm)
+			do.OverrideValue[app.Repository](i, mrm)
 			router := do.MustInvoke[*gin.Engine](i)
 			recorder := httptest.NewRecorder()
 

@@ -39,7 +39,7 @@ var GetInjector = sync.OnceValue(func() *do.Injector {
 	injector := do.New()
 	do.Provide(injector, NewRouter)
 	do.Provide(injector, handler.NewHandler)
-	do.ProvideValue[app.RepositoryManager](injector, nil)
+	do.ProvideValue[app.Repository](injector, nil)
 	do.ProvideValue[app.Dispatcher](injector, nil)
 	do.ProvideValue[token.Manager](injector, tm)
 	do.ProvideNamedValue(injector, "AccessTokenDuration", cfg.AccessTokenDuration)
@@ -47,8 +47,8 @@ var GetInjector = sync.OnceValue(func() *do.Injector {
 	return injector
 })
 
-func NewMockRepository(t *testing.T, ctrl *gomock.Controller) *mock_app.MockRepositoryManager {
-	mrm := mock_app.NewMockRepositoryManager(ctrl)
+func NewMockRepository(t *testing.T, ctrl *gomock.Controller) *mock_app.MockRepository {
+	mrm := mock_app.NewMockRepository(ctrl)
 	mrm.EXPECT().Account().AnyTimes().Return(mock_app.NewMockAccountRepository(ctrl))
 	mrm.EXPECT().Transfer().AnyTimes().Return(mock_app.NewMockTransferRepository(ctrl))
 	mrm.EXPECT().User().AnyTimes().Return(mock_app.NewMockUserRepository(ctrl))

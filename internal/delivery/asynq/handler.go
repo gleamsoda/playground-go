@@ -19,7 +19,7 @@ type handler struct {
 }
 
 func NewHandler(i *do.Injector) (*handler, error) {
-	r := do.MustInvoke[app.RepositoryManager](i)
+	r := do.MustInvoke[app.Repository](i)
 	m := do.MustInvoke[mail.Sender](i)
 	return &handler{
 		sendVerifyEmail: usecase.NewSendVerifyEmail(r, m),

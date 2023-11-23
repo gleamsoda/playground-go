@@ -8,10 +8,10 @@ import (
 )
 
 type (
-	Transaction struct{ db TxRunner }
+	Transaction struct{ db DB }
 )
 
-func NewTransaction(db TxRunner) app.Transaction {
+func NewTransaction(db DB) *Transaction {
 	return &Transaction{db: db}
 }
 
@@ -22,7 +22,7 @@ func (t *Transaction) Run(ctx context.Context, fn app.TransactionFunc) error {
 	if err != nil {
 		return err
 	}
-	txm := &Manager{e: tx}
+	txm := &Repository{exec: tx}
 	if err := fn(ctx, txm); err != nil {
 		if rbErr := tx.Rollback(); rbErr != nil {
 			return fmt.Errorf("tx err: %v, rb err: %v", err, rbErr)

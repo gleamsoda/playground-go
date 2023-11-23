@@ -14,14 +14,14 @@ import (
 )
 
 type User struct {
-	e Executor
-	q gen.Querier
+	exec Executor
+	q    gen.Querier
 }
 
 func NewUser(e Executor) *User {
 	return &User{
-		e: e,
-		q: gen.New(e),
+		exec: e,
+		q:    gen.New(e),
 	}
 }
 
@@ -80,7 +80,7 @@ func (r *User) Update(ctx context.Context, args *app.User) (*app.User, error) {
 func (r *User) UpdateEmailVerified(ctx context.Context, args *app.VerifyEmailParams) (*app.User, *app.VerifyEmail, error) {
 	var u *gen.User
 	var ve *gen.VerifyEmail
-	if err := runTx(ctx, r.e, func(ctx context.Context, tx *sql.Tx) error {
+	if err := runTx(ctx, r.exec, func(ctx context.Context, tx *sql.Tx) error {
 		txr := NewUser(tx)
 		var err error
 		if err = txr.q.UpdateVerifyEmail(ctx, &gen.UpdateVerifyEmailParams{

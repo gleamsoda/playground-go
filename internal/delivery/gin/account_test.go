@@ -129,7 +129,7 @@ func TestGetAccountAPI(t *testing.T) {
 			mrm.EXPECT().Account().AnyTimes().Return(ar)
 			tc.buildStubs(ar)
 
-			do.OverrideValue[app.RepositoryManager](i, mrm)
+			do.OverrideValue[app.Repository](i, mrm)
 			tm := do.MustInvoke[token.Manager](i)
 			router := do.MustInvoke[*gin.Engine](i)
 			recorder := httptest.NewRecorder()
@@ -234,7 +234,7 @@ func TestCreateAccountAPI(t *testing.T) {
 			ar := mrm.Account().(*mock_app.MockAccountRepository)
 			tc.buildStubs(ar)
 
-			do.OverrideValue[app.RepositoryManager](i, mrm)
+			do.OverrideValue[app.Repository](i, mrm)
 			tm := do.MustInvoke[token.Manager](i)
 			router := do.MustInvoke[*gin.Engine](i)
 			recorder := httptest.NewRecorder()
@@ -372,7 +372,7 @@ func TestListAccountsAPI(t *testing.T) {
 			ar := mrm.Account().(*mock_app.MockAccountRepository)
 			tc.buildStubs(ar)
 
-			do.OverrideValue[app.RepositoryManager](i, mrm)
+			do.OverrideValue[app.Repository](i, mrm)
 			tm := do.MustInvoke[token.Manager](i)
 			router := do.MustInvoke[*gin.Engine](i)
 			recorder := httptest.NewRecorder()

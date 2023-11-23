@@ -12,17 +12,17 @@ import (
 
 type (
 	CreateAccount struct {
-		r app.RepositoryManager
+		r app.Repository
 	}
 	GetAccount struct {
-		r app.RepositoryManager
+		r app.Repository
 	}
 	ListAccounts struct {
-		r app.RepositoryManager
+		r app.Repository
 	}
 )
 
-func NewCreateAccount(r app.RepositoryManager) *CreateAccount {
+func NewCreateAccount(r app.Repository) *CreateAccount {
 	return &CreateAccount{
 		r: r,
 	}
@@ -32,7 +32,7 @@ func (u *CreateAccount) Execute(ctx context.Context, args *app.CreateAccountPara
 	return u.r.Account().Create(ctx, app.NewAccount(args.Owner, args.Balance, args.Currency))
 }
 
-func NewGetAccount(r app.RepositoryManager) *GetAccount {
+func NewGetAccount(r app.Repository) *GetAccount {
 	return &GetAccount{
 		r: r,
 	}
@@ -50,7 +50,7 @@ func (u *GetAccount) Execute(ctx context.Context, args *app.GetAccountsParams) (
 	return a, nil
 }
 
-func NewListAccounts(r app.RepositoryManager) *ListAccounts {
+func NewListAccounts(r app.Repository) *ListAccounts {
 	return &ListAccounts{
 		r: r,
 	}

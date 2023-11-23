@@ -9,14 +9,14 @@ import (
 )
 
 type Transfer struct {
-	e Executor
-	q gen.Querier
+	exec Executor
+	q    gen.Querier
 }
 
 func NewTransfer(e Executor) *Transfer {
 	return &Transfer{
-		e: e,
-		q: gen.New(e),
+		exec: e,
+		q:    gen.New(e),
 	}
 }
 
@@ -25,7 +25,7 @@ var _ app.TransferRepository = (*Transfer)(nil)
 func (r *Transfer) Create(ctx context.Context, args *app.Transfer) (*app.Transfer, error) {
 	var t *gen.Transfer
 
-	if err := runTx(ctx, r.e, func(cctx context.Context, tx *sql.Tx) error {
+	if err := runTx(ctx, r.exec, func(cctx context.Context, tx *sql.Tx) error {
 		txr := NewTransfer(tx)
 		id, err := txr.q.CreateTransfer(cctx, &gen.CreateTransferParams{
 			FromAccountID: args.FromAccountID,
